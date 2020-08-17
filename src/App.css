@@ -1,16 +1,10 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
+/* @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
+} */
+.App {
+  text-align: center;
 }
 
 .App-header {
@@ -24,8 +18,45 @@
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.baseBackground {
+  background: #ef5350;
+  color: #ffffff;
+  height: 60vh;
+}
+
+.baseBackground img {
+  height: 240px;
+  width: 240px;
+}
+
+.authenticationLayer {
+  border: 1px solid #ffffff;
+  border-radius: 40px 40px 0 0;
+  background: #ffffff;
+  position: fixed;
+  bottom: 0;
+  height: 60vh;
+  width: 100%;
+}
+
+.loginBtn {
+  padding: 24px 30px;
+  margin-top: 30px;
+  border: 1px solid #00bfa5;
+  background: #00bfa5;
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: bold;
+  border-radius: 40px;
+  min-width: 200px;
+}
+.rangerView {
+  height: 90vh;
+}
+.rangerNav {
+  height: 10vh;
+  position: fixed;
+  bottom: 0;
 }
 
 @keyframes App-logo-spin {

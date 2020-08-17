@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>profile</title>
+    <g id="General" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="profile" fill="#29333B">
+            <path d="M17,7 C17,9.76 14.76,12 12,12 C9.24,12 7,9.76 7,7 C7,4.24 9.24,2 12,2 C14.76,2 17,4.24 17,7 Z M15,7 C15,5.35 13.65,4 12,4 C10.35,4 9,5.35 9,7 C9,8.65 10.35,10 12,10 C13.65,10 15,8.65 15,7 Z M3,19 C3,15.69 5.69,13 9,13 L15,13 C18.31,13 21,15.69 21,19 C21,20.65 19.65,22 18,22 L6,22 C4.35,22 3,20.65 3,19 Z M5,19 C5,19.55 5.45,20 6,20 L18,20 C18.55,20 19,19.55 19,19 C19,16.79 17.21,15 15,15 L9,15 C6.79,15 5,16.79 5,19 Z" id="color"></path>
+        </g>
+    </g>
+</svg>

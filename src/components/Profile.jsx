@@ -1,0 +1,11 @@
+import React from "react";
+
+export default function Profile() {
+  return (
+    <div>
+      <h3>Profile</h3>
+      <a href="/app">go to app</a>
+      <a href="/">go to home</a>
+    </div>
+  );
+}

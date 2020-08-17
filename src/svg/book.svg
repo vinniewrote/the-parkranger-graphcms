@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>book</title>
+    <g id="General" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="book">
+            <g id="book-bold">
+                <rect id="Rectangle" x="0" y="0" width="24" height="24"></rect>
+                <path d="M6.5,2 L20,2 C20.55,2 21,2.45 21,3 L21,16 L21,21 C21,21.55 20.55,22 20,22 L6.5,22 C4.57,22 3,20.43 3,18.5 L3,5.5 C3,3.57 4.57,2 6.5,2 Z M5,15.3379 L5,5.5 C5,4.67 5.67,4 6.5,4 L19,4 L19,15 L6.5,15 C5.96352,15 5.45486,15.1213 5,15.3379 Z M19,17 L6.5,17 C5.67,17 5,17.67 5,18.5 C5,19.33 5.67,20 6.5,20 L19,20 L19,17 Z M16,10.5 L8,10.5 C7.45,10.5 7,10.95 7,11.5 C7,12.05 7.45,12.5 8,12.5 L16,12.5 C16.55,12.5 17,12.05 17,11.5 C17,10.95 16.55,10.5 16,10.5 Z M16,8.5 L8,8.5 C7.45,8.5 7,8.05 7,7.5 C7,6.95 7.45,6.5 8,6.5 L16,6.5 C16.55,6.5 17,6.95 17,7.5 C17,8.05 16.55,8.5 16,8.5 Z" id="Shape" fill="#29333B"></path>
+            </g>
+        </g>
+    </g>
+</svg>
