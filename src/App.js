@@ -37,8 +37,8 @@ function App() {
 
   return (
     <Auth0Provider
-      domain="made-to-thrill.auth0.com"
-      clientId="U4vLa56rDYM5Kri2PeNTFz4agGlvmI1k"
+      domain="parkranger.us.auth0.com"
+      clientId="7b2H1ssfuueiedKhY1tyIsNAsgR1SoPQ"
       redirectUri={window.location.origin}
     >
       <div className="App">

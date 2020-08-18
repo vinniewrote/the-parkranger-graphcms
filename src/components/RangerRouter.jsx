@@ -15,7 +15,7 @@ import { withAuthenticationRequired } from "@auth0/auth0-react";
 import Parks from "./Parks";
 import RangerView from "../layouts/RangerView";
 import { Security, LoginCallback, SecureRoute } from "@okta/okta-react";
-
+import { PrivateRoute } from "../components/PrivateRoute";
 const CALLBACK_PATH = "/implicit/callback";
 
 const config = {
@@ -27,26 +27,15 @@ const config = {
 };
 
 export default function RangerRouter() {
-  // const PrivateRoute = ({ component, ...args }) => (
-  //   <Route
-  //     component={withAuthenticationRequired(component, {
-  //       onRedirecting: () => <div>Redirecting you to the login...</div>,
-  //     })}
-  //     {...args}
-  //   />
-  // );
   return (
     <Router>
       <Switch>
-        <Security {...config}>
-          <Route exact path="/" component={MainSplash} />
-          <Route path="/login" component={MainSplash} />
-          <Route path={CALLBACK_PATH} component={LoginCallback} />
-          <SecureRoute path="/app" component={RangerView} />
-          <SecureRoute path="/parks" component={Parks} />
-          <SecureRoute path="/journal" component={Journal} />
-          <SecureRoute path="/profile" component={Profile} />
-        </Security>
+        <Route exact path="/" component={MainSplash} />
+        <Route path="/login" component={MainSplash} />
+        <PrivateRoute path="/app" component={RangerView} />
+        <PrivateRoute path="/parks" component={Parks} />
+        <PrivateRoute path="/journal" component={Journal} />
+        <PrivateRoute path="/profile" component={Profile} />
       </Switch>
     </Router>
   );
