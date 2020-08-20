@@ -1,5 +1,5 @@
 import React from "react";
 
 export default function Journal() {
-  return <div>Journal</div>;
+  return <h3>Journal</h3>;
 }

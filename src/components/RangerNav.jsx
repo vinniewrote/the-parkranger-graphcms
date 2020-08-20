@@ -1,19 +1,19 @@
 import React from "react";
-import book from "../svg/book.svg";
-import park from "../svg/park.svg";
-import profile from "../svg/profile.svg";
+import Parksbtn from "./ParksButton";
+import Profilebtn from "./ProfileButton";
+import Journalbtn from "./JournalButton";
 
 export default function RangerNav() {
   return (
     <div className="rangerNav">
-      <a href="/parks">
-        <img src={park} alt="park" />
+      <a href="/app/parks">
+        <Parksbtn />
       </a>
-      <a href="/journal">
-        <img src={book} alt="journal" />
+      <a href="/app/journal">
+        <Journalbtn />
       </a>
-      <a href="/profile">
-        <img src={profile} alt="profile" />
+      <a href="/user/profile">
+        <Profilebtn />
       </a>
     </div>
   );

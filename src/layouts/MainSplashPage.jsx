@@ -12,7 +12,7 @@ export default function MainSplashPage() {
       <div className="authenticationLayer">
         <LoginButton />
         <LogoutButton />
-        <a href="/app">go to app</a>
+        <a href="/app/parks">go to app</a>
         <a href="/">go to home</a>
       </div>
     </div>
