@@ -103,10 +103,10 @@
 }
 .userImage {
   position: absolute;
-  top: -75%;
-  left: 43%;
-  height: 100px;
-  width: 100px;
+  top: -65%;
+  left: 41%;
+  height: 105px;
+  width: 105px;
   border-radius: 50%;
   border: 1px solid white;
   background-color: #ffffff;
@@ -115,6 +115,7 @@
   border-radius: 50%;
   height: 95px;
   width: 95px;
+  margin-top: 5px;
 }
 @keyframes App-logo-spin {
   from {
@@ -123,4 +124,58 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes ldio-laceo5ga78f {
+  0% {
+    top: 90px;
+    left: 90px;
+    width: 0;
+    height: 0;
+    opacity: 1;
+  }
+  100% {
+    top: 35px;
+    left: 35px;
+    width: 110px;
+    height: 110px;
+    opacity: 0;
+  }
+}
+
+.ldio-laceo5ga78f div {
+  position: absolute;
+  border-width: 10px;
+  border-style: solid;
+  opacity: 1;
+  border-radius: 50%;
+  animation: ldio-laceo5ga78f 1s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.ldio-laceo5ga78f div:nth-child(1) {
+  border-color: #607d8b;
+}
+
+.ldio-laceo5ga78f div:nth-child(2) {
+  border-color: #00bfa5;
+  animation-delay: -0.5s;
+}
+
+.loadingio-spinner-ripple-8u38x6gutdc {
+  width: 200px;
+  height: 200px;
+  display: inline-block;
+  overflow: hidden;
+  background: none;
+}
+.ldio-laceo5ga78f {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform: translateZ(0) scale(1);
+  backface-visibility: hidden;
+  transform-origin: 0 0;
+}
+.ldio-laceo5ga78f div {
+  box-sizing: content-box;
 }
