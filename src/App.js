@@ -5,40 +5,14 @@ import { ApolloClient } from "apollo-client";
 import { HttpLink } from "apollo-link-http";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import gql from "graphql-tag";
-import { request } from "graphql-request";
-import NewVisitorPage from "./components/NewVistorPage";
 import { Auth0Provider } from "@auth0/auth0-react";
-import MainSplash from "./layouts/MainSplashPage";
 import RangerRouter from "./components/RangerRouter";
 
-const GRAPHCMS_API =
-  "https://api-us-east-1.graphcms.com/v2/ck8g4we3i14kb01xv6avzh80e/master";
-
 function App() {
-  const [parks, setParks] = useState(null);
-
-  useEffect(() => {
-    const fetchParks = async () => {
-      const { parks } = await request(
-        "https://api-us-east-1.graphcms.com/v2/ck8g4we3i14kb01xv6avzh80e/master",
-        `
-          {
-            parks {
-              id
-              name 
-            }
-          }
-        `
-      );
-      setParks(parks);
-    };
-    fetchParks();
-  }, []);
-
   return (
     <Auth0Provider
-      domain="made-to-thrill.auth0.com"
-      clientId="U4vLa56rDYM5Kri2PeNTFz4agGlvmI1k"
+      domain="parkranger.us.auth0.com"
+      clientId="7b2H1ssfuueiedKhY1tyIsNAsgR1SoPQ"
       redirectUri={window.location.origin}
     >
       <div className="App">

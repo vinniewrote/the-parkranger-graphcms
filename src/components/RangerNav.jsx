@@ -1,20 +1,21 @@
 import React from "react";
-import book from "../svg/book.svg";
-import park from "../svg/park.svg";
-import profile from "../svg/profile.svg";
+import Parksbtn from "./ParksButton";
+import Profilebtn from "./ProfileButton";
+import Journalbtn from "./JournalButton";
+import { NavLink } from "react-router-dom";
 
 export default function RangerNav() {
   return (
     <div className="rangerNav">
-      <a href="/parks">
-        <img src={park} alt="park" />
-      </a>
-      <a href="/journal">
-        <img src={book} alt="journal" />
-      </a>
-      <a href="/profile">
-        <img src={profile} alt="profile" />
-      </a>
+      <NavLink to="/app/parks" activeClassName="selected">
+        <Parksbtn />
+      </NavLink>
+      <NavLink to="/app/journal" activeClassName="selected">
+        <Journalbtn />
+      </NavLink>
+      <NavLink to="/user/profile" activeClassName="selected">
+        <Profilebtn />
+      </NavLink>
     </div>
   );
 }
