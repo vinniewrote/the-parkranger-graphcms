@@ -6,6 +6,7 @@ import Journal from "./Journal";
 import Parks from "./Parks";
 import RangerView from "../layouts/RangerView";
 import ProfileView from "../layouts/ProfileView";
+import ParkDetail from "./ParkDetail";
 import { PrivateRoute } from "../components/PrivateRoute";
 
 export default function RangerRouter() {
@@ -14,11 +15,16 @@ export default function RangerRouter() {
       <Switch>
         <Route exact path="/" component={MainSplash} />
         <Route path="/login" component={MainSplash} />
-        <Route path="/app/:path?" exact>
+        <Route path="/app/:path?">
           <Switch>
             <RangerView>
-              <PrivateRoute path="/app/parks" component={Parks} />
-              <PrivateRoute path="/app/journal" component={Journal} />
+              <PrivateRoute exact path="/app/parks" component={Parks} />
+              <PrivateRoute
+                exact
+                path="/app/parks/:parkId"
+                component={ParkDetail}
+              />
+              <PrivateRoute exact path="/app/journal" component={Journal} />
             </RangerView>
           </Switch>
         </Route>

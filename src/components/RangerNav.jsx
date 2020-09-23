@@ -2,19 +2,20 @@ import React from "react";
 import Parksbtn from "./ParksButton";
 import Profilebtn from "./ProfileButton";
 import Journalbtn from "./JournalButton";
+import { NavLink } from "react-router-dom";
 
 export default function RangerNav() {
   return (
     <div className="rangerNav">
-      <a href="/app/parks">
+      <NavLink to="/app/parks" activeClassName="selected">
         <Parksbtn />
-      </a>
-      <a href="/app/journal">
+      </NavLink>
+      <NavLink to="/app/journal" activeClassName="selected">
         <Journalbtn />
-      </a>
-      <a href="/user/profile">
+      </NavLink>
+      <NavLink to="/user/profile" activeClassName="selected">
         <Profilebtn />
-      </a>
+      </NavLink>
     </div>
   );
 }
