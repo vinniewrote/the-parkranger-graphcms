@@ -48,7 +48,7 @@ export default function ParkDetail(props, match, location) {
       ) : (
         <Fragment>
           {parks[0].landmarks.map(({ id, name }) => (
-            <Link key={id} to={`/${id}`}>
+            <Link key={id} to={`/parks/${parkId}/${id}`}>
               <p>{name}</p>
             </Link>
           ))}
