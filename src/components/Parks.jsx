@@ -35,7 +35,7 @@ export default function Parks() {
       ) : (
         <Fragment>
           {parks.map(({ id, parkId, name }) => (
-            <Link key={parkId} to={`/app/parks/${parkId}`}>
+            <Link key={id} to={`/parks/${parkId}`}>
               <p>{name}</p>
             </Link>
           ))}
