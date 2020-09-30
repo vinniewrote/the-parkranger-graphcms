@@ -5,6 +5,7 @@ import Parks from "../components/Parks";
 import Journal from "../components/Journal";
 import ParkDetail from "../components/ParkDetail";
 import LandmarkDetail from "../components/LandmarkDetail";
+import Splash from "../components/Splash";
 
 export default function RangerView({ children }) {
   return (
@@ -20,6 +21,7 @@ export default function RangerView({ children }) {
           <Route path="/parks/:parkId" component={ParkDetail} />
           <Route path="/parks" component={Parks} />
           <Route path="/journal" component={Journal} />
+          <Route exact path="/" component={Splash} />
         </Switch>
       </div>
     </div>
