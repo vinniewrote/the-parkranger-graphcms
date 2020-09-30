@@ -11,6 +11,7 @@ export default function AuthenticatedUser() {
         <Route path="/parks" component={RangerView} />
         <Route path="/journal" component={RangerView} />
         <Route exact path="/profile" component={ProfileView} />
+        <Route path="/" component={RangerView} />
       </Switch>
       <RangerNav />
     </div>
