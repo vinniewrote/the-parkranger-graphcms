@@ -3,15 +3,16 @@ import RangerNav from "../components/RangerNav";
 import RangerView from "./RangerView";
 import { Switch, Route } from "react-router-dom";
 import ProfileView from "./ProfileView";
+import { PrivateRoute } from "../components/PrivateRoute";
 
 export default function AuthenticatedUser() {
   return (
     <div className="rangerWrapper">
       <Switch>
-        <Route path="/parks" component={RangerView} />
-        <Route path="/journal" component={RangerView} />
-        <Route exact path="/profile" component={ProfileView} />
-        <Route path="/" component={RangerView} />
+        <PrivateRoute path="/parks" component={RangerView} />
+        <PrivateRoute path="/journal" component={RangerView} />
+        <PrivateRoute exact path="/profile" component={ProfileView} />
+        <PrivateRoute path="/" component={RangerView} />
       </Switch>
       <RangerNav />
     </div>
