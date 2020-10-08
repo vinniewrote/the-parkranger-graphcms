@@ -3,6 +3,10 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Profile() {
   const { user, isAuthenticated } = useAuth0();
+  const { sub } = user;
+  const usrId = sub.split("|");
+  const idk = usrId[1];
+
   return (
     isAuthenticated && (
       <div className="profileWrapper">
@@ -10,8 +14,12 @@ export default function Profile() {
           <img src={user.picture} alt="user avatar" />
         </div>
         <h3>Profile</h3>
-        <a href="/app/parks">go to app</a>
-        <a href="/">go to home</a>
+        <p>
+          <a href="/app/parks">go to parks</a>
+        </p>
+        <p>
+          <a href="/">go to home</a>
+        </p>
       </div>
     )
   );
