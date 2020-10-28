@@ -2,6 +2,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { request } from "graphql-request";
+import VisitLog from "./VisitLogger";
 
 const GRAPHCMS_API =
   "https://api-us-east-1.graphcms.com/v2/ck8g4we3i14kb01xv6avzh80e/master";
@@ -40,6 +41,41 @@ export default function LandmarkDetail(props, match) {
     area {
       name
       id
+      park {
+        id
+        name
+      }
+      venues {
+        name
+        id
+      }
+    }
+    location {
+      latitude
+      longitude
+    }
+    category {
+      name
+    }
+    classifications {
+      name
+    }
+    theme {
+      name
+    }
+    summary
+    predecessor {
+      name
+      openingDate
+      closingDate
+    }
+    successor {
+      name
+      openingDate
+      closingDate
+    }
+    colorPalette {
+      hex
     }
           }
         }
@@ -65,6 +101,7 @@ export default function LandmarkDetail(props, match) {
               <p>{inversions}</p>
               <p>{duration}</p>
               <p>{openingDate}</p>
+              <VisitLog landmarkId={id} landmarkName={name} />
             </div>
           ))}
         </Fragment>
