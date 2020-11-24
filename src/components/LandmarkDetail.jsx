@@ -2,7 +2,8 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Link } from "react-router-dom";
 import { request } from "graphql-request";
-import VisitLog from "./VisitLogger";
+import VisitLogger from "./VisitLogger";
+import { useManagedStory } from "../contexts/StoryContext";
 
 const GRAPHCMS_API =
   "https://api-us-east-1.graphcms.com/v2/ck8g4we3i14kb01xv6avzh80e/master";
@@ -94,14 +95,17 @@ export default function LandmarkDetail(props, match) {
         "no data yet"
       ) : (
         <Fragment>
-          {console.log(landmarks)}
           {landmarks.map(({ id, name, inversions, duration, openingDate }) => (
             <div>
               <p>{name}</p>
               <p>{inversions}</p>
               <p>{duration}</p>
               <p>{openingDate}</p>
-              <VisitLog landmarkId={id} landmarkName={name} />
+              <VisitLogger
+                landmarkId={id}
+                landmarkName={name}
+                useManagedStory={useManagedStory}
+              />
             </div>
           ))}
         </Fragment>
