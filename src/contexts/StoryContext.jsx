@@ -5,13 +5,16 @@ export const useManagedStory = () => useContext(StoryContext);
 
 export function ManageStory({ children }) {
   const [savedStoryId, setSavedStoryId] = useState(null);
+  const [storyStatus, setStoryStatus] = useState(false);
 
   const value = useMemo(() => {
     return {
       savedStoryId,
       setSavedStoryId,
+      storyStatus,
+      setStoryStatus,
     };
-  }, [savedStoryId, setSavedStoryId]);
+  }, [savedStoryId, setSavedStoryId, storyStatus, setStoryStatus]);
 
   return (
     <StoryContext.Provider value={value}>{children}</StoryContext.Provider>
