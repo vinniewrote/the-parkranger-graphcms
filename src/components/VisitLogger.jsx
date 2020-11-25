@@ -11,10 +11,12 @@ export default function VisitLogger(props) {
   const landmarkId = props.landmarkId;
   const landmarkName = props.landmarkName;
   const currentDate = new Date().toDateString();
-  const [storyStatus, setStoryStatus] = useState(false);
-  const { savedStoryId, setSavedStoryId } = useManagedStory();
-
-  console.log(currentDate);
+  const {
+    savedStoryId,
+    setSavedStoryId,
+    storyStatus,
+    setStoryStatus,
+  } = useManagedStory();
 
   const createAStory = async () => {
     const { createStory } = await request(
