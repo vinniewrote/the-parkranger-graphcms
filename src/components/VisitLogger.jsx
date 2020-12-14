@@ -14,24 +14,42 @@ export default function VisitLogger(props) {
   const {
     savedStoryId,
     setSavedStoryId,
-    storyStatus,
-    setStoryStatus,
+    journalStatus,
+    setJournalStatus,
+    savedJournalId,
+    setSavedJournalId,
+    savedChapterId,
+    setSavedChapterId,
+    savedLandmarkId,
+    setSavedLandmarkId,
   } = useManagedStory();
 
-  const createAStory = async () => {
-    const { createStory } = await request(
+  const mergeLandmarkIds = () => savedLandmarkId.push(landmarkId);
+  const checkForLandmark = savedLandmarkId.includes(landmarkId);
+  console.log(checkForLandmark);
+
+  const createAJournal = async () => {
+    const { createJournal } = await request(
       `${GRAPHCMS_API}`,
       `
-      mutation addStory() {
-        createStory(data: {title: "${landmarkName}-${currentDate}", journal: {}, visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}) {
-            id
-            title
-          }
+    mutation createJournal() {
+      createJournal(data: {title: "${landmarkName}-${currentDate}", chapters: {create: {title: "second chapter", stories: {create: {title: "second story", visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}}}}}) {
+        id
+        title
+        createdAt
+        chapters {
+          id
         }
-    `
+      }
+      }
+  `
     );
-    setStoryStatus(createStory.title.split("-")[1]);
-    setSavedStoryId(createStory.id);
+    setJournalStatus(createJournal.title.split("-")[1]);
+    setSavedJournalId(createJournal.id);
+    setSavedLandmarkId(savedLandmarkId.concat(landmarkId));
+    let chapterArray = createJournal.chapters;
+    const chapterIds = chapterArray.map((x) => x.id);
+    setSavedChapterId(chapterIds[0]);
     toast("landmark logged!");
   };
 
@@ -40,23 +58,41 @@ export default function VisitLogger(props) {
       `${GRAPHCMS_API}`,
       `
       mutation updateStory() {
-        updateStory(data: {journal: {}, visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}, where: {id: "${savedStoryId}"}) {
-            id
-            updatedAt
-          }
+        updateStory(data: {visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}, where: {id: "${savedStoryId}"}) {
+          id
+          updatedAt
+        }
         }
     `
     );
-    toast("story updated");
+    toast("visit updated");
+  };
+
+  const addNewStory = async () => {
+    const { updateChapter } = await request(
+      `${GRAPHCMS_API}`,
+      `
+      mutation updateChapter() {
+        updateChapter(data: {stories: {create: {visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}, title: "title here"}}}, where: {id: "${savedChapterId}"}) {
+          updatedAt
+          id
+        }
+      }
+      `
+    );
+    setSavedLandmarkId(savedLandmarkId.concat(landmarkId));
+    toast("chapter updated");
   };
 
   return (
     <Fragment>
       <button
         onClick={
-          currentDate === storyStatus && savedStoryId !== null
+          currentDate === journalStatus && savedStoryId !== null
             ? () => addVisitToStory()
-            : () => createAStory()
+            : checkForLandmark === true
+            ? () => addNewStory()
+            : () => createAJournal()
         }
       >
         +

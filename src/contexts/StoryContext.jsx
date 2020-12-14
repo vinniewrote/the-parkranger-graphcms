@@ -5,16 +5,36 @@ export const useManagedStory = () => useContext(StoryContext);
 
 export function ManageStory({ children }) {
   const [savedStoryId, setSavedStoryId] = useState(null);
-  const [storyStatus, setStoryStatus] = useState(false);
+  const [journalStatus, setJournalStatus] = useState(false);
+  const [savedJournalId, setSavedJournalId] = useState(false);
+  const [savedChapterId, setSavedChapterId] = useState(false);
+  const [savedLandmarkId, setSavedLandmarkId] = useState([]);
 
   const value = useMemo(() => {
     return {
       savedStoryId,
       setSavedStoryId,
-      storyStatus,
-      setStoryStatus,
+      journalStatus,
+      setJournalStatus,
+      savedJournalId,
+      setSavedJournalId,
+      savedChapterId,
+      setSavedChapterId,
+      savedLandmarkId,
+      setSavedLandmarkId,
     };
-  }, [savedStoryId, setSavedStoryId, storyStatus, setStoryStatus]);
+  }, [
+    savedStoryId,
+    setSavedStoryId,
+    journalStatus,
+    setJournalStatus,
+    savedJournalId,
+    setSavedJournalId,
+    savedChapterId,
+    setSavedChapterId,
+    savedLandmarkId,
+    setSavedLandmarkId,
+  ]);
 
   return (
     <StoryContext.Provider value={value}>{children}</StoryContext.Provider>
