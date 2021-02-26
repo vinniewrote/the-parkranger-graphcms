@@ -22,7 +22,7 @@ export default function ParkDetail(props, match, location) {
             parks(where: {parkId: "${parkId}"}) {
               id
               name
-              openingDate
+              
               landmarks {
                 id
                 name

@@ -1,7 +1,7 @@
 import React from "react";
 import RangerNav from "../components/RangerNav";
 import RangerView from "./RangerView";
-import { Switch, Route } from "react-router-dom";
+import { Switch } from "react-router-dom";
 import ProfileView from "./ProfileView";
 import { PrivateRoute } from "../components/PrivateRoute";
 

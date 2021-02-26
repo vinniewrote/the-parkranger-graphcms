@@ -1,5 +1,4 @@
 import React from "react";
-import { ReactComponent as LoadingAnimation } from "../svg/loading-dot.svg";
 
 export default function Loading() {
   return (
