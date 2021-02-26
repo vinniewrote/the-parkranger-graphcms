@@ -3,9 +3,6 @@ import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Profile() {
   const { user, isAuthenticated } = useAuth0();
-  const { sub } = user;
-  const usrId = sub.split("|");
-  const idk = usrId[1];
 
   return (
     isAuthenticated && (

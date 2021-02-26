@@ -1,5 +1,5 @@
-import React, { Fragment, useState, useEffect } from "react";
-import { request, GraphQLClient, gql } from "graphql-request";
+import React, { Fragment } from "react";
+import { request } from "graphql-request";
 import { useManagedStory } from "../contexts/StoryContext";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";

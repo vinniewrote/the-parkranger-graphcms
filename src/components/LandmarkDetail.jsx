@@ -1,6 +1,4 @@
 import React, { Fragment, useEffect, useState } from "react";
-import { useParams } from "react-router";
-import { Link } from "react-router-dom";
 import { request } from "graphql-request";
 import VisitLogger from "./VisitLogger";
 import { useManagedStory } from "../contexts/StoryContext";
@@ -21,63 +19,37 @@ export default function LandmarkDetail(props, match) {
         `{
           landmarks(where: {id: "${id}"}) {
             id
-    name
-    height
-    inversions
-    length
-    heightRestriction
-    gForce
-    externalLink
-    duration
-    drop
-    closingDate
-    createdAt
-    openingDate
-    operationalStatus
-    speed
-    designer {
-      name
-      id
-    }
-    area {
-      name
-      id
-      park {
-        id
-        name
-      }
-      venues {
-        name
-        id
-      }
-    }
-    location {
-      latitude
-      longitude
-    }
-    category {
-      name
-    }
-    classifications {
-      name
-    }
-    theme {
-      name
-    }
-    summary
-    predecessor {
-      name
-      openingDate
-      closingDate
-    }
-    successor {
-      name
-      openingDate
-      closingDate
-    }
-    colorPalette {
-      hex
-    }
+            name
+            height
+            inversions
+            length
+            heightRestriction
+            gForce
+            externalLink
+            duration
+            drop
+            createdAt
+            openingMonth
+            openingDay
+            openingYear
+            closingDay
+            closingMonth
+            closingYear
+            operationalStatus
+            speed
+            designer {
+              name
+              id
+            }
+            location {
+              latitude
+              longitude
+            }
+            
+            summary
+            colorPalette {
+              hex
+            }
           }
         }
         `
@@ -85,7 +57,7 @@ export default function LandmarkDetail(props, match) {
       setLandmarks(landmarks);
     };
     fetchParks();
-  }, []);
+  }, [id]);
 
   return (
     <Fragment>
@@ -95,19 +67,31 @@ export default function LandmarkDetail(props, match) {
         "no data yet"
       ) : (
         <Fragment>
-          {landmarks.map(({ id, name, inversions, duration, openingDate }) => (
-            <div>
-              <p>{name}</p>
-              <p>{inversions}</p>
-              <p>{duration}</p>
-              <p>{openingDate}</p>
-              <VisitLogger
-                landmarkId={id}
-                landmarkName={name}
-                useManagedStory={useManagedStory}
-              />
-            </div>
-          ))}
+          {landmarks.map(
+            ({
+              id,
+              name,
+              inversions,
+              duration,
+              openingMonth,
+              openingDay,
+              openingYear,
+            }) => (
+              <div>
+                <p>{name}</p>
+                <p>{inversions} inversions</p>
+                <p>{duration}</p>
+                <p>{openingDay}</p>
+                <p>{openingMonth}</p>
+                <p>{openingYear}</p>
+                <VisitLogger
+                  landmarkId={id}
+                  landmarkName={name}
+                  useManagedStory={useManagedStory}
+                />
+              </div>
+            )
+          )}
         </Fragment>
       )}
     </Fragment>
