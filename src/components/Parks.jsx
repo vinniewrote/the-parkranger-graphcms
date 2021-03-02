@@ -2,45 +2,38 @@ import React, { useEffect, useState, Fragment } from "react";
 import { request } from "graphql-request";
 import {} from "react-router-dom";
 import { Link } from "react-router-dom";
+import { useQuery, gql } from "@apollo/client";
 
-const GRAPHCMS_API =
-  "https://api-us-east-1.graphcms.com/v2/ck8g4we3i14kb01xv6avzh80e/master";
+const PARK_LISTING = gql`
+  query GetParkListing {
+    parks {
+      id
+      parkId
+      name
+      openingDay
+      openingMonth
+      openingYear
+    }
+  }
+`;
 
 export default function Parks() {
-  const [parks, setParks] = useState(null);
+  const { loading, error, data } = useQuery(PARK_LISTING);
 
-  useEffect(() => {
-    const fetchParks = async () => {
-      const { parks } = await request(
-        `${GRAPHCMS_API}`,
-        `
-          {
-            parks {
-              id
-              parkId
-              name 
-            }
-          }
-        `
-      );
-      setParks(parks);
-    };
-    fetchParks();
-  }, []);
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
   return (
     <Fragment>
       <h3>Parks and Maps</h3>
-      {!parks ? (
-        "Loading"
-      ) : (
-        <Fragment>
-          {parks.map(({ id, parkId, name }) => (
-            <Link key={id} to={`/parks/${parkId}`}>
-              <p>{name}</p>
-            </Link>
-          ))}
-        </Fragment>
-      )}
+
+      <Fragment>
+        {data.parks.map(({ id, parkId, name }) => (
+          <Link key={id} to={`/parks/${parkId}`}>
+            <p>{name}</p>
+          </Link>
+        ))}
+      </Fragment>
     </Fragment>
   );
 }

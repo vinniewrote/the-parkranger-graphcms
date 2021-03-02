@@ -1,6 +1,8 @@
 import React, { Fragment } from "react";
 import { request } from "graphql-request";
+import { gql, useMutation } from "@apollo/client";
 import { useManagedStory } from "../contexts/StoryContext";
+import { useAuth0 } from "@auth0/auth0-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 
@@ -11,6 +13,8 @@ export default function VisitLogger(props) {
   const landmarkId = props.landmarkId;
   const landmarkName = props.landmarkName;
   const currentDate = new Date().toDateString();
+  const { user, isAuthenticated } = useAuth0();
+
   const {
     savedStoryId,
     setSavedStoryId,
