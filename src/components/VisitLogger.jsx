@@ -1,18 +1,17 @@
 import React, { Fragment } from "react";
 import { request } from "graphql-request";
-import { gql, useMutation } from "@apollo/client";
+import { useQuery, gql, useMutation } from "@apollo/client";
 import { useManagedStory } from "../contexts/StoryContext";
 import { useAuth0 } from "@auth0/auth0-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 
-const GRAPHCMS_API =
-  "https://api-us-east-1.graphcms.com/v2/ck8g4we3i14kb01xv6avzh80e/master";
-
 export default function VisitLogger(props) {
   const landmarkId = props.landmarkId;
   const landmarkName = props.landmarkName;
-  const currentDate = new Date().toDateString();
+  const newDate = new Date();
+  const currentDate = newDate.toDateString();
+  const currentDay = newDate.getDay();
   const { user, isAuthenticated } = useAuth0();
 
   const {
@@ -29,75 +28,72 @@ export default function VisitLogger(props) {
   } = useManagedStory();
 
   const mergeLandmarkIds = () => savedLandmarkId.push(landmarkId);
-  const checkForLandmark = savedLandmarkId.includes(landmarkId);
-  console.log(checkForLandmark);
 
-  const createAJournal = async () => {
-    const { createJournal } = await request(
-      `${GRAPHCMS_API}`,
-      `
-    mutation createJournal() {
-      createJournal(data: {title: "${landmarkName}-${currentDate}", chapters: {create: {title: "second chapter", stories: {create: {title: "second story", visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}}}}}) {
+  const weekday = new Array(7);
+  weekday[0] = "Sunday";
+  weekday[1] = "Monday";
+  weekday[2] = "Tuesday";
+  weekday[3] = "Wednesday";
+  weekday[4] = "Thursday";
+  weekday[5] = "Friday";
+  weekday[6] = "Saturday";
+
+  let dayName = weekday[newDate.getDay()];
+
+  console.log(newDate);
+
+  console.log(currentDate);
+
+  const CREATE_NEW_JOURNAL = gql`
+    mutation CreateNewJournal {
+      createJournal(data: {author: {connect: {auth0id: "${user.sub}", email: "${user.email}"}}, name: "${user.name}'s Journal", chapters: {create: {title: "${dayName}'s Experience", date: "${currentDate}", stories: {create: {title: "${landmarkName}'s Story", visits: {create: {title: "${landmarkName}'s visit", destination: {connect: {Landmark: {id: "{landmarkId}"}}}}}}}}}}) {
         id
-        title
-        createdAt
+        name
         chapters {
+          date
           id
+          title
         }
       }
-      }
-  `
-    );
-    setJournalStatus(createJournal.title.split("-")[1]);
-    setSavedJournalId(createJournal.id);
-    setSavedLandmarkId(savedLandmarkId.concat(landmarkId));
-    let chapterArray = createJournal.chapters;
-    const chapterIds = chapterArray.map((x) => x.id);
-    setSavedChapterId(chapterIds[0]);
-    toast("landmark logged!");
-  };
+    }
+  `;
 
-  const addVisitToStory = async () => {
-    const { updateStory } = await request(
-      `${GRAPHCMS_API}`,
-      `
-      mutation updateStory() {
-        updateStory(data: {visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}, where: {id: "${savedStoryId}"}) {
-          id
-          updatedAt
-        }
-        }
-    `
-    );
-    toast("visit updated");
-  };
-
-  const addNewStory = async () => {
-    const { updateChapter } = await request(
-      `${GRAPHCMS_API}`,
-      `
-      mutation updateChapter() {
-        updateChapter(data: {stories: {create: {visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}, title: "title here"}}}, where: {id: "${savedChapterId}"}) {
-          updatedAt
+  const GET_CHAPTER_DATE = gql`
+    query GetChapterDate {
+      journals(
+        where: { author: { auth0id: "google-oauth2|114631981982606367806" } }
+      ) {
+        id
+        name
+        chapters {
+          date
           id
         }
       }
-      `
-    );
-    setSavedLandmarkId(savedLandmarkId.concat(landmarkId));
-    toast("chapter updated");
-  };
+    }
+  `;
+
+  // const CREATE_CHAPTER = gql``;
+  // const NEW_STORY = gql``;
+  // const NEW_VISIT = gql``;
+  // const UPDATE_VISIT = gql``;
+
+  const [createJournal, { journalData }] = useMutation(CREATE_NEW_JOURNAL);
+  const { loading, error, data } = useQuery(GET_CHAPTER_DATE, {
+    pollInterval: 500,
+  });
+  const currentChapterDate = data;
+  // const isDateSynced = currentChapterDate === currentDate;
+  console.log(currentChapterDate);
+  // console.log(`check for date match ${isDateSynced}`);
 
   return (
     <Fragment>
       <button
-        onClick={
-          currentDate === journalStatus && savedStoryId !== null
-            ? () => addVisitToStory()
-            : checkForLandmark === true
-            ? () => addNewStory()
-            : () => createAJournal()
-        }
+        onClick={() => {
+          createJournal();
+          console.log("created a new user journal.");
+        }}
       >
         +
       </button>
