@@ -17,6 +17,14 @@ export default function Journal(props, match, location) {
       }
     }
   `;
+  const JOURNAL_CHECK = gql`
+    query getJournalStatus {
+      journals(where: { author: { auth0id: "${user.sub}" } }) {
+        id
+        name
+      }
+    }
+  `;
   const CREATE_NEW_AUTHOR = gql`
     mutation CreateNewAuthor {
       createAuthor(data: {email: "${user.email}", name: "${user.name}", auth0id: "${user.sub}"}) {
@@ -31,19 +39,31 @@ export default function Journal(props, match, location) {
     }
   `;
 
-  const { loading, error, data } = useQuery(AUTHOR_CHECK, {
+  const {
+    loading: authorQueryLoading,
+    error: authorQueryError,
+    data: authorQueryData,
+  } = useQuery(AUTHOR_CHECK, {
     pollInterval: 500,
   });
-  const [createAuthor, { authorData }] = useMutation(CREATE_NEW_AUTHOR);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error :(</p>;
-  console.log(data.author);
+  const {
+    loading: journalQueryLoading,
+    error: journalQueryError,
+    data: journalQueryData,
+  } = useQuery(JOURNAL_CHECK, {
+    pollInterval: 500,
+  });
+
+  const [createAuthor] = useMutation(CREATE_NEW_AUTHOR);
+
+  if (authorQueryLoading || journalQueryLoading) return <p>Loading...</p>;
+  if (authorQueryError || journalQueryError) return <p>Error :(</p>;
 
   return (
     <Fragment>
       <h3 style={{ marginTop: "3em" }}>Journal</h3>
-      {data.author === null ? (
+      {authorQueryData.author === null ? (
         <Fragment>
           <div
             className="ActivateJournal"

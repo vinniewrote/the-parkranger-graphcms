@@ -1,106 +1,115 @@
 import React, { Fragment } from "react";
 import { request } from "graphql-request";
-import { gql, useMutation } from "@apollo/client";
+import { useQuery, gql, useMutation } from "@apollo/client";
 import { useManagedStory } from "../contexts/StoryContext";
 import { useAuth0 } from "@auth0/auth0-react";
+import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
-
-const GRAPHCMS_API =
-  "https://api-us-east-1.graphcms.com/v2/ck8g4we3i14kb01xv6avzh80e/master";
 
 export default function VisitLogger(props) {
   const landmarkId = props.landmarkId;
   const landmarkName = props.landmarkName;
-  const currentDate = new Date().toDateString();
   const { user, isAuthenticated } = useAuth0();
 
+  const { savedLandmarkId, currentDate, dayName } = useManagedStory();
+
+  const CREATE_NEW_JOURNAL = gql`
+    mutation CreateNewJournal {
+      createJournal(data: {author: {connect: {auth0id: "${user.sub}", email: "${user.email}"}}, name: "${user.name}'s Journal", chapters: {create: {title: "${dayName}'s Experience", date: "${currentDate}", stories: {create: {title: "${landmarkName}'s Story", visits: {create: {title: "${landmarkName}'s visit", destination: {connect: {Landmark: {id: "{landmarkId}"}}}}}}}}}}) {
+        id
+        name
+        chapters {
+          date
+          id
+          title
+        }
+      }
+    }
+    # add a publish mutation for journal. look for other publish/draft requirements in other querys/mutations
+  `;
+
+  const GET_CHAPTER_DATE = gql`
+    query GetChapterDate {
+      chapters(where: { journal: { id: "ckm9da8wgon8n0977uqxo8vzr" } }) {
+        date
+        id
+        stage
+        title
+      }
+    }
+  `;
+
+  const JOURNAL_CHECK = gql`
+    query getJournalStatus {
+      journals(where: { author: { auth0id: "${user.sub}" } }) {
+        id
+        name
+      }
+    }
+  `;
   const {
-    savedStoryId,
-    setSavedStoryId,
-    journalStatus,
-    setJournalStatus,
-    savedJournalId,
-    setSavedJournalId,
-    savedChapterId,
-    setSavedChapterId,
-    savedLandmarkId,
-    setSavedLandmarkId,
-  } = useManagedStory();
+    loading: journalQueryLoading,
+    error: journalQueryError,
+    data: journalQueryData,
+  } = useQuery(JOURNAL_CHECK);
 
-  const mergeLandmarkIds = () => savedLandmarkId.push(landmarkId);
-  const checkForLandmark = savedLandmarkId.includes(landmarkId);
-  console.log(checkForLandmark);
-
-  const createAJournal = async () => {
-    const { createJournal } = await request(
-      `${GRAPHCMS_API}`,
-      `
-    mutation createJournal() {
-      createJournal(data: {title: "${landmarkName}-${currentDate}", chapters: {create: {title: "second chapter", stories: {create: {title: "second story", visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}}}}}) {
+  const CREATE_NEW_CHAPTER = gql`
+    mutation CreateNewChapter {
+      createChapter(
+        data: {
+          journal: { connect: { id: "ckltst54o6zye0a71dhr2tixi" } }
+          date: "${currentDate}"
+          title: "${dayName}'s Adventure"
+        }
+      ) {
+        date
         id
         title
-        createdAt
-        chapters {
-          id
-        }
       }
-      }
-  `
-    );
-    setJournalStatus(createJournal.title.split("-")[1]);
-    setSavedJournalId(createJournal.id);
-    setSavedLandmarkId(savedLandmarkId.concat(landmarkId));
-    let chapterArray = createJournal.chapters;
-    const chapterIds = chapterArray.map((x) => x.id);
-    setSavedChapterId(chapterIds[0]);
-    toast("landmark logged!");
-  };
+    }
+  `;
+  // const CHECK_FOR_LANDMARK = gql``;
+  // const NEW_STORY = gql``;
+  // const NEW_VISIT = gql``;
+  // const UPDATE_VISIT = gql``;
 
-  const addVisitToStory = async () => {
-    const { updateStory } = await request(
-      `${GRAPHCMS_API}`,
-      `
-      mutation updateStory() {
-        updateStory(data: {visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}, where: {id: "${savedStoryId}"}) {
-          id
-          updatedAt
-        }
-        }
-    `
-    );
-    toast("visit updated");
-  };
+  const [createJournal] = useMutation(CREATE_NEW_JOURNAL);
+  const [createNewChapter] = useMutation(CREATE_NEW_CHAPTER);
+  const {
+    loading: chapterQueryLoading,
+    error: chapterQueryError,
+    data: chapterQueryData,
+  } = useQuery(GET_CHAPTER_DATE, {
+    pollInterval: 2000,
+  });
+  const currentChapterDate = chapterQueryData;
+  // const isDateSynced = currentChapterDate === currentDate;
+  console.log(currentChapterDate);
+  // console.log(`check for date match ${isDateSynced}`);
+  const chapterMap =
+    chapterQueryData !== undefined
+      ? chapterQueryData.chapters.map(({ id, date }) => <p key={id}>{date}</p>)
+      : console.log("no mapping yet");
+  if (chapterQueryData !== undefined) console.log(chapterMap);
 
-  const addNewStory = async () => {
-    const { updateChapter } = await request(
-      `${GRAPHCMS_API}`,
-      `
-      mutation updateChapter() {
-        updateChapter(data: {stories: {create: {visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}, title: "title here"}}}, where: {id: "${savedChapterId}"}) {
-          updatedAt
-          id
-        }
-      }
-      `
-    );
-    setSavedLandmarkId(savedLandmarkId.concat(landmarkId));
-    toast("chapter updated");
-  };
-
+  const journalMap =
+    journalQueryData !== undefined
+      ? journalQueryData.journals.map(({ id, name }) => <p key={id}>{id}</p>)
+      : console.log("no mapping yet");
+  if (journalQueryData !== undefined) console.log(journalMap);
   return (
     <Fragment>
       <button
-        onClick={
-          currentDate === journalStatus && savedStoryId !== null
-            ? () => addVisitToStory()
-            : checkForLandmark === true
-            ? () => addNewStory()
-            : () => createAJournal()
-        }
+        onClick={() => {
+          createJournal();
+          console.log("created a new user journal.");
+        }}
       >
         +
       </button>
+      {chapterMap}
+      {journalMap}
       <ToastContainer />
     </Fragment>
   );
