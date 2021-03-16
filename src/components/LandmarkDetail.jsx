@@ -76,11 +76,7 @@ export default function LandmarkDetail(props, match) {
               <p>{openingDay}</p>
               <p>{openingMonth}</p>
               <p>{openingYear}</p>
-              <VisitLogger
-                landmarkId={id}
-                landmarkName={name}
-                useManagedStory={useManagedStory}
-              />
+              <VisitLogger landmarkId={id} landmarkName={name} />
             </div>
           )
         )}
