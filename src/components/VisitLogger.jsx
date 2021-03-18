@@ -10,13 +10,13 @@ import "react-toastify/dist/ReactToastify.min.css";
 export default function VisitLogger(props) {
   const landmarkId = props.landmarkId;
   const landmarkName = props.landmarkName;
-  const { user, isAuthenticated } = useAuth0();
+  const { user } = useAuth0();
 
-  const { savedLandmarkId, currentDate, dayName } = useManagedStory();
+  const { currentDate, dayName, todaysDate } = useManagedStory();
 
   const CREATE_NEW_JOURNAL = gql`
     mutation CreateNewJournal {
-      createJournal(data: {author: {connect: {auth0id: "${user.sub}", email: "${user.email}"}}, name: "${user.name}'s Journal", chapters: {create: {title: "${dayName}'s Experience", date: "${currentDate}", stories: {create: {title: "${landmarkName}'s Story", visits: {create: {title: "${landmarkName}'s visit", destination: {connect: {Landmark: {id: "{landmarkId}"}}}}}}}}}}) {
+      createJournal(data: {author: {connect: {auth0id: "${user.sub}", email: "${user.email}"}}, name: "${user.name}'s Journal", chapters: {create: {title: "${dayName}'s Experience", date: "${currentDate}", stories: {create: {title: "${landmarkName}'s Story", visits: {create: {title: "${landmarkName}'s visit", destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}}}}}) {
         id
         name
         chapters {
@@ -27,17 +27,6 @@ export default function VisitLogger(props) {
       }
     }
     # add a publish mutation for journal. look for other publish/draft requirements in other querys/mutations
-  `;
-
-  const GET_CHAPTER_DATE = gql`
-    query GetChapterDate {
-      chapters(where: { journal: { id: "ckm9da8wgon8n0977uqxo8vzr" } }) {
-        date
-        id
-        stage
-        title
-      }
-    }
   `;
 
   const JOURNAL_CHECK = gql`
@@ -54,11 +43,18 @@ export default function VisitLogger(props) {
     data: journalQueryData,
   } = useQuery(JOURNAL_CHECK);
 
+  const journalMap =
+    journalQueryData !== undefined
+      ? journalQueryData.journals.map(({ id, name }) => <p key={id}>{id}</p>)
+      : console.log("no mapping yet");
+
+  console.log(journalMap);
+
   const CREATE_NEW_CHAPTER = gql`
     mutation CreateNewChapter {
       createChapter(
         data: {
-          journal: { connect: { id: "ckltst54o6zye0a71dhr2tixi" } }
+          journal: { connect: { id: "${user.sub}" } }
           date: "${currentDate}"
           title: "${dayName}'s Adventure"
         }
@@ -69,13 +65,19 @@ export default function VisitLogger(props) {
       }
     }
   `;
-  // const CHECK_FOR_LANDMARK = gql``;
-  // const NEW_STORY = gql``;
-  // const NEW_VISIT = gql``;
-  // const UPDATE_VISIT = gql``;
 
   const [createJournal] = useMutation(CREATE_NEW_JOURNAL);
-  const [createNewChapter] = useMutation(CREATE_NEW_CHAPTER);
+
+  const GET_CHAPTER_DATE = gql`
+    query GetChapterDate {
+      chapters(where: { journal: { id: "ckm9da8wgon8n0977uqxo8vzr" } }) {
+        date
+        id
+        stage
+        title
+      }
+    }
+  `;
   const {
     loading: chapterQueryLoading,
     error: chapterQueryError,
@@ -84,20 +86,115 @@ export default function VisitLogger(props) {
     pollInterval: 2000,
   });
   const currentChapterDate = chapterQueryData;
-  // const isDateSynced = currentChapterDate === currentDate;
-  console.log(currentChapterDate);
-  // console.log(`check for date match ${isDateSynced}`);
+  let nArr = [];
   const chapterMap =
     chapterQueryData !== undefined
-      ? chapterQueryData.chapters.map(({ id, date }) => <p key={id}>{date}</p>)
+      ? chapterQueryData.chapters.map(({ id, date }) => {
+          nArr.push(date);
+          console.log(nArr);
+        })
       : console.log("no mapping yet");
-  if (chapterQueryData !== undefined) console.log(chapterMap);
 
-  const journalMap =
-    journalQueryData !== undefined
-      ? journalQueryData.journals.map(({ id, name }) => <p key={id}>{id}</p>)
-      : console.log("no mapping yet");
-  if (journalQueryData !== undefined) console.log(journalMap);
+  //compare current date to date array
+  console.log(chapterMap);
+  console.log(currentDate);
+  const dateComp = nArr.includes(todaysDate);
+  if (!dateComp) {
+    console.log("imma create a new chapter here");
+  } else {
+    console.log("ill just add to the chapter");
+  }
+
+  // const UPDATE_CHAPTER = gql``;
+  const CHECK_FOR_LANDMARKS = gql`
+    query getLoggedLandmarks {
+      chapters(where: { journal: { id: "ckm9da8wgon8n0977uqxo8vzr" } }) {
+        date
+        id
+        stage
+        title
+        stories {
+          id
+          title
+          landmarkId
+        }
+      }
+    }
+  `;
+
+  const {
+    loading: landmarkQueryLoading,
+    error: landmarkQueryError,
+    data: landmarkQueryData,
+  } = useQuery(CHECK_FOR_LANDMARKS, {
+    pollInterval: 2000,
+  });
+  if (landmarkQueryData) {
+    console.log(landmarkQueryData.chapters);
+  } else {
+    console.log("no data yet fam");
+  }
+
+  let storyArr = [];
+
+  const storyMap =
+    landmarkQueryData !== undefined
+      ? landmarkQueryData.chapters.map(({ id, stories }) => {
+          stories.map((landmark, id) => {
+            storyArr.push(landmark.landmarkId);
+          });
+        })
+      : console.log("no story mapping yet");
+  console.log(storyArr);
+
+  const ldmkComp = storyArr.includes(landmarkId);
+  if (!ldmkComp) {
+    console.log("new story needed my man");
+  } else {
+    console.log("ill just add a visit to the story");
+  }
+  const CREATE_NEW_STORY = gql`
+    mutation CreateNewStory {
+      createStory(
+        data: {
+          landmarkId: "ckb5wq9201loa0179kvo517od"
+          title: "Maxx Force ride"
+          visits: {
+            create: {
+              destination: {
+                connect: { Landmark: { id: "ckb5wq9201loa0179kvo517od" } }
+              }
+            }
+          }
+          chapter: { connect: { id: "ckmazlwv4t9zm0977bsvk4nol" } }
+        }
+      ) {
+        id
+        stage
+      }
+    }
+  `;
+
+  const CREATE_NEW_VISIT = gql`
+    mutation CreateNewVisit {
+      createVisit(
+        data: {
+          story: { connect: { id: "ckmf3ahgw0bui0e72fenvtbxt" } }
+          destination: {
+            connect: { Landmark: { id: "ckb5wq9201loa0179kvo517od" } }
+          }
+        }
+      ) {
+        id
+        stage
+      }
+    }
+  `;
+
+  const [createNewStory] = useMutation(CREATE_NEW_STORY);
+  const [createNewChapter] = useMutation(CREATE_NEW_CHAPTER);
+  const [createNewVisit] = useMutation(CREATE_NEW_VISIT);
+
   return (
     <Fragment>
       <button
@@ -108,8 +205,7 @@ export default function VisitLogger(props) {
       >
         +
       </button>
-      {chapterMap}
-      {journalMap}
+
       <ToastContainer />
     </Fragment>
   );
