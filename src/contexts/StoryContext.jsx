@@ -13,8 +13,10 @@ export function ManageStory({ children }) {
   const [savedLandmarkId, setSavedLandmarkId] = useState([]);
   const newDate = new Date();
   const currentDate = newDate.toDateString();
-  const currentDay = newDate.getDay();
-
+  const currentDay = newDate.getDate().toString().padStart(2, "0");
+  const currentMonth = (newDate.getMonth() + 1).toString().padStart(2, "0");
+  const currentYear = newDate.getFullYear();
+  let todaysDate = `${currentYear}-${currentMonth}-${currentDay}`;
   const weekday = new Array(7);
 
   weekday[0] = "Sunday";
@@ -43,6 +45,7 @@ export function ManageStory({ children }) {
     currentDate,
     currentDay,
     dayName,
+    todaysDate,
   };
 
   return (
