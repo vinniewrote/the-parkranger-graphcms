@@ -1,6 +1,4 @@
-import React, { useContext, useState, useMemo } from "react";
-import { useQuery, gql, useMutation } from "@apollo/client";
-import { useAuth0 } from "@auth0/auth0-react";
+import React, { useContext, useState } from "react";
 
 const StoryContext = React.createContext();
 export const useManagedStory = () => useContext(StoryContext);
@@ -11,6 +9,8 @@ export function ManageStory({ children }) {
   const [savedJournalId, setSavedJournalId] = useState(false);
   const [savedChapterId, setSavedChapterId] = useState(false);
   const [savedLandmarkId, setSavedLandmarkId] = useState([]);
+  const [userJournalId, setUserJournalId] = useState(null);
+  const [currentChapterId, setCurentChapterId] = useState(null);
   const newDate = new Date();
   const currentDate = newDate.toDateString();
   const currentDay = newDate.getDate().toString().padStart(2, "0");
@@ -26,8 +26,6 @@ export function ManageStory({ children }) {
   weekday[4] = "Thursday";
   weekday[5] = "Friday";
   weekday[6] = "Saturday";
-
-  // let authUserId = user.sub;
 
   let dayName = weekday[currentDay];
 
@@ -46,6 +44,10 @@ export function ManageStory({ children }) {
     currentDay,
     dayName,
     todaysDate,
+    userJournalId,
+    setUserJournalId,
+    currentChapterId,
+    setCurentChapterId,
   };
 
   return (

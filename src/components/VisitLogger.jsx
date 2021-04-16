@@ -1,18 +1,26 @@
 import React, { Fragment } from "react";
-import { request } from "graphql-request";
 import { useQuery, gql, useMutation } from "@apollo/client";
 import { useManagedStory } from "../contexts/StoryContext";
 import { useAuth0 } from "@auth0/auth0-react";
-import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 
 export default function VisitLogger(props) {
-  const landmarkId = props.landmarkId;
-  const landmarkName = props.landmarkName;
   const { user } = useAuth0();
 
-  const { currentDate, dayName, todaysDate } = useManagedStory();
+  const {
+    currentDate,
+    dayName,
+    todaysDate,
+    userJournalId,
+    setUserJournalId,
+    currentChapterId,
+    setCurentChapterId,
+    savedStoryId,
+    setSavedStoryId,
+  } = useManagedStory();
+
+  const { landmarkId, landmarkName } = props;
 
   const CREATE_NEW_JOURNAL = gql`
     mutation CreateNewJournal {
@@ -33,7 +41,6 @@ export default function VisitLogger(props) {
     query getJournalStatus {
       journals(where: { author: { auth0id: "${user.sub}" } }) {
         id
-        name
       }
     }
   `;
@@ -45,10 +52,10 @@ export default function VisitLogger(props) {
 
   const journalMap =
     journalQueryData !== undefined
-      ? journalQueryData.journals.map(({ id, name }) => <p key={id}>{id}</p>)
-      : console.log("no mapping yet");
-
-  console.log(journalMap);
+      ? journalQueryData.journals.map(({ id }) => {
+          setUserJournalId(id);
+        })
+      : "";
 
   const CREATE_NEW_CHAPTER = gql`
     mutation CreateNewChapter {
@@ -70,7 +77,7 @@ export default function VisitLogger(props) {
 
   const GET_CHAPTER_DATE = gql`
     query GetChapterDate {
-      chapters(where: { journal: { id: "ckm9da8wgon8n0977uqxo8vzr" } }) {
+      chapters(where: { journal: { id: "${userJournalId}" } }) {
         date
         id
         stage
@@ -87,28 +94,22 @@ export default function VisitLogger(props) {
   });
   const currentChapterDate = chapterQueryData;
   let nArr = [];
+  let chapterIds = [];
+
   const chapterMap =
     chapterQueryData !== undefined
       ? chapterQueryData.chapters.map(({ id, date }) => {
           nArr.push(date);
-          console.log(nArr);
+          setCurentChapterId(id);
         })
-      : console.log("no mapping yet");
+      : "";
 
   //compare current date to date array
-  console.log(chapterMap);
-  console.log(currentDate);
   const dateComp = nArr.includes(todaysDate);
-  if (!dateComp) {
-    console.log("imma create a new chapter here");
-  } else {
-    console.log("ill just add to the chapter");
-  }
 
-  // const UPDATE_CHAPTER = gql``;
   const CHECK_FOR_LANDMARKS = gql`
     query getLoggedLandmarks {
-      chapters(where: { journal: { id: "ckm9da8wgon8n0977uqxo8vzr" } }) {
+      chapters(where: { journal: { id: "${userJournalId}" } }) {
         date
         id
         stage
@@ -129,11 +130,6 @@ export default function VisitLogger(props) {
   } = useQuery(CHECK_FOR_LANDMARKS, {
     pollInterval: 2000,
   });
-  if (landmarkQueryData) {
-    console.log(landmarkQueryData.chapters);
-  } else {
-    console.log("no data yet fam");
-  }
 
   let storyArr = [];
 
@@ -144,29 +140,53 @@ export default function VisitLogger(props) {
             storyArr.push(landmark.landmarkId);
           });
         })
-      : console.log("no story mapping yet");
+      : "";
   console.log(storyArr);
 
   const ldmkComp = storyArr.includes(landmarkId);
-  if (!ldmkComp) {
-    console.log("new story needed my man");
-  } else {
-    console.log("ill just add a visit to the story");
-  }
+
+  const CHECK_FOR_STORYID = gql`
+    query GetStoryId {
+      stories(
+        where: {
+          chapter: { id: "ckmazlwv4t9zm0977bsvk4nol" }
+          landmarkId: "${landmarkId}"
+        }
+      ) {
+        id
+      }
+    }
+  `;
+
+  const {
+    loading: storyQueryLoading,
+    error: storyQueryError,
+    data: storyQueryData,
+  } = useQuery(CHECK_FOR_STORYID, { pollInterval: 10000 });
+
+  const currentStoryMap =
+    storyQueryData !== undefined
+      ? storyQueryData.stories.map(({ id }) => {
+          setSavedStoryId(id);
+        })
+      : "";
+
+  console.log(storyQueryData);
+
   const CREATE_NEW_STORY = gql`
     mutation CreateNewStory {
       createStory(
         data: {
-          landmarkId: "ckb5wq9201loa0179kvo517od"
-          title: "Maxx Force ride"
+          landmarkId: "${landmarkId}"
+          title: "${landmarkName} ride"
           visits: {
             create: {
               destination: {
-                connect: { Landmark: { id: "ckb5wq9201loa0179kvo517od" } }
+                connect: { Landmark: { id: "${landmarkId}" } }
               }
             }
           }
-          chapter: { connect: { id: "ckmazlwv4t9zm0977bsvk4nol" } }
+          chapter: { connect: { id: "${currentChapterId}" } }
         }
       ) {
         id
@@ -179,9 +199,9 @@ export default function VisitLogger(props) {
     mutation CreateNewVisit {
       createVisit(
         data: {
-          story: { connect: { id: "ckmf3ahgw0bui0e72fenvtbxt" } }
+          story: { connect: { id: "${savedStoryId}" } }
           destination: {
-            connect: { Landmark: { id: "ckb5wq9201loa0179kvo517od" } }
+            connect: { Landmark: { id: "${landmarkId}" } }
           }
         }
       ) {
@@ -195,17 +215,38 @@ export default function VisitLogger(props) {
   const [createNewChapter] = useMutation(CREATE_NEW_CHAPTER);
   const [createNewVisit] = useMutation(CREATE_NEW_VISIT);
 
+  const journalLogic = () => {
+    if (!journalQueryData) {
+      console.log(
+        "i gotta create a new journal, chapter, story and visit. dont forget to publish"
+      );
+      // createJournal();
+    } else if (!dateComp) {
+      console.log(
+        "there is nothing here for today, i need to create a new chapter story and visit. dont forget to publish"
+      );
+      // createNewChapter();
+    } else if (!landmarkQueryData) {
+      console.log(
+        "there are no landmarks present, i gotta create a new story and visit. dont forget to publish"
+      );
+      // createNewStory();
+    } else if (ldmkComp) {
+      console.log(
+        "this landmark is already set here, add a visit. dont forget to publish"
+      );
+      // createNewVisit();
+    }
+  };
   return (
     <Fragment>
       <button
         onClick={() => {
-          createJournal();
-          console.log("created a new user journal.");
+          journalLogic();
         }}
       >
         +
       </button>
-
       <ToastContainer />
     </Fragment>
   );
