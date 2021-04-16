@@ -1,7 +1,5 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { request } from "graphql-request";
+import React, { Fragment } from "react";
 import VisitLogger from "./VisitLogger";
-import { useManagedStory } from "../contexts/StoryContext";
 import { useQuery, gql } from "@apollo/client";
 
 export default function LandmarkDetail(props, match) {
@@ -70,12 +68,12 @@ export default function LandmarkDetail(props, match) {
             openingYear,
           }) => (
             <div>
-              <p>{name}</p>
-              <p>{inversions} inversions</p>
-              <p>{duration}</p>
-              <p>{openingDay}</p>
-              <p>{openingMonth}</p>
-              <p>{openingYear}</p>
+              <p key={name}>{name}</p>
+              <p key={inversions}>{inversions} inversions</p>
+              <p key={duration}>{duration}</p>
+              <p key={openingDay}>{openingDay}</p>
+              <p key={openingMonth}>{openingMonth}</p>
+              <p key={openingYear}>{openingYear}</p>
               <VisitLogger landmarkId={id} landmarkName={name} />
             </div>
           )
