@@ -47,7 +47,7 @@ export default function LandmarkDetail(props, match) {
 `;
 
   const { loading, error, data } = useQuery(LANDMARK_DETAILS);
-
+  console.log(data);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
@@ -68,7 +68,7 @@ export default function LandmarkDetail(props, match) {
             openingYear,
           }) => (
             <div>
-              <p key={name}>{name}</p>
+              <p key={`${name}-${id}`}>{name}</p>
               <p key={inversions}>{inversions} inversions</p>
               <p key={duration}>{duration}</p>
               <p key={openingDay}>{openingDay}</p>

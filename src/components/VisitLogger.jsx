@@ -24,7 +24,7 @@ export default function VisitLogger(props) {
 
   const CREATE_NEW_JOURNAL = gql`
     mutation CreateNewJournal {
-      createJournal(data: {author: {connect: {auth0id: "${user.sub}", email: "${user.email}"}}, name: "${user.name}'s Journal", chapters: {create: {title: "${dayName}'s Experience", date: "${currentDate}", stories: {create: {title: "${landmarkName}'s Story", visits: {create: {title: "${landmarkName}'s visit", destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}}}}}) {
+      createJournal(data: {author: {connect: {auth0id: "${user.sub}", email: "${user.email}"}}, name: "${user.name}'s Journal", journalSlug: "${user.nickmane}-journal", chapters: {create: {title: "${dayName}'s Experience", date: "${currentDate}", stories: {create: {title: "${landmarkName}'s Story", visits: {create: {title: "${landmarkName}'s visit", destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}}}}}) {
         id
         name
         chapters {
@@ -34,7 +34,6 @@ export default function VisitLogger(props) {
         }
       }
     }
-    # add a publish mutation for journal. look for other publish/draft requirements in other querys/mutations
   `;
 
   const JOURNAL_CHECK = gql`
@@ -59,16 +58,9 @@ export default function VisitLogger(props) {
 
   const CREATE_NEW_CHAPTER = gql`
     mutation CreateNewChapter {
-      createChapter(
-        data: {
-          journal: { connect: { id: "${user.sub}" } }
-          date: "${currentDate}"
-          title: "${dayName}'s Adventure"
-        }
-      ) {
+      createChapter(data: {date: "${todaysDate}", journal: {connect: {id: "${user.sub}"}}, stories: {create: {visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}, title: "${dayName}'s Adventure"}}}}}) {
         date
         id
-        title
       }
     }
   `;
@@ -149,7 +141,7 @@ export default function VisitLogger(props) {
     query GetStoryId {
       stories(
         where: {
-          chapter: { id: "ckmazlwv4t9zm0977bsvk4nol" }
+          chapter: { id: "${currentChapterId}" }
           landmarkId: "${landmarkId}"
         }
       ) {
@@ -215,29 +207,56 @@ export default function VisitLogger(props) {
   const [createNewChapter] = useMutation(CREATE_NEW_CHAPTER);
   const [createNewVisit] = useMutation(CREATE_NEW_VISIT);
 
+  const PUBLISH_JOURNAL = gql`
+    mutation PublishJournal {
+      publishJournal(where: {id: "${userJournalId}"}) {
+    publishedAt
+  }
+    }
+  `;
+  const [publishUserJournal] = useMutation(PUBLISH_JOURNAL);
+
+  const PUBLISH_CHAPTER = gql`
+    mutation PublishChapter {
+      publishChapter(where: {id: "${currentChapterId}"}) {
+        publishedAt
+      }
+    }
+  `;
+  const [publishUserChapter] = useMutation(PUBLISH_CHAPTER);
+
+  const PUBLISH_STORY = gql`
+    mutation PublishStory {
+      publishStory(where: {id: "${savedStoryId}"}) {
+        publishedAt
+      }
+    }
+  `;
+  const [publishUserStory] = useMutation(PUBLISH_STORY);
+
   const journalLogic = () => {
     if (!journalQueryData) {
-      console.log(
-        "i gotta create a new journal, chapter, story and visit. dont forget to publish"
-      );
-      // createJournal();
+      createJournal();
+      toast("registering your journal & visit");
+      publishUserJournal();
     } else if (!dateComp) {
-      console.log(
-        "there is nothing here for today, i need to create a new chapter story and visit. dont forget to publish"
-      );
-      // createNewChapter();
+      createNewChapter();
+      toast("updating & publishing your data for today");
+      publishUserChapter();
     } else if (!landmarkQueryData) {
-      console.log(
-        "there are no landmarks present, i gotta create a new story and visit. dont forget to publish"
-      );
-      // createNewStory();
+      createNewStory();
+      toast("creating and publishing your story");
+      publishUserStory();
     } else if (ldmkComp) {
-      console.log(
-        "this landmark is already set here, add a visit. dont forget to publish"
-      );
-      // createNewVisit();
+      createNewVisit();
+      toast("updating and publishing your visit");
+    } else if (!ldmkComp) {
+      createNewStory();
+      toast("creating and publishing your story");
+      publishUserStory();
     }
   };
+
   return (
     <Fragment>
       <button
