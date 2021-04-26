@@ -14,11 +14,11 @@ export function ManageStory({ children }) {
   const newDate = new Date();
   const currentDate = newDate.toDateString();
   const currentDay = newDate.getDate().toString().padStart(2, "0");
+  const currentNumberDay = newDate.getDay();
   const currentMonth = (newDate.getMonth() + 1).toString().padStart(2, "0");
   const currentYear = newDate.getFullYear();
-  let todaysDate = `${currentYear}-${currentMonth}-${currentDay}`;
+  const todaysDate = `${currentYear}-${currentMonth}-${currentDay}`;
   const weekday = new Array(7);
-
   weekday[0] = "Sunday";
   weekday[1] = "Monday";
   weekday[2] = "Tuesday";
@@ -27,7 +27,7 @@ export function ManageStory({ children }) {
   weekday[5] = "Friday";
   weekday[6] = "Saturday";
 
-  let dayName = weekday[currentDay];
+  let dayName = weekday[currentNumberDay];
 
   const value = {
     savedStoryId,

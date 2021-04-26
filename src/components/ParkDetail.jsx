@@ -1,7 +1,5 @@
-import React, { Fragment, useEffect, useState } from "react";
-import { useParams } from "react-router";
+import React, { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { request } from "graphql-request";
 import { useQuery, gql } from "@apollo/client";
 
 export default function ParkDetail(props, match, location) {
