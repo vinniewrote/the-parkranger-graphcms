@@ -58,9 +58,12 @@ export default function VisitLogger(props) {
 
   const CREATE_NEW_CHAPTER = gql`
     mutation CreateNewChapter {
-      createChapter(data: {date: "${todaysDate}", journal: {connect: {id: "${user.sub}"}}, stories: {create: {visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}, title: "${dayName}'s Adventure"}}}}}) {
+      createChapter(data: {date: "${todaysDate}", journal: {connect: {id: "${userJournalId}"}}, stories: {create: {visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}, title: "${dayName}'s Adventure"}}}}}) {
         date
         id
+        stories {
+          title
+        }
       }
     }
   `;
@@ -240,6 +243,7 @@ export default function VisitLogger(props) {
       toast("registering your journal & visit");
       publishUserJournal();
     } else if (!dateComp) {
+      // create chapter request is busted test graphql query
       createNewChapter();
       toast("updating & publishing your data for today");
       publishUserChapter();
