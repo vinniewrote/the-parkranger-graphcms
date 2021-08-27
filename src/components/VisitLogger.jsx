@@ -18,6 +18,8 @@ export default function VisitLogger(props) {
     setCurentChapterId,
     savedStoryId,
     setSavedStoryId,
+    savedLandmarkId,
+    setSavedLandmarkId,
   } = useManagedStory();
 
   const { landmarkId, landmarkName } = props;
@@ -27,14 +29,19 @@ export default function VisitLogger(props) {
       createJournal(data: {author: {connect: {auth0id: "${user.sub}", email: "${user.email}"}}, name: "${user.name}'s Journal", journalSlug: "${user.nickmane}-journal", chapters: {create: {title: "${dayName}'s Experience", date: "${currentDate}", stories: {create: {title: "${landmarkName}'s Story", visits: {create: {title: "${landmarkName}'s visit", destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}}}}}) {
         id
         name
-        chapters {
-          date
-          id
-          title
-        }
       }
     }
   `;
+
+const PUBLISH_JOURNAL = gql`
+mutation PublishJournal {
+  publishJournal(where: {id: "${userJournalId}"}) {
+    id
+    name
+  }
+}
+`;
+const [publishJournal] = useMutation(PUBLISH_JOURNAL);
 
   const JOURNAL_CHECK = gql`
     query getJournalStatus {
@@ -56,19 +63,28 @@ export default function VisitLogger(props) {
         })
       : "";
 
+  const [createJournal, { data: newJournaldata, loading: newJournalLoading, error: newJournalError }] = useMutation(CREATE_NEW_JOURNAL, {
+    // onCompleted: prepJournalForPublish
+  });
+  
+  const journalMutationId = newJournaldata?.createJournal?.id;
+    
+  const prepJournalForPublish = () => {
+    setUserJournalId(journalMutationId);
+  }
+
+
+        
+
   const CREATE_NEW_CHAPTER = gql`
     mutation CreateNewChapter {
-      createChapter(data: {date: "${todaysDate}", journal: {connect: {id: "${userJournalId}"}}, stories: {create: {visits: {create: {destination: {connect: {Landmark: {id: "${landmarkId}"}}}, title: "${dayName}'s Adventure"}}}}}) {
-        date
+      createChapter(data: {journal: {connect: {id: "${userJournalId}"}}, date: "${todaysDate}", stories: {create: {visits: {create: {landmark: {connect: {id: "${landmarkId}"}}, title: "${dayName}'s Adventure"}}}}}) {
         id
-        stories {
-          title
-        }
       }
     }
   `;
 
-  const [createJournal] = useMutation(CREATE_NEW_JOURNAL);
+
 
   const GET_CHAPTER_DATE = gql`
     query GetChapterDate {
@@ -80,6 +96,7 @@ export default function VisitLogger(props) {
       }
     }
   `;
+
   const {
     loading: chapterQueryLoading,
     error: chapterQueryError,
@@ -90,7 +107,7 @@ export default function VisitLogger(props) {
   const currentChapterDate = chapterQueryData;
   let nArr = [];
   let chapterIds = [];
-
+  
   const chapterMap =
     chapterQueryData !== undefined
       ? chapterQueryData.chapters.map(({ id, date }) => {
@@ -104,16 +121,8 @@ export default function VisitLogger(props) {
 
   const CHECK_FOR_LANDMARKS = gql`
     query getLoggedLandmarks {
-      chapters(where: { journal: { id: "${userJournalId}" } }) {
-        date
-        id
-        stage
-        title
-        stories {
-          id
-          title
-          landmarkId
-        }
+      stories(where: {chapter: {date: "${todaysDate}", journal: {id: "${userJournalId}"}}}) {
+        landmarkId
       }
     }
   `;
@@ -129,23 +138,21 @@ export default function VisitLogger(props) {
   let storyArr = [];
 
   const storyMap =
-    landmarkQueryData !== undefined
-      ? landmarkQueryData.chapters.map(({ id, stories }) => {
-          stories.map((landmark, id) => {
-            storyArr.push(landmark.landmarkId);
-          });
+  landmarkQueryData !== undefined ?
+      landmarkQueryData.stories.map (({ id, landmarkId }) => {
+         storyArr.push(landmarkId);
+         
         })
-      : "";
-  console.log(storyArr);
-
+        :"";
+    
   const ldmkComp = storyArr.includes(landmarkId);
+  // console.log(ldmkComp);
 
   const CHECK_FOR_STORYID = gql`
     query GetStoryId {
       stories(
         where: {
           chapter: { id: "${currentChapterId}" }
-          landmarkId: "${landmarkId}"
         }
       ) {
         id
@@ -166,58 +173,32 @@ export default function VisitLogger(props) {
         })
       : "";
 
-  console.log(storyQueryData);
 
   const CREATE_NEW_STORY = gql`
     mutation CreateNewStory {
-      createStory(
-        data: {
-          landmarkId: "${landmarkId}"
-          title: "${landmarkName} ride"
-          visits: {
-            create: {
-              destination: {
-                connect: { Landmark: { id: "${landmarkId}" } }
-              }
-            }
-          }
-          chapter: { connect: { id: "${currentChapterId}" } }
-        }
-      ) {
-        id
-        stage
-      }
+      
+
+      createStory(data: {landmarkId: "${landmarkId}", visits: {create: {landmark: {connect: {id: "${landmarkId}"}}}}, title: "my awesome story", chapter: {connect: {id: "${currentChapterId}"}}}) {
+    id
+  }
+
     }
   `;
-
+  
   const CREATE_NEW_VISIT = gql`
     mutation CreateNewVisit {
-      createVisit(
-        data: {
-          story: { connect: { id: "${savedStoryId}" } }
-          destination: {
-            connect: { Landmark: { id: "${landmarkId}" } }
-          }
-        }
-      ) {
-        id
-        stage
-      }
-    }
-  `;
-
-  const [createNewStory] = useMutation(CREATE_NEW_STORY);
-  const [createNewChapter] = useMutation(CREATE_NEW_CHAPTER);
-  const [createNewVisit] = useMutation(CREATE_NEW_VISIT);
-
-  const PUBLISH_JOURNAL = gql`
-    mutation PublishJournal {
-      publishJournal(where: {id: "${userJournalId}"}) {
-    publishedAt
+      createVisit(data: {story: {connect: {id: "${savedStoryId}"}}, landmark: {connect: {id: "${landmarkId}"}}}) {
+    id
   }
     }
   `;
-  const [publishUserJournal] = useMutation(PUBLISH_JOURNAL);
+
+  const [createNewStory, {data:newStoryData, loading: newStoryLoading, error: newStoryError}] = useMutation(CREATE_NEW_STORY);
+  const [createNewChapter, {data: newChapterData, loading: newChapterLoading, error: newChapterError}] = useMutation(CREATE_NEW_CHAPTER);
+  const chapterMutation = newChapterData?.createChapter?.id;
+  const [createNewVisit, {data: newVisitData, loading: newVisitLoading, error: newVisitError}] = useMutation(CREATE_NEW_VISIT);
+  const visitMutation = newVisitData?.createVisit?.id;
+  
 
   const PUBLISH_CHAPTER = gql`
     mutation PublishChapter {
@@ -240,24 +221,31 @@ export default function VisitLogger(props) {
   const journalLogic = () => {
     if (!journalQueryData) {
       createJournal();
-      toast("registering your journal & visit");
-      publishUserJournal();
+      toast("registering your brand new journal & visit");
+      prepJournalForPublish();
+      publishJournal();
     } else if (!dateComp) {
-      // create chapter request is busted test graphql query
+      publishJournal();
       createNewChapter();
-      toast("updating & publishing your data for today");
+      toast("updating your data for today");
       publishUserChapter();
     } else if (!landmarkQueryData) {
+      publishJournal();
       createNewStory();
-      toast("creating and publishing your story");
+      toast("creating your story");
+      publishUserChapter();
       publishUserStory();
     } else if (ldmkComp) {
+      publishJournal();
       createNewVisit();
-      toast("updating and publishing your visit");
+      toast("updating your visit");
     } else if (!ldmkComp) {
+      publishJournal();
       createNewStory();
-      toast("creating and publishing your story");
+      toast("creating your new story");
+      publishUserChapter();
       publishUserStory();
+      
     }
   };
 
