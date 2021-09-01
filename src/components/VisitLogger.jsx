@@ -73,9 +73,6 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
     setUserJournalId(journalMutationId);
   }
 
-
-        
-
   const CREATE_NEW_CHAPTER = gql`
     mutation CreateNewChapter {
       createChapter(data: {journal: {connect: {id: "${userJournalId}"}}, date: "${todaysDate}", stories: {create: {visits: {create: {landmark: {connect: {id: "${landmarkId}"}}, title: "${dayName}'s Adventure"}}}}}) {
@@ -136,17 +133,18 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
   });
 
   let storyArr = [];
-
+console.log(landmarkQueryData?.stories);
   const storyMap =
   landmarkQueryData !== undefined ?
       landmarkQueryData.stories.map (({ id, landmarkId }) => {
          storyArr.push(landmarkId);
-         
+         console.log('done');
         })
         :"";
     
   const ldmkComp = storyArr.includes(landmarkId);
-  // console.log(ldmkComp);
+  console.log(storyArr);
+  console.log(ldmkComp);
 
   const CHECK_FOR_STORYID = gql`
     query GetStoryId {
@@ -173,11 +171,8 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
         })
       : "";
 
-
   const CREATE_NEW_STORY = gql`
     mutation CreateNewStory {
-      
-
       createStory(data: {landmarkId: "${landmarkId}", visits: {create: {landmark: {connect: {id: "${landmarkId}"}}}}, title: "my awesome story", chapter: {connect: {id: "${currentChapterId}"}}}) {
     id
   }
@@ -187,7 +182,7 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
   
   const CREATE_NEW_VISIT = gql`
     mutation CreateNewVisit {
-      createVisit(data: {story: {connect: {id: "${savedStoryId}"}}, landmark: {connect: {id: "${landmarkId}"}}}) {
+      createStory(data: {landmarkId: "${landmarkId}", visits: {create: {landmark: {connect: {id: "${landmarkId}"}}}}, title: "my thrilling  story", chapter: {connect: {id: "${currentChapterId}"}}}) {
     id
   }
     }
@@ -227,22 +222,25 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
     } else if (!dateComp) {
       publishJournal();
       createNewChapter();
-      toast("updating your data for today");
+      toast("updating today's data");
       publishUserChapter();
+      publishUserStory();
     } else if (!landmarkQueryData) {
       publishJournal();
       createNewStory();
-      toast("creating your story");
+      toast("creating your new story");
       publishUserChapter();
       publishUserStory();
     } else if (ldmkComp) {
       publishJournal();
       createNewVisit();
-      toast("updating your visit");
+      toast("updating your story & visit");
+      publishUserChapter();
+      publishUserStory();
     } else if (!ldmkComp) {
       publishJournal();
       createNewStory();
-      toast("creating your new story");
+      toast("creating your new landmark story");
       publishUserChapter();
       publishUserStory();
       
