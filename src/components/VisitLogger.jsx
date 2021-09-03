@@ -75,7 +75,7 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
 
   const CREATE_NEW_CHAPTER = gql`
     mutation CreateNewChapter {
-      createChapter(data: {journal: {connect: {id: "${userJournalId}"}}, date: "${todaysDate}", stories: {create: {visits: {create: {landmark: {connect: {id: "${landmarkId}"}}, title: "${dayName}'s Adventure"}}}}}) {
+      createChapter(data: {date: "${todaysDate}", journal: {connect: {id: "${userJournalId}"}}, stories: {create: {chapter: {create: {title: "${dayName}'s chapter"}}, title: "${dayName}'s story", visits: {create: {landmark: {connect: {id: "${landmarkId}"}}}}}}}) {
         id
       }
     }
@@ -173,18 +173,31 @@ console.log(landmarkQueryData?.stories);
 
   const CREATE_NEW_STORY = gql`
     mutation CreateNewStory {
-      createStory(data: {landmarkId: "${landmarkId}", visits: {create: {landmark: {connect: {id: "${landmarkId}"}}}}, title: "my awesome story", chapter: {connect: {id: "${currentChapterId}"}}}) {
-    id
-  }
-
+      createStory(
+        data: {
+          landmarkId: "${landmarkId}"
+          title: "${landmarkName} ride"
+          visits: {
+            create: {
+              landmark: {
+                connect: {  id: "${landmarkId}"  }
+              }
+            }
+          }
+          chapter: { connect: { id: "${currentChapterId}" } }
+        }
+      ) {
+        id
+        stage
+      }
     }
-  `;
-  
+  `; 
+
   const CREATE_NEW_VISIT = gql`
     mutation CreateNewVisit {
-      createStory(data: {landmarkId: "${landmarkId}", visits: {create: {landmark: {connect: {id: "${landmarkId}"}}}}, title: "my thrilling  story", chapter: {connect: {id: "${currentChapterId}"}}}) {
-    id
-  }
+      createVisit(data: {story: {connect: {id: "${savedStoryId}"}}, landmark: {connect: {id: "${landmarkId}"}}})  {
+        id
+      }
     }
   `;
 
@@ -220,7 +233,6 @@ console.log(landmarkQueryData?.stories);
       prepJournalForPublish();
       publishJournal();
     } else if (!dateComp) {
-      publishJournal();
       createNewChapter();
       toast("updating today's data");
       publishUserChapter();
