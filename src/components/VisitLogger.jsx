@@ -75,9 +75,9 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
 
   const CREATE_NEW_CHAPTER = gql`
     mutation CreateNewChapter {
-      createChapter(data: {date: "${todaysDate}", journal: {connect: {id: "${userJournalId}"}}, stories: {create: {chapter: {create: {title: "${dayName}'s chapter"}}, title: "${dayName}'s story", visits: {create: {landmark: {connect: {id: "${landmarkId}"}}}}}}}) {
-        id
-      }
+      createChapter(data: {date: "${todaysDate}", journal: {connect: {id: "${userJournalId}"}}, stories: {create: {title: "${dayName}'s adventure", visits: {create: {landmark: {connect: {id: "${landmarkId}"}}}}}}}) {
+    id
+  }
     }
   `;
 
@@ -104,12 +104,16 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
   const currentChapterDate = chapterQueryData;
   let nArr = [];
   let chapterIds = [];
-  
+  console.log(chapterQueryData?.chapters);
   const chapterMap =
     chapterQueryData !== undefined
       ? chapterQueryData.chapters.map(({ id, date }) => {
           nArr.push(date);
-          setCurentChapterId(id);
+          if (date===todaysDate){
+            // console.log(`winner winner ${id}`);
+            setCurentChapterId(id);
+          }
+          
         })
       : "";
 
