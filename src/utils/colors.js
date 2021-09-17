@@ -1,0 +1,42 @@
+const colors = {
+    black: '#121212',
+    blackVariant: '#000000',
+    white: '#ffffff',
+    whiteVariant: '#f7f7f7',
+    lightGray: '#f4f6f8',
+    lightGrayVariant: '#ecf0f3',
+    mediumGray: '#e9eced',
+    darkGray: '#6d7173',
+    darkGrayVariant: '#636769',
+    gray: '#DEE3E4',
+    grayVariant: '#d5dbdd',
+    blue: '#0070F0',
+    blueHover: '#0064d6',
+    red: '#e61f00',
+    redVariant: '#d61d00',
+    lightRed: '#E39695',
+    green: '#1da595',
+    greenVariant: '#1b9889',
+    border: '#E9ECED',
+    starkWhite: '#f8f0e8',
+    holidayRed: '#C83627',
+    perksGradient:
+        'linear-gradient(90deg, #02AFE4 0%, #43BFB9 12%, #B1D67F 25%, #D0DE63 37%, #FDEF06 50%, #FFD344 63%, #FBAE6E 75%, #F05D89 88%, #EE4389 100%)',
+    lightBlue: 'rgba(0, 112, 240, 0.15)',
+
+    // order/merchant stuff, might make sense to move to another file
+    DELIVERY: '#8a2be2',
+    PICKUP: '#DBC300',
+    SCHEDULED_DELIVERY: '#00c0f0',
+    DIGITAL: '#0070f0',
+    CAFE: '#FF5733',
+    WHITE_10: 'rgba(255, 255, 255, 0.1)',
+    WHITE_20: 'rgba(255, 255, 255, 0.2)',
+    WHITE_60: 'rgba(255, 255, 255, 0.6)',
+    LIGHT_BLUE: '#D9EAFD',
+    YELLOW: '#F5DEA3',
+    GREEN: '#608A69',
+    PURPLE: '#583673',
+};
+
+export default colors;

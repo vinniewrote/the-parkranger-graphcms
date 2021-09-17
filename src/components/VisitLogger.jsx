@@ -1,14 +1,15 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import { useQuery, gql, useMutation } from "@apollo/client";
 import { useManagedStory } from "../contexts/StoryContext";
 import { useAuth0 } from "@auth0/auth0-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
-import { logDOM } from "@testing-library/dom";
+import Button from './styledComponents/Button';
+
 
 export default function VisitLogger(props) {
   const { user } = useAuth0();
-
+  const [status, setStatus] = useState(false);
   const {
     currentDate,
     dayName,
@@ -21,6 +22,7 @@ export default function VisitLogger(props) {
     setSavedStoryId,
     savedLandmarkId,
     setSavedLandmarkId,
+    STATUS,
   } = useManagedStory();
 
   const { landmarkId, landmarkName } = props;
@@ -111,7 +113,6 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
       ? chapterQueryData.chapters.map(({ id, date }) => {
           nArr.push(date);
           if (date===todaysDate){
-            // console.log(`winner winner ${id}`);
             setCurentChapterId(id);
           }
           
@@ -221,10 +222,6 @@ console.log(landmarkQueryData?.stories);
   let storyDraft = newStoryData?.createNewStory?.id;
   let visitDraft = newVisitData?.createVisit?.id;
 
-  console.log(chapterDraft);
-  console.log(storyDraft);
-  console.log(visitDraft);
-
   const PUBLISH_CHAPTER = gql`
     mutation PublishChapter {
       publishChapter(where: {id: "${currentChapterId}"}) {
@@ -253,46 +250,59 @@ console.log(landmarkQueryData?.stories);
   }
 `;
 const [publishUserVisit] = useMutation(PUBLISH_VISIT);
-console.log(dateComp);
-console.log(landmarkQueryData);
-console.log(currentChapterId);
-console.log(landmarkId);
+
   const journalLogic = () => {
-    
+    setStatus(true);
     if (!journalQueryData) {
       createJournal();
-      toast("registering your brand new journal & visit");
+      toast("registering your brand new journal & visit", {onClose: () => setStatus(false)});
       prepJournalForPublish();
       publishJournal();
     } else if (!dateComp) {
       createNewChapter();
-      toast("creating today's data");
-      publishUserChapter();
+      toast("creating today's data", {onClose: () => setStatus(false)});
+      // publishUserChapter();
     } else if (!landmarkQueryData) {
       createNewStory();
-      toast("creating your new story");
-      publishUserStory();
+      toast("creating your new story", {onClose: () => setStatus(false)});
+      // publishUserStory();
     } else if (ldmkComp) {
-      createNewVisit();
-      toast("updating your story & visit");
-      publishUserVisit();
-    } else if (!ldmkComp) {
-      createNewStory();
-      toast("creating your new landmark story");
-      publishUserStory();
       
+      createNewVisit();
+      toast("updating your story & visit", {onClose: () => setStatus(false)});
+      // publishUserVisit();
+      
+    } else if (!ldmkComp) {
+  
+      createNewStory();
+      toast("creating your new landmark story", {onClose: () => setStatus(false)});
+      // publishUserStory();      
     }
+    
   };
 
   return (
     <Fragment>
-      <button
+      {/* <button
+        style={{width: '60px', height: '60px', border: '1px solid black', borderRadius: '60px', fontSize: '2.25em', lineHeight: '1em', cursor: 'pointer'}}
         onClick={() => {
           journalLogic();
         }}
       >
         +
-      </button>
+      </button> */}
+
+      
+        <button disabled={status} type="button"
+        style={{width: '60px', height: '60px', border: '1px solid black', borderRadius: '60px', fontSize: '2.25em', lineHeight: '1em', cursor: 'pointer'}}
+        onClick={() => {
+          
+          journalLogic();
+          
+        }}>
+          {/* {status.children || 'Submit'} */}+{status}
+        </button>
+    
       <ToastContainer />
     </Fragment>
   );

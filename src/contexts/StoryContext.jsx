@@ -29,6 +29,16 @@ export function ManageStory({ children }) {
 
   let dayName = weekday[currentNumberDay];
 
+  const STATUS = {
+    DEFAULT: 'default',
+    LOADING: 'loading',
+    SUCCESS: 'success',
+    DISABLED: 'disabled',
+    SUBMITTING: 'submitting',
+    SUBMITTED: 'submitted',
+    ERROR: 'error',
+  }
+
   const value = {
     savedStoryId,
     setSavedStoryId,
@@ -48,6 +58,7 @@ export function ManageStory({ children }) {
     setUserJournalId,
     currentChapterId,
     setCurentChapterId,
+    STATUS,
   };
 
   return (
