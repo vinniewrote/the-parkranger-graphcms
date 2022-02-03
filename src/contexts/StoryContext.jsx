@@ -4,13 +4,15 @@ const StoryContext = React.createContext();
 export const useManagedStory = () => useContext(StoryContext);
 
 export function ManageStory({ children }) {
-  const [savedStoryId, setSavedStoryId] = useState(null);
+  const [savedStoryId, setSavedStoryId] = useState([]);
+  const [savedStoryLandmarkBundle, setSavedStoryLandmarkBundle] = useState([])
   const [journalStatus, setJournalStatus] = useState(false);
   const [savedJournalId, setSavedJournalId] = useState(false);
   const [savedChapterId, setSavedChapterId] = useState(false);
   const [savedLandmarkId, setSavedLandmarkId] = useState([]);
   const [userJournalId, setUserJournalId] = useState(null);
   const [currentChapterId, setCurentChapterId] = useState(null);
+  const [rawVisitData, setRawVisitData] = useState([]);
   const newDate = new Date();
   const currentDate = newDate.toDateString();
   const currentDay = newDate.getDate().toString().padStart(2, "0");
@@ -42,6 +44,8 @@ export function ManageStory({ children }) {
   const value = {
     savedStoryId,
     setSavedStoryId,
+    savedStoryLandmarkBundle,
+    setSavedStoryLandmarkBundle,
     journalStatus,
     setJournalStatus,
     savedJournalId,
@@ -58,6 +62,8 @@ export function ManageStory({ children }) {
     setUserJournalId,
     currentChapterId,
     setCurentChapterId,
+    rawVisitData,
+    setRawVisitData,
     STATUS,
   };
 

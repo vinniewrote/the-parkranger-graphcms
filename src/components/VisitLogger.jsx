@@ -107,7 +107,7 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
   const currentChapterDate = chapterQueryData;
   let nArr = [];
   let chapterIds = [];
-  console.log(chapterQueryData?.chapters);
+  // console.log(chapterQueryData?.chapters);
   const chapterMap =
     chapterQueryData !== undefined
       ? chapterQueryData.chapters.map(({ id, date }) => {
@@ -125,6 +125,7 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
   const CHECK_FOR_LANDMARKS = gql`
     query getLoggedLandmarks {
       stories(where: {chapter: {date: "${todaysDate}", journal: {id: "${userJournalId}"}}}) {
+        id
         landmarkId
       }
     }
@@ -139,19 +140,27 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
   });
 
   let storyArr = [];
-console.log(landmarkQueryData?.stories);
+  let bundleArray = [];
+// console.log(landmarkQueryData?.stories);
   const storyMap =
   landmarkQueryData !== undefined ?
       landmarkQueryData.stories.map (({ id, landmarkId }) => {
         console.log(landmarkId);
          storyArr.push(landmarkId);
+         bundleArray.push({landmarkId, storyId: id})
          
         })
         :"";
     
   const ldmkComp = storyArr.includes(landmarkId);
-  console.log(storyArr);
-  console.log(ldmkComp);
+  const checkForLandmark = bundleArray.some(b => b.landmarkId === landmarkId);
+  const findStoryIdForLandmark = bundleArray.find(b => b.landmarkId === landmarkId);
+  console.log(checkForLandmark);
+  console.log(findStoryIdForLandmark);
+  console.log(findStoryIdForLandmark?.storyId);
+  // console.log(storyArr);
+  console.log(bundleArray);
+  // console.log(ldmkComp);
 
   const CHECK_FOR_STORYID = gql`
     query GetStoryId {
@@ -202,7 +211,7 @@ console.log(landmarkQueryData?.stories);
 
   const CREATE_NEW_VISIT = gql`
     mutation CreateNewVisit {
-      createVisit(data: {story: {connect: {id: "${savedStoryId}"}}, landmark: {connect: {id: "${landmarkId}"}}})  {
+      createVisit(data: {story: {connect: {id: "${findStoryIdForLandmark?.storyId}"}}, landmark: {connect: {id: "${landmarkId}"}}})  {
         id
       }
     }
@@ -266,13 +275,13 @@ const [publishUserVisit] = useMutation(PUBLISH_VISIT);
       createNewStory();
       toast("creating your new story", {onClose: () => setStatus(false)});
       // publishUserStory();
-    } else if (ldmkComp) {
+    } else if (checkForLandmark) {
       
       createNewVisit();
       toast("updating your story & visit", {onClose: () => setStatus(false)});
       // publishUserVisit();
       
-    } else if (!ldmkComp) {
+    } else if (!checkForLandmark) {
   
       createNewStory();
       toast("creating your new landmark story", {onClose: () => setStatus(false)});

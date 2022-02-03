@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useQuery, gql, useMutation } from "@apollo/client";
 import { useManagedStory } from "../contexts/StoryContext";
@@ -8,8 +8,9 @@ import "react-toastify/dist/ReactToastify.min.css";
 export default function Journal(props, match, location) {
   const { user } = useAuth0();
 
-  const { userJournalId, setUserJournalId } = useManagedStory();
-
+  const { userJournalId, setUserJournalId, rawVisitData, setRawVisitData } = useManagedStory();
+  const [userVisitData, setUserVisitData] = useState(null);
+  
   const AUTHOR_CHECK = gql`
     query getAuthorStatus {
       author(where: { email: "${user.email}" }) {
@@ -46,21 +47,67 @@ export default function Journal(props, match, location) {
     }
   `;
 
+  const GET_USER_VISIT_DATA = gql `
+    query getUserVisitData {
+      journals(where: {author: {auth0id: "${user.sub}"}}) {
+    chapters {
+      date
+      id
+      title
+      stories {
+        id
+        landmarkId
+        title
+        visits {
+          id
+          landmark {
+            id
+            name
+            park {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+    }
+  `
+
   const {
     loading: authorQueryLoading,
     error: authorQueryError,
     data: authorQueryData,
   } = useQuery(AUTHOR_CHECK, {
-    pollInterval: 500,
+    pollInterval: 10000,
   });
-  console.log(authorQueryData);
+  
   const {
     loading: journalQueryLoading,
     error: journalQueryError,
     data: journalQueryData,
   } = useQuery(JOURNAL_CHECK, {
-    pollInterval: 500,
+    pollInterval: 10000,
   });
+
+  const {loading: visitDataQueryLoading, error: visitDataQueryError, data: visitQueryData, } = useQuery(GET_USER_VISIT_DATA);
+  
+  
+  // visitQueryData?.journals?.[0] && {
+
+  // }
+
+  // setRawVisitData( userVisitChapters) 
+  // console.log(userVisitChapters);
+  // console.log(visitQueryData?.journals?.[0].chapters.length);
+
+  if(visitQueryData?.journals?.[0].chapters.length > 0) {
+    const userChapters = visitQueryData?.journals?.[0].chapters
+    setRawVisitData(userChapters);
+  } 
+  
+  console.log(rawVisitData);
 
   const [createAuthor] = useMutation(CREATE_NEW_AUTHOR);
 
@@ -122,6 +169,24 @@ export default function Journal(props, match, location) {
         <Fragment>
           <div>Youre in! Start journaling</div>
         </Fragment>
+      )}
+      {rawVisitData && (
+        rawVisitData.map((visit, i) => (
+          <>
+            <div key={i}>
+             <h3>{visit.date}</h3>
+              <h4>{visit?.stories[0]?.visits[0]?.landmark?.park?.name}</h4>
+              {/* {console.log(visit?.stories[0]?.visits[0]?.landmark?.park?.name)} */}
+              {console.log(visit.stories)}
+              {visit.stories.map((story)=>
+                story?.visits.map((visit, index)=> (
+                  <p key={index}>{visit.landmark.name}</p>
+                ))
+              )
+              }
+            </div>
+          </>
+        ))
       )}
       <ToastContainer />
     </Fragment>
