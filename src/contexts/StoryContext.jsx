@@ -5,14 +5,16 @@ export const useManagedStory = () => useContext(StoryContext);
 
 export function ManageStory({ children }) {
   const [savedStoryId, setSavedStoryId] = useState([]);
-  const [savedStoryLandmarkBundle, setSavedStoryLandmarkBundle] = useState([])
+  const [savedStoryLandmarkBundle, setSavedStoryLandmarkBundle] = useState([]);
   const [journalStatus, setJournalStatus] = useState(false);
   const [savedJournalId, setSavedJournalId] = useState(false);
   const [savedChapterId, setSavedChapterId] = useState(false);
   const [savedLandmarkId, setSavedLandmarkId] = useState([]);
+  const [todaysChapterId, setTodaysChapterId] = useState([]);
   const [userJournalId, setUserJournalId] = useState(null);
   const [currentChapterId, setCurentChapterId] = useState(null);
   const [rawVisitData, setRawVisitData] = useState([]);
+  const [landmarkFlagBoolean, setLandmarkFlagBoolean] = useState(null);
   const newDate = new Date();
   const currentDate = newDate.toDateString();
   const currentDay = newDate.getDate().toString().padStart(2, "0");
@@ -32,14 +34,14 @@ export function ManageStory({ children }) {
   let dayName = weekday[currentNumberDay];
 
   const STATUS = {
-    DEFAULT: 'default',
-    LOADING: 'loading',
-    SUCCESS: 'success',
-    DISABLED: 'disabled',
-    SUBMITTING: 'submitting',
-    SUBMITTED: 'submitted',
-    ERROR: 'error',
-  }
+    DEFAULT: "default",
+    LOADING: "loading",
+    SUCCESS: "success",
+    DISABLED: "disabled",
+    SUBMITTING: "submitting",
+    SUBMITTED: "submitted",
+    ERROR: "error",
+  };
 
   const value = {
     savedStoryId,
@@ -65,6 +67,10 @@ export function ManageStory({ children }) {
     rawVisitData,
     setRawVisitData,
     STATUS,
+    todaysChapterId,
+    setTodaysChapterId,
+    landmarkFlagBoolean,
+    setLandmarkFlagBoolean,
   };
 
   return (

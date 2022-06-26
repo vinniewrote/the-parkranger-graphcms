@@ -4,8 +4,7 @@ import { useManagedStory } from "../contexts/StoryContext";
 import { useAuth0 } from "@auth0/auth0-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
-import Button from './styledComponents/Button';
-
+import Button from "./styledComponents/Button";
 
 export default function VisitLogger(props) {
   const { user } = useAuth0();
@@ -23,6 +22,10 @@ export default function VisitLogger(props) {
     savedLandmarkId,
     setSavedLandmarkId,
     STATUS,
+    todaysChapterId,
+    setTodaysChapterId,
+    landmarkFlagBoolean,
+    setLandmarkFlagBoolean,
   } = useManagedStory();
 
   const { landmarkId, landmarkName } = props;
@@ -36,7 +39,7 @@ export default function VisitLogger(props) {
     }
   `;
 
-const PUBLISH_JOURNAL = gql`
+  const PUBLISH_JOURNAL = gql`
 mutation PublishJournal {
   publishJournal(where: {id: "${userJournalId}"}) {
     id
@@ -44,7 +47,7 @@ mutation PublishJournal {
   }
 }
 `;
-const [publishJournal] = useMutation(PUBLISH_JOURNAL);
+  const [publishJournal] = useMutation(PUBLISH_JOURNAL);
 
   const JOURNAL_CHECK = gql`
     query getJournalStatus {
@@ -66,15 +69,22 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
         })
       : "";
 
-  const [createJournal, { data: newJournaldata, loading: newJournalLoading, error: newJournalError }] = useMutation(CREATE_NEW_JOURNAL, {
+  const [
+    createJournal,
+    {
+      data: newJournaldata,
+      loading: newJournalLoading,
+      error: newJournalError,
+    },
+  ] = useMutation(CREATE_NEW_JOURNAL, {
     // onCompleted: prepJournalForPublish
   });
-  
+
   const journalMutationId = newJournaldata?.createJournal?.id;
-    
+
   const prepJournalForPublish = () => {
     setUserJournalId(journalMutationId);
-  }
+  };
 
   const CREATE_NEW_CHAPTER = gql`
     mutation CreateNewChapter {
@@ -84,8 +94,6 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
     }
   `;
 
-
-
   const GET_CHAPTER_DATE = gql`
     query GetChapterDate {
       chapters(where: { journal: { id: "${userJournalId}" } }) {
@@ -93,6 +101,10 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
         id
         stage
         title
+        stories {
+          id
+          landmarkId
+        }
       }
     }
   `;
@@ -112,10 +124,9 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
     chapterQueryData !== undefined
       ? chapterQueryData.chapters.map(({ id, date }) => {
           nArr.push(date);
-          if (date===todaysDate){
+          if (date === todaysDate) {
             setCurentChapterId(id);
           }
-          
         })
       : "";
 
@@ -141,20 +152,75 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
 
   let storyArr = [];
   let bundleArray = [];
-// console.log(landmarkQueryData?.stories);
+  let landmarkArray = [];
+  console.log(landmarkQueryData);
+  console.log(chapterQueryData);
+
   const storyMap =
-  landmarkQueryData !== undefined ?
-      landmarkQueryData.stories.map (({ id, landmarkId }) => {
-        console.log(landmarkId);
-         storyArr.push(landmarkId);
-         bundleArray.push({landmarkId, storyId: id})
-         
+    landmarkQueryData !== undefined
+      ? landmarkQueryData.stories.map(({ id, landmarkId }) => {
+          console.log(landmarkId);
+          storyArr.push(landmarkId);
+          bundleArray.push({ landmarkId, storyId: id });
         })
-        :"";
-    
+      : "";
+
+  const landmarkMap =
+    chapterQueryData !== undefined
+      ? chapterQueryData.chapters.map(({ id, stories }) => {
+          console.log(stories);
+          // stories.map(({ id, landmarkId }) => {
+          //   landmarkArray.push({ landmarkId, storyId: id });
+          // });
+          landmarkArray.push({ chapterId: id, stories });
+        })
+      : "";
+  console.log(landmarkArray);
+  let cleanedLandMarkArray = [];
+
+  const cleanLandmark = landmarkArray.map(
+    (landmark, id, chapterId, stories) => {
+      console.log(landmark.stories);
+      console.log(chapterId);
+      landmark.stories.map(({ id, landmarkId }) => {
+        console.log(landmark.chapterId);
+        let chpId = landmark.chapterId;
+        cleanedLandMarkArray.push({ chpId, landmarkId, storyId: id });
+      });
+    }
+  );
+  console.log(cleanedLandMarkArray);
+  console.log(chapterQueryData?.chapters?.length);
+  console.log(todaysDate);
+  if (
+    cleanedLandMarkArray?.length > 0 &&
+    chapterQueryData?.chapters?.length > 0
+  ) {
+    console.log("passed the test");
+
+    const findTodaysChapterId = chapterQueryData?.chapters?.find(
+      (c) => c.date === todaysDate
+    );
+    let isTodaysChapterId = findTodaysChapterId?.id;
+    console.log(todaysChapterId);
+    const findTodays = cleanedLandMarkArray?.filter(
+      (d) => d.chpId === todaysChapterId
+    );
+    console.log(findTodays);
+    const onlyLandmarks = findTodays.map((marks) => marks.landmarkId);
+    console.log(onlyLandmarks);
+    const landmarkFlag = onlyLandmarks.includes(`${landmarkId}`);
+    console.log(landmarkFlag);
+    setLandmarkFlagBoolean(landmarkFlag);
+    setTodaysChapterId(isTodaysChapterId);
+  }
+
   const ldmkComp = storyArr.includes(landmarkId);
-  const checkForLandmark = bundleArray.some(b => b.landmarkId === landmarkId);
-  const findStoryIdForLandmark = bundleArray.find(b => b.landmarkId === landmarkId);
+  const checkForLandmark = bundleArray.some((b) => b.landmarkId === landmarkId);
+  const findStoryIdForLandmark = bundleArray.find(
+    (b) => b.landmarkId === landmarkId
+  );
+
   console.log(checkForLandmark);
   console.log(findStoryIdForLandmark);
   console.log(findStoryIdForLandmark?.storyId);
@@ -200,14 +266,14 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
               }
             }
           }
-          chapter: { connect: { id: "${currentChapterId}" } }
+          chapter: { connect: { id: "${todaysChapterId}" } }
         }
       ) {
         id
         stage
       }
     }
-  `; 
+  `;
 
   const CREATE_NEW_VISIT = gql`
     mutation CreateNewVisit {
@@ -217,12 +283,26 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
     }
   `;
 
-  const [createNewStory, {data:newStoryData, loading: newStoryLoading, error: newStoryError}] = useMutation(CREATE_NEW_STORY);
-  const [createNewChapter, {data: newChapterData, loading: newChapterLoading, error: newChapterError}] = useMutation(CREATE_NEW_CHAPTER);
+  const [
+    createNewStory,
+    { data: newStoryData, loading: newStoryLoading, error: newStoryError },
+  ] = useMutation(CREATE_NEW_STORY);
+  const [
+    createNewChapter,
+    {
+      data: newChapterData,
+      loading: newChapterLoading,
+      error: newChapterError,
+    },
+  ] = useMutation(CREATE_NEW_CHAPTER);
+  console.log(newChapterData);
   const chapterMutation = newChapterData?.createChapter?.id;
-  const [createNewVisit, {data: newVisitData, loading: newVisitLoading, error: newVisitError}] = useMutation(CREATE_NEW_VISIT);
+  const [
+    createNewVisit,
+    { data: newVisitData, loading: newVisitLoading, error: newVisitError },
+  ] = useMutation(CREATE_NEW_VISIT);
   const visitMutation = newVisitData?.createVisit?.id;
-  
+
   console.log(newStoryData?.createNewStory);
   console.log(newChapterData?.createNewChapter);
   console.log(newVisitData?.createVisit);
@@ -258,36 +338,44 @@ const [publishJournal] = useMutation(PUBLISH_JOURNAL);
     }
   }
 `;
-const [publishUserVisit] = useMutation(PUBLISH_VISIT);
+  const [publishUserVisit] = useMutation(PUBLISH_VISIT);
+
+  const newLandmarkPayload = {
+    id: "",
+    landmarkId: `${landmarkId}`,
+    storyId: "",
+  };
 
   const journalLogic = () => {
     setStatus(true);
     if (!journalQueryData) {
       createJournal();
-      toast("registering your brand new journal & visit", {onClose: () => setStatus(false)});
+      toast("registering your brand new journal & visit", {
+        onClose: () => setStatus(false),
+      });
       prepJournalForPublish();
       publishJournal();
     } else if (!dateComp) {
       createNewChapter();
-      toast("creating today's data", {onClose: () => setStatus(false)});
+      console.log("new chapter");
+      toast("creating today's data", { onClose: () => setStatus(false) });
       // publishUserChapter();
     } else if (!landmarkQueryData) {
       createNewStory();
-      toast("creating your new story", {onClose: () => setStatus(false)});
+      console.log("new story");
+      toast("creating your new story", { onClose: () => setStatus(false) });
       // publishUserStory();
-    } else if (checkForLandmark) {
-      
+    } else if (landmarkFlagBoolean) {
       createNewVisit();
-      toast("updating your story & visit", {onClose: () => setStatus(false)});
+      toast("updating your story & visit", { onClose: () => setStatus(false) });
       // publishUserVisit();
-      
-    } else if (!checkForLandmark) {
-  
+    } else if (!landmarkFlagBoolean) {
       createNewStory();
-      toast("creating your new landmark story", {onClose: () => setStatus(false)});
-      // publishUserStory();      
+      toast("creating your new landmark story", {
+        onClose: () => setStatus(false),
+      });
+      // publishUserStory();
     }
-    
   };
 
   return (
@@ -301,17 +389,25 @@ const [publishUserVisit] = useMutation(PUBLISH_VISIT);
         +
       </button> */}
 
-      
-        <button disabled={status} type="button"
-        style={{width: '60px', height: '60px', border: '1px solid black', borderRadius: '60px', fontSize: '2.25em', lineHeight: '1em', cursor: 'pointer'}}
+      <button
+        disabled={status}
+        type="button"
+        style={{
+          width: "60px",
+          height: "60px",
+          border: "1px solid black",
+          borderRadius: "60px",
+          fontSize: "2.25em",
+          lineHeight: "1em",
+          cursor: "pointer",
+        }}
         onClick={() => {
-          
           journalLogic();
-          
-        }}>
-          {/* {status.children || 'Submit'} */}+{status}
-        </button>
-    
+        }}
+      >
+        {/* {status.children || 'Submit'} */}+{status}
+      </button>
+
       <ToastContainer />
     </Fragment>
   );
