@@ -104,6 +104,7 @@ mutation PublishJournal {
         stories {
           id
           landmarkId
+          landmarkName
         }
       }
     }
@@ -258,6 +259,7 @@ mutation PublishJournal {
       createStory(
         data: {
           landmarkId: "${landmarkId}"
+          landmarkName: "${landmarkName}"
           title: "${landmarkName} ride"
           visits: {
             create: {
@@ -345,6 +347,7 @@ mutation PublishJournal {
     landmarkId: `${landmarkId}`,
     storyId: "",
   };
+  console.log(landmarkName);
 
   const journalLogic = () => {
     setStatus(true);

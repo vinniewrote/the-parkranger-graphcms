@@ -8,9 +8,10 @@ import "react-toastify/dist/ReactToastify.min.css";
 export default function Journal(props, match, location) {
   const { user } = useAuth0();
 
-  const { userJournalId, setUserJournalId, rawVisitData, setRawVisitData } = useManagedStory();
+  const { userJournalId, setUserJournalId, rawVisitData, setRawVisitData } =
+    useManagedStory();
   const [userVisitData, setUserVisitData] = useState(null);
-  
+
   const AUTHOR_CHECK = gql`
     query getAuthorStatus {
       author(where: { email: "${user.email}" }) {
@@ -47,7 +48,7 @@ export default function Journal(props, match, location) {
     }
   `;
 
-  const GET_USER_VISIT_DATA = gql `
+  const GET_USER_VISIT_DATA = gql`
     query getUserVisitData {
       journals(where: {author: {auth0id: "${user.sub}"}}) {
     chapters {
@@ -57,6 +58,7 @@ export default function Journal(props, match, location) {
       stories {
         id
         landmarkId
+        landmarkName
         title
         visits {
           id
@@ -73,7 +75,7 @@ export default function Journal(props, match, location) {
     }
   }
     }
-  `
+  `;
 
   const {
     loading: authorQueryLoading,
@@ -82,7 +84,7 @@ export default function Journal(props, match, location) {
   } = useQuery(AUTHOR_CHECK, {
     pollInterval: 10000,
   });
-  
+
   const {
     loading: journalQueryLoading,
     error: journalQueryError,
@@ -91,22 +93,25 @@ export default function Journal(props, match, location) {
     pollInterval: 10000,
   });
 
-  const {loading: visitDataQueryLoading, error: visitDataQueryError, data: visitQueryData, } = useQuery(GET_USER_VISIT_DATA);
-  
-  
+  const {
+    loading: visitDataQueryLoading,
+    error: visitDataQueryError,
+    data: visitQueryData,
+  } = useQuery(GET_USER_VISIT_DATA);
+
   // visitQueryData?.journals?.[0] && {
 
   // }
 
-  // setRawVisitData( userVisitChapters) 
+  // setRawVisitData( userVisitChapters)
   // console.log(userVisitChapters);
   // console.log(visitQueryData?.journals?.[0].chapters.length);
 
-  if(visitQueryData?.journals?.[0].chapters.length > 0) {
-    const userChapters = visitQueryData?.journals?.[0].chapters
+  if (visitQueryData?.journals?.[0].chapters.length > 0) {
+    const userChapters = visitQueryData?.journals?.[0].chapters;
     setRawVisitData(userChapters);
-  } 
-  
+  }
+
   console.log(rawVisitData);
 
   const [createAuthor] = useMutation(CREATE_NEW_AUTHOR);
@@ -170,24 +175,37 @@ export default function Journal(props, match, location) {
           <div>Youre in! Start journaling</div>
         </Fragment>
       )}
-      {rawVisitData && (
+      {rawVisitData &&
         rawVisitData.map((visit, i) => (
           <>
             <div key={i}>
-             <h3>{visit.date}</h3>
+              <h3>{visit.date}</h3>
               <h4>{visit?.stories[0]?.visits[0]?.landmark?.park?.name}</h4>
+              {console.log(visit?.stories?.landmarkId)}
+              {/* <p>{visit?.stories[0]?.visits.length}</p>
+              <p>{visit?.stories[1]?.visits.length}</p>
+              <p>{visit?.stories[2]?.visits.length}</p>[p]
+              <p>{visit?.stories[3]?.visits.length}</p> */}
               {/* {console.log(visit?.stories[0]?.visits[0]?.landmark?.park?.name)} */}
-              {console.log(visit.stories)}
-              {visit.stories.map((story)=>
-                story?.visits.map((visit, index)=> (
+              {console.log(visit?.stories[0]?.visits)}
+              {visit?.stories.map((story, landmarkId, index, visits) => (
+                <>
+                  <h3>
+                    {story.landmarkName !== null
+                      ? story.landmarkName
+                      : story.landmarkId}
+                  </h3>
+                  <p>X {story?.visits.length}</p>
+                </>
+              ))}
+              {/* {visit.stories.map((story) =>
+                story?.visits.map((visit, index) => (
                   <p key={index}>{visit.landmark.name}</p>
                 ))
-              )
-              }
+              )} */}
             </div>
           </>
-        ))
-      )}
+        ))}
       <ToastContainer />
     </Fragment>
   );
