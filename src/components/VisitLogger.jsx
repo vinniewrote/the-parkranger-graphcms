@@ -154,13 +154,10 @@ mutation PublishJournal {
   let storyArr = [];
   let bundleArray = [];
   let landmarkArray = [];
-  console.log(landmarkQueryData);
-  console.log(chapterQueryData);
 
   const storyMap =
     landmarkQueryData !== undefined
       ? landmarkQueryData.stories.map(({ id, landmarkId }) => {
-          console.log(landmarkId);
           storyArr.push(landmarkId);
           bundleArray.push({ landmarkId, storyId: id });
         })
@@ -169,49 +166,44 @@ mutation PublishJournal {
   const landmarkMap =
     chapterQueryData !== undefined
       ? chapterQueryData.chapters.map(({ id, stories }) => {
-          console.log(stories);
           // stories.map(({ id, landmarkId }) => {
           //   landmarkArray.push({ landmarkId, storyId: id });
           // });
           landmarkArray.push({ chapterId: id, stories });
         })
       : "";
-  console.log(landmarkArray);
   let cleanedLandMarkArray = [];
 
   const cleanLandmark = landmarkArray.map(
     (landmark, id, chapterId, stories) => {
-      console.log(landmark.stories);
-      console.log(chapterId);
       landmark.stories.map(({ id, landmarkId }) => {
-        console.log(landmark.chapterId);
         let chpId = landmark.chapterId;
         cleanedLandMarkArray.push({ chpId, landmarkId, storyId: id });
       });
     }
   );
-  console.log(cleanedLandMarkArray);
-  console.log(chapterQueryData?.chapters?.length);
-  console.log(todaysDate);
+  // console.log(cleanedLandMarkArray);
+  // console.log(chapterQueryData?.chapters?.length);
+  // console.log(todaysDate);
   if (
     cleanedLandMarkArray?.length > 0 &&
     chapterQueryData?.chapters?.length > 0
   ) {
-    console.log("passed the test");
+    // console.log("passed the test");
 
     const findTodaysChapterId = chapterQueryData?.chapters?.find(
       (c) => c.date === todaysDate
     );
     let isTodaysChapterId = findTodaysChapterId?.id;
-    console.log(todaysChapterId);
+    // console.log(todaysChapterId);
     const findTodays = cleanedLandMarkArray?.filter(
       (d) => d.chpId === todaysChapterId
     );
-    console.log(findTodays);
+    // console.log(findTodays);
     const onlyLandmarks = findTodays.map((marks) => marks.landmarkId);
-    console.log(onlyLandmarks);
+    // console.log(onlyLandmarks);
     const landmarkFlag = onlyLandmarks.includes(`${landmarkId}`);
-    console.log(landmarkFlag);
+    // console.log(landmarkFlag);
     setLandmarkFlagBoolean(landmarkFlag);
     setTodaysChapterId(isTodaysChapterId);
   }
@@ -222,11 +214,11 @@ mutation PublishJournal {
     (b) => b.landmarkId === landmarkId
   );
 
-  console.log(checkForLandmark);
-  console.log(findStoryIdForLandmark);
-  console.log(findStoryIdForLandmark?.storyId);
+  // console.log(checkForLandmark);
+  // console.log(findStoryIdForLandmark);
+  // console.log(findStoryIdForLandmark?.storyId);
   // console.log(storyArr);
-  console.log(bundleArray);
+
   // console.log(ldmkComp);
 
   const CHECK_FOR_STORYID = gql`
@@ -297,7 +289,7 @@ mutation PublishJournal {
       error: newChapterError,
     },
   ] = useMutation(CREATE_NEW_CHAPTER);
-  console.log(newChapterData);
+  // console.log(newChapterData);
   const chapterMutation = newChapterData?.createChapter?.id;
   const [
     createNewVisit,
@@ -305,9 +297,9 @@ mutation PublishJournal {
   ] = useMutation(CREATE_NEW_VISIT);
   const visitMutation = newVisitData?.createVisit?.id;
 
-  console.log(newStoryData?.createNewStory);
-  console.log(newChapterData?.createNewChapter);
-  console.log(newVisitData?.createVisit);
+  // console.log(newStoryData?.createNewStory);
+  // console.log(newChapterData?.createNewChapter);
+  // console.log(newVisitData?.createVisit);
 
   let chapterDraft = newChapterData?.createNewChapter?.id;
   let storyDraft = newStoryData?.createNewStory?.id;
@@ -347,7 +339,6 @@ mutation PublishJournal {
     landmarkId: `${landmarkId}`,
     storyId: "",
   };
-  console.log(landmarkName);
 
   const journalLogic = () => {
     setStatus(true);
@@ -360,12 +351,12 @@ mutation PublishJournal {
       publishJournal();
     } else if (!dateComp) {
       createNewChapter();
-      console.log("new chapter");
+
       toast("creating today's data", { onClose: () => setStatus(false) });
       // publishUserChapter();
     } else if (!landmarkQueryData) {
       createNewStory();
-      console.log("new story");
+
       toast("creating your new story", { onClose: () => setStatus(false) });
       // publishUserStory();
     } else if (landmarkFlagBoolean) {
@@ -403,6 +394,7 @@ mutation PublishJournal {
           fontSize: "2.25em",
           lineHeight: "1em",
           cursor: "pointer",
+          margin: "auto 0",
         }}
         onClick={() => {
           journalLogic();
