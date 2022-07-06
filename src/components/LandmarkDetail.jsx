@@ -1,6 +1,11 @@
 import React, { Fragment } from "react";
 import VisitLogger from "./VisitLogger";
 import { useQuery, gql } from "@apollo/client";
+import {
+  InfoBlockWrapper,
+  LoggingCountContainer,
+  SpecsBlockWrapper,
+} from "../styledComponents/LandmarkDetails_styled";
 
 export default function LandmarkDetail(props, match) {
   const {
@@ -42,6 +47,18 @@ export default function LandmarkDetail(props, match) {
       colorPalette {
         hex
       }
+      visits {
+      id
+      title
+      date
+    }
+    park {
+      name
+    }
+    area {
+      id
+      name
+    }
     }
   }
 `;
@@ -53,8 +70,8 @@ export default function LandmarkDetail(props, match) {
 
   return (
     <Fragment>
-      <div>Detail about the landmark goes here </div>
-      <h4>{id}</h4>
+      {/* <div>Detail about the landmark goes here </div>
+      <h4>{id}</h4> */}
 
       <Fragment>
         {data.landmarks.map(
@@ -66,15 +83,107 @@ export default function LandmarkDetail(props, match) {
             openingMonth,
             openingDay,
             openingYear,
+            summary,
+            gForce,
+            speed,
+            colorPalette,
+            designer,
+            park,
+            area,
           }) => (
             <div>
-              <p key={`${name}-${id}`}>{name}</p>
+              {/* <p key={`${name}-${id}`}>{name}</p>
               <p key={inversions}>{inversions} inversions</p>
               <p key={duration}>{duration}</p>
               <p key={openingDay}>{openingDay}</p>
               <p key={openingMonth}>{openingMonth}</p>
-              <p key={openingYear}>{openingYear}</p>
-              <VisitLogger landmarkId={id} landmarkName={name} />
+          <p key={openingYear}>{openingYear}</p> */}
+              <h2>{name}</h2>
+              <p>{openingYear !== null ? `@ ${openingYear}` : ""}</p>
+              <h3>Your Visits</h3>
+              <InfoBlockWrapper>
+                <LoggingCountContainer>
+                  <div style={{ width: "70%" }}>
+                    <p
+                      style={{
+                        color: "#ffffff",
+                        textAlign: "left",
+                        fontSize: "38px",
+                        lineHeight: "42px",
+                        fontWeight: "300",
+                      }}
+                    >
+                      0
+                    </p>
+                  </div>
+                  <VisitLogger landmarkId={id} landmarkName={name} />
+                </LoggingCountContainer>
+                <p>You havent been here yet</p>
+              </InfoBlockWrapper>
+              <h3>Location</h3>
+              <InfoBlockWrapper>
+                <p>{park?.name}</p>
+                <p>{area?.name}</p>
+              </InfoBlockWrapper>
+
+              <h3>Summary</h3>
+              <InfoBlockWrapper>
+                <p>{summary}</p>
+              </InfoBlockWrapper>
+
+              <h3>Specs</h3>
+              <>
+                {gForce !== null ? (
+                  <SpecsBlockWrapper>
+                    <h5>GForce</h5>
+                    <span>{gForce}</span>
+                  </SpecsBlockWrapper>
+                ) : (
+                  ""
+                )}
+                {speed !== null ? (
+                  <SpecsBlockWrapper>
+                    <h5>Speed (in mph)</h5>
+                    <span>{speed}mph</span>
+                  </SpecsBlockWrapper>
+                ) : (
+                  ""
+                )}
+              </>
+
+              <h3>Theme</h3>
+              <InfoBlockWrapper>
+                {console.log(colorPalette[0].hex)}
+                {colorPalette.map((color, index) => {
+                  // <p>{color.hex}</p>;
+                })}
+                <div
+                  style={{
+                    height: "40px",
+                    width: "40px",
+                    background: `${colorPalette[0]?.hex}`,
+                  }}
+                />
+                <div
+                  style={{
+                    height: "40px",
+                    width: "40px",
+                    background: `${colorPalette[1]?.hex}`,
+                  }}
+                />
+                <div
+                  style={{
+                    height: "40px",
+                    width: "40px",
+                    background: `${colorPalette[2]?.hex}`,
+                  }}
+                />
+              </InfoBlockWrapper>
+
+              <h3>Creative</h3>
+              <InfoBlockWrapper>
+                <p>{designer[0]?.name}</p>
+              </InfoBlockWrapper>
             </div>
           )
         )}
