@@ -182,7 +182,7 @@ mutation PublishJournal {
       });
     }
   );
-  // console.log(cleanedLandMarkArray);
+  console.log(cleanedLandMarkArray);
   // console.log(chapterQueryData?.chapters?.length);
   // console.log(todaysDate);
   if (
@@ -201,9 +201,9 @@ mutation PublishJournal {
     );
     // console.log(findTodays);
     const onlyLandmarks = findTodays.map((marks) => marks.landmarkId);
-    // console.log(onlyLandmarks);
+    console.log(onlyLandmarks);
     const landmarkFlag = onlyLandmarks.includes(`${landmarkId}`);
-    // console.log(landmarkFlag);
+    console.log(landmarkFlag);
     setLandmarkFlagBoolean(landmarkFlag);
     setTodaysChapterId(isTodaysChapterId);
   }
@@ -359,11 +359,11 @@ mutation PublishJournal {
 
       toast("creating your new story", { onClose: () => setStatus(false) });
       // publishUserStory();
-    } else if (landmarkFlagBoolean) {
+    } else if (landmarkFlagBoolean === true) {
       createNewVisit();
       toast("updating your story & visit", { onClose: () => setStatus(false) });
       // publishUserVisit();
-    } else if (!landmarkFlagBoolean) {
+    } else if (landmarkFlagBoolean === false) {
       createNewStory();
       toast("creating your new landmark story", {
         onClose: () => setStatus(false),
