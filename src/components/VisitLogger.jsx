@@ -5,6 +5,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 import Button from "./styledComponents/Button";
+import { findDangerousChanges } from "graphql";
 
 export default function VisitLogger(props) {
   const { user } = useAuth0();
@@ -182,7 +183,7 @@ mutation PublishJournal {
       });
     }
   );
-  console.log(cleanedLandMarkArray);
+  // console.log(cleanedLandMarkArray);
   // console.log(chapterQueryData?.chapters?.length);
   // console.log(todaysDate);
   if (
@@ -199,11 +200,11 @@ mutation PublishJournal {
     const findTodays = cleanedLandMarkArray?.filter(
       (d) => d.chpId === todaysChapterId
     );
-    // console.log(findTodays);
+    console.log(`findTodays - ${findTodays}`);
     const onlyLandmarks = findTodays.map((marks) => marks.landmarkId);
-    console.log(onlyLandmarks);
+    console.log(`findTodays - ${onlyLandmarks}`);
     const landmarkFlag = onlyLandmarks.includes(`${landmarkId}`);
-    console.log(landmarkFlag);
+    console.log(`findTodays - ${landmarkFlag}`);
     setLandmarkFlagBoolean(landmarkFlag);
     setTodaysChapterId(isTodaysChapterId);
   }
@@ -213,13 +214,17 @@ mutation PublishJournal {
   const findStoryIdForLandmark = bundleArray.find(
     (b) => b.landmarkId === landmarkId
   );
-
+  const storyIdForLandmark = findStoryIdForLandmark?.storyId;
   // console.log(checkForLandmark);
-  // console.log(findStoryIdForLandmark);
-  // console.log(findStoryIdForLandmark?.storyId);
+  console.log(findStoryIdForLandmark);
+  console.log(storyIdForLandmark);
   // console.log(storyArr);
 
   // console.log(ldmkComp);
+
+  console.log(`landmarkid - ${landmarkId}`);
+  console.log(`landmarkname - ${landmarkName}`);
+  console.log(`todayschpid - ${todaysChapterId}`);
 
   const CHECK_FOR_STORYID = gql`
     query GetStoryId {
@@ -268,10 +273,15 @@ mutation PublishJournal {
       }
     }
   `;
-
+  {
+    /* have to fix findStoryIdForLandmark?.storyId    */
+  }
+  {
+    /* a relational filter on \"story\" of \"Visit\" used in your mutation could not be resolved, please make sure all referred documents exist*/
+  }
   const CREATE_NEW_VISIT = gql`
     mutation CreateNewVisit {
-      createVisit(data: {story: {connect: {id: "${findStoryIdForLandmark?.storyId}"}}, landmark: {connect: {id: "${landmarkId}"}}})  {
+      createVisit(data: {story: {connect: {id: "${storyIdForLandmark}"}}, landmark: {connect: {id: "${landmarkId}"}}})  {
         id
       }
     }
@@ -359,7 +369,10 @@ mutation PublishJournal {
 
       toast("creating your new story", { onClose: () => setStatus(false) });
       // publishUserStory();
-    } else if (landmarkFlagBoolean === true) {
+    } else if (
+      landmarkFlagBoolean === true &&
+      storyIdForLandmark !== "undefined"
+    ) {
       createNewVisit();
       toast("updating your story & visit", { onClose: () => setStatus(false) });
       // publishUserVisit();

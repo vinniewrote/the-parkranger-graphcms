@@ -11,7 +11,7 @@ export default function RangerView({ children }) {
   return (
     <div className="rangerView">
       <div className="topBlock">
-        <p>v0.88</p>
+        <p>v0.89</p>
         <Logout />
         <h1>Page Header</h1>
         <h2>Subheader Text</h2>
