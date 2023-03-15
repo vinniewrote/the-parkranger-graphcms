@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useQuery, gql, useMutation } from "@apollo/client";
 import { useManagedStory } from "../contexts/StoryContext";
@@ -8,9 +8,7 @@ import "react-toastify/dist/ReactToastify.min.css";
 export default function Journal(props, match, location) {
   const { user } = useAuth0();
 
-  const { userJournalId, setUserJournalId, rawVisitData, setRawVisitData } =
-    useManagedStory();
-  const [userVisitData, setUserVisitData] = useState(null);
+  const { userJournalId, rawVisitData, setRawVisitData } = useManagedStory();
 
   const AUTHOR_CHECK = gql`
     query getAuthorStatus {
@@ -115,13 +113,6 @@ export default function Journal(props, match, location) {
   console.log(rawVisitData);
 
   const [createAuthor] = useMutation(CREATE_NEW_AUTHOR);
-
-  const journalMap =
-    journalQueryData !== undefined
-      ? journalQueryData.journals.map(({ id }) => {
-          setUserJournalId(id);
-        })
-      : console.log("no data available yet");
 
   const PUBLISH_JOURNAL = gql`
       mutation PublishJournal {

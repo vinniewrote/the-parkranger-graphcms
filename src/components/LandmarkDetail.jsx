@@ -13,58 +13,58 @@ export default function LandmarkDetail(props, match) {
   } = props.match;
 
   const LANDMARK_DETAILS = gql`
-  query GetLandmarkDetails {
-    landmarks(where: {id: "${id}"}) {
-      id
-      name
-      height
-      inversions
-      length
-      heightRestriction
-      gForce
-      externalLink
-      duration
-      drop
-      createdAt
-      openingMonth
-      openingDay
-      openingYear
-      closingDay
-      closingMonth
-      closingYear
-      operationalStatus
-      speed
-      designer {
-        name
+    query GetLandmarkDetails {
+      landmarks(where: {id: "${id}"}) {
         id
+        name
+        height
+        inversions
+        length
+        heightRestriction
+        gForce
+        externalLink
+        duration
+        drop
+        createdAt
+        openingMonth
+        openingDay
+        openingYear
+        closingDay
+        closingMonth
+        closingYear
+        operationalStatus
+        speed
+        designer {
+          name
+          id
+        }
+        location {
+          latitude
+          longitude
+        }
+        
+        summary
+        colorPalette {
+          hex
+        }
+        visits {
+        id
+        title
+        date
       }
-      location {
-        latitude
-        longitude
+      park {
+        name
       }
-      
-      summary
-      colorPalette {
-        hex
+      area {
+        id
+        name
       }
-      visits {
-      id
-      title
-      date
+      }
     }
-    park {
-      name
-    }
-    area {
-      id
-      name
-    }
-    }
-  }
-`;
+  `;
 
   const { loading, error, data } = useQuery(LANDMARK_DETAILS);
-  console.log(data);
+  // console.log(data);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
@@ -72,7 +72,6 @@ export default function LandmarkDetail(props, match) {
     <Fragment>
       {/* <div>Detail about the landmark goes here </div>
       <h4>{id}</h4> */}
-
       <Fragment>
         {data.landmarks.map(
           ({
@@ -91,15 +90,11 @@ export default function LandmarkDetail(props, match) {
             park,
             area,
           }) => (
-            <div>
-              {/* <p key={`${name}-${id}`}>{name}</p>
-              <p key={inversions}>{inversions} inversions</p>
-              <p key={duration}>{duration}</p>
-              <p key={openingDay}>{openingDay}</p>
-              <p key={openingMonth}>{openingMonth}</p>
-          <p key={openingYear}>{openingYear}</p> */}
-              <h2>{name}</h2>
-              <p>{openingYear !== null ? `@ ${openingYear}` : ""}</p>
+            <div key={`Landmark Detail -  ${id}`}>
+              <h2 key={`${name} - ${id}`}>{name}</h2>
+              <p key={`${openingYear} - ${id}`}>
+                {openingYear !== null ? `@ ${openingYear}` : ""}
+              </p>
               <h3>Your Visits</h3>
               <InfoBlockWrapper>
                 <LoggingCountContainer>
@@ -116,19 +111,23 @@ export default function LandmarkDetail(props, match) {
                       0
                     </p>
                   </div>
-                  <VisitLogger landmarkId={id} landmarkName={name} />
+                  <VisitLogger
+                    key={`${name} - ${id}`}
+                    landmarkId={id}
+                    landmarkName={name}
+                  />
                 </LoggingCountContainer>
                 <p>You havent been here yet</p>
               </InfoBlockWrapper>
               <h3>Location</h3>
               <InfoBlockWrapper>
-                <p>{park?.name}</p>
-                <p>{area?.name}</p>
+                <p key={`${park?.name} - ${id}`}>{park?.name}</p>
+                <p key={`${area?.name} - ${id}`}>{area?.name}</p>
               </InfoBlockWrapper>
 
               <h3>Summary</h3>
               <InfoBlockWrapper>
-                <p>{summary}</p>
+                <p key={`${summary} - ${id}`}>{summary}</p>
               </InfoBlockWrapper>
 
               <h3>Specs</h3>
@@ -136,7 +135,7 @@ export default function LandmarkDetail(props, match) {
                 {gForce !== null ? (
                   <SpecsBlockWrapper>
                     <h5>GForce</h5>
-                    <span>{gForce}</span>
+                    <span key={`${gForce} - ${id}`}>{gForce}</span>
                   </SpecsBlockWrapper>
                 ) : (
                   ""
@@ -144,7 +143,7 @@ export default function LandmarkDetail(props, match) {
                 {speed !== null ? (
                   <SpecsBlockWrapper>
                     <h5>Speed (in mph)</h5>
-                    <span>{speed}mph</span>
+                    <span key={`${speed} - ${id}`}>{speed}mph</span>
                   </SpecsBlockWrapper>
                 ) : (
                   ""
@@ -153,11 +152,13 @@ export default function LandmarkDetail(props, match) {
 
               <h3>Theme</h3>
               <InfoBlockWrapper>
-                {console.log(colorPalette[0].hex)}
+                {/* {console.log(colorPalette[0].hex)} 
                 {colorPalette.map((color, index) => {
                   // <p>{color.hex}</p>;
                 })}
+                */}
                 <div
+                  key={`${colorPalette} - ${id} - Block1`}
                   style={{
                     height: "40px",
                     width: "40px",
@@ -165,6 +166,7 @@ export default function LandmarkDetail(props, match) {
                   }}
                 />
                 <div
+                  key={`${colorPalette} - ${id} - Block2`}
                   style={{
                     height: "40px",
                     width: "40px",
@@ -172,6 +174,7 @@ export default function LandmarkDetail(props, match) {
                   }}
                 />
                 <div
+                  key={`${colorPalette} - ${id} - Block3`}
                   style={{
                     height: "40px",
                     width: "40px",
@@ -182,7 +185,7 @@ export default function LandmarkDetail(props, match) {
 
               <h3>Creative</h3>
               <InfoBlockWrapper>
-                <p>{designer[0]?.name}</p>
+                <p key={`designer - ${id}`}>{designer[0]?.name}</p>
               </InfoBlockWrapper>
             </div>
           )
