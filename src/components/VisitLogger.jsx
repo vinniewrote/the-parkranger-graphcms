@@ -364,10 +364,7 @@ mutation PublishJournal {
 
       toast("creating today's data", { onClose: () => setStatus(false) });
       // publishUserChapter();
-    } else if (
-      landmarkFlagBoolean === false &&
-      storyIdForLandmark === "undefined"
-    ) {
+    } else if (landmarkFlagBoolean === false) {
       createNewStory();
 
       toast("creating your new story", { onClose: () => setStatus(false) });
