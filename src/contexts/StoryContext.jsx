@@ -16,7 +16,7 @@ export function ManageStory({ children }) {
   const [rawVisitData, setRawVisitData] = useState([]);
   const [landmarkFlagBoolean, setLandmarkFlagBoolean] = useState(null);
   const newDate = new Date();
-  const currentDate = newDate.toDateString();
+  const currentDate = newDate.toISOString();
   const currentDay = newDate.getDate().toString().padStart(2, "0");
   const currentNumberDay = newDate.getDay();
   const currentMonth = (newDate.getMonth() + 1).toString().padStart(2, "0");

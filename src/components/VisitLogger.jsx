@@ -6,7 +6,27 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 import Button from "./styledComponents/Button";
 import { findDangerousChanges } from "graphql";
-
+import {
+  JOURNAL_CHECK,
+  GET_CHAPTER_DATE,
+  CHECK_FOR_STORYID,
+  CHECK_FOR_LANDMARKS,
+} from "../graphql/queries/journalQueries";
+import {
+  CREATE_NEW_AUTHOR,
+  CREATE_NEW_CHAPTER,
+  PUBLISH_JOURNAL,
+  CREATE_NEW_JOURNAL,
+  CREATE_NEW_STORY,
+  CREATE_NEW_VISIT,
+  PUBLISH_CHAPTER,
+  PUBLISH_STORY,
+  PUBLISH_VISIT,
+  NEW_AUTHOR_STEP_ONE,
+  NEW_AUTHOR_STEP_TWO,
+  NEW_AUTHOR_STEP_THREE,
+  NEW_AUTHOR_STEP_FOUR,
+} from "../graphql/mutations/journalMutations";
 export default function VisitLogger(props) {
   const { user } = useAuth0();
   const [status, setStatus] = useState(false);
@@ -28,47 +48,33 @@ export default function VisitLogger(props) {
     landmarkFlagBoolean,
     setLandmarkFlagBoolean,
   } = useManagedStory();
-
   const { landmarkId, landmarkName } = props;
 
-  const CREATE_NEW_JOURNAL = gql`
-    mutation CreateNewJournal {
-      createJournal(data: {author: {connect: {auth0id: "${user.sub}", email: "${user.email}"}}, name: "${user.name}'s Journal", journalSlug: "${user.nickmane}-journal", chapters: {create: {title: "${dayName}'s Experience", date: "${currentDate}", stories: {create: {title: "${landmarkName}'s Story", visits: {create: {title: "${landmarkName}'s visit", destination: {connect: {Landmark: {id: "${landmarkId}"}}}}}}}}}}) {
-        id
-        name
-      }
-    }
-  `;
+  const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
+    variables: {
+      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
+    },
+  });
 
-  const PUBLISH_JOURNAL = gql`
-mutation PublishJournal {
-  publishJournal(where: {id: "${userJournalId}"}) {
-    id
-    name
-  }
-}
-`;
-  const [publishJournal] = useMutation(PUBLISH_JOURNAL);
-
-  const JOURNAL_CHECK = gql`
-    query getJournalStatus {
-      journals(where: { author: { auth0id: "${user.sub}" } }) {
-        id
-      }
-    }
-  `;
   const {
     loading: journalQueryLoading,
     error: journalQueryError,
     data: journalQueryData,
-  } = useQuery(JOURNAL_CHECK);
+  } = useQuery(JOURNAL_CHECK, {
+    variables: { authZeroId: user.sub },
+    onCompleted: () => {
+      journalQueryData.journals.map(({ id }) => {
+        setUserJournalId(id);
+      });
+    },
+  });
 
-  const journalMap =
-    journalQueryData !== undefined
-      ? journalQueryData.journals.map(({ id }) => {
-          setUserJournalId(id);
-        })
-      : "";
+  // const journalMap =
+  //   journalQueryData !== undefined
+  //     ? journalQueryData.journals.map(({ id }) => {
+  //         setUserJournalId(id);
+  //       })
+  //     : "";
 
   const [
     createJournal,
@@ -78,46 +84,125 @@ mutation PublishJournal {
       error: newJournalError,
     },
   ] = useMutation(CREATE_NEW_JOURNAL, {
-    // onCompleted: prepJournalForPublish
+    variables: {
+      authZeroEmail: user.email,
+      authZeroName: user.name,
+      authZeroId: user.sub,
+    },
+    // onCompleted: setUserJournalId(journalMutationId),
+  });
+
+  const [
+    createNewChapter,
+    {
+      data: newChapterData,
+      loading: newChapterLoading,
+      error: newChapterError,
+    },
+  ] = useMutation(CREATE_NEW_CHAPTER, {
+    variables: {
+      authLandmark: landmarkId,
+      landmarkIdentifier: landmarkId,
+      authJournalID: userJournalId,
+      currentDate: currentDate,
+      dayOfWeek: dayName,
+    },
+    onCompleted() {
+      console.log(`post author created  ${userJournalId}`);
+    },
+  });
+
+  const [createAuthor] = useMutation(CREATE_NEW_AUTHOR, {
+    variables: {
+      authZeroId: user.sub,
+      authZeroEmail: user.email,
+      authZeroName: user.name,
+    },
+    refetchQueries: [
+      { query: JOURNAL_CHECK }, // DocumentNode object parsed with gql
+      "getJournalStatus", // Query name
+    ],
+    onCompleted: () => console.log(`post author created  ${userJournalId}`),
+  });
+
+  const [
+    newAuthorStepFour,
+    { data: stepFourData, loading: stepFourLoading, error: stepFourError },
+  ] = useMutation(NEW_AUTHOR_STEP_FOUR, {
+    variables: {
+      authLandmark: landmarkId,
+      landmarkIdentifier: landmarkId,
+      authJournalID: userJournalId,
+      currentDate: currentDate,
+      dayOfWeek: dayName,
+    },
+    onCompleted() {
+      console.log("mission accomplished");
+      publishJournal();
+    },
+    //publish that stuff
+  });
+
+  const [
+    newAuthorStepThree,
+    { data: stepThreeData, loading: stepThreeLoading, error: stepThreeError },
+  ] = useMutation(NEW_AUTHOR_STEP_THREE, {
+    variables: {
+      authZeroId: user.sub,
+      authZeroEmail: user.email,
+      authZeroName: user.name,
+    },
+    onCompleted() {
+      // localStorage.setItem("newJournalId", stepThreeData.createJournal.id);
+      setUserJournalId(stepThreeData.createJournal.id);
+      newAuthorStepFour({ authJournalID: stepThreeData.createJournal.id });
+    },
+  });
+
+  const [newAuthorStepTwo] = useMutation(NEW_AUTHOR_STEP_TWO, {
+    variables: {
+      authZeroEmail: user.email,
+    },
+    onCompleted: () => newAuthorStepThree(),
+  });
+
+  const [newAuthorStepOne] = useMutation(NEW_AUTHOR_STEP_ONE, {
+    variables: {
+      authZeroId: user.sub,
+      authZeroEmail: user.email,
+      authZeroName: user.name,
+    },
+    onCompleted: () => newAuthorStepTwo(),
   });
 
   const journalMutationId = newJournaldata?.createJournal?.id;
 
-  const prepJournalForPublish = () => {
-    setUserJournalId(journalMutationId);
-  };
-
-  const CREATE_NEW_CHAPTER = gql`
-    mutation CreateNewChapter {
-      createChapter(data: {date: "${todaysDate}", journal: {connect: {id: "${userJournalId}"}}, title: "${todaysDate}", stories: {create: {title: "An epic ${dayName} endeavor", visits: {create: {landmark: {connect: {id: "${landmarkId}"}}}}, landmarkId: "${landmarkId}"}}}) {
-        id
-      }
-    }
-  `;
-
-  const GET_CHAPTER_DATE = gql`
-    query GetChapterDate {
-      chapters(where: { journal: { id: "${userJournalId}" } }) {
-        date
-        id
-        stage
-        title
-        stories {
-          id
-          landmarkId
-          landmarkName
-        }
-      }
-    }
-  `;
+  // const prepJournalForPublish = () => {
+  //   setUserJournalId(journalMutationId);
+  // };
 
   const {
     loading: chapterQueryLoading,
     error: chapterQueryError,
     data: chapterQueryData,
   } = useQuery(GET_CHAPTER_DATE, {
+    variables: {
+      journalTracker: userJournalId || localStorage.getItem("newJournalId"),
+    },
     pollInterval: 8000,
+
+    onCompleted() {
+      chapterQueryData.chapters.map(({ id, date }) => {
+        nArr.push(date);
+        console.log(nArr);
+        if (date === todaysDate) {
+          console.log("found it");
+          setCurentChapterId(id);
+        }
+      });
+    },
   });
+
   const currentChapterDate = chapterQueryData;
   let nArr = [];
   let chapterIds = [];
@@ -127,6 +212,7 @@ mutation PublishJournal {
       ? chapterQueryData.chapters.map(({ id, date }) => {
           nArr.push(date);
           if (date === todaysDate) {
+            console.log("over here");
             setCurentChapterId(id);
           }
         })
@@ -135,20 +221,15 @@ mutation PublishJournal {
   //compare current date to date array
   const dateComp = nArr.includes(todaysDate);
 
-  const CHECK_FOR_LANDMARKS = gql`
-    query getLoggedLandmarks {
-      stories(where: {chapter: {date: "${todaysDate}", journal: {id: "${userJournalId}"}}}) {
-        id
-        landmarkId
-      }
-    }
-  `;
-
   const {
     loading: landmarkQueryLoading,
     error: landmarkQueryError,
     data: landmarkQueryData,
   } = useQuery(CHECK_FOR_LANDMARKS, {
+    variables: {
+      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
+      currentDate: currentDate,
+    },
     pollInterval: 10000,
   });
 
@@ -183,15 +264,11 @@ mutation PublishJournal {
       });
     }
   );
-  // console.log(cleanedLandMarkArray);
-  // console.log(chapterQueryData?.chapters?.length);
-  // console.log(todaysDate);
+
   if (
     cleanedLandMarkArray?.length > 0 &&
     chapterQueryData?.chapters?.length > 0
   ) {
-    // console.log("passed the test");
-
     const findTodaysChapterId = chapterQueryData?.chapters?.find(
       (c) => c.date === todaysDate
     );
@@ -215,34 +292,25 @@ mutation PublishJournal {
     (b) => b.landmarkId === landmarkId
   );
   const storyIdForLandmark = findStoryIdForLandmark?.storyId;
-  // console.log(checkForLandmark);
+
+  console.log(landmarkQueryData);
+  console.log(bundleArray);
   console.log(findStoryIdForLandmark);
   console.log(storyIdForLandmark);
-  // console.log(storyArr);
-
-  // console.log(ldmkComp);
+  console.log(userJournalId);
 
   console.log(`landmarkid - ${landmarkId}`);
   console.log(`landmarkname - ${landmarkName}`);
   console.log(`todayschpid - ${todaysChapterId}`);
 
-  const CHECK_FOR_STORYID = gql`
-    query GetStoryId {
-      stories(
-        where: {
-          chapter: { id: "${currentChapterId}" }
-        }
-      ) {
-        id
-      }
-    }
-  `;
-
   const {
     loading: storyQueryLoading,
     error: storyQueryError,
     data: storyQueryData,
-  } = useQuery(CHECK_FOR_STORYID, { pollInterval: 10000 });
+  } = useQuery(CHECK_FOR_STORYID, {
+    variables: { currentChapterId: currentChapterId },
+    pollInterval: 10000,
+  });
 
   const currentStoryMap =
     storyQueryData !== undefined
@@ -251,98 +319,49 @@ mutation PublishJournal {
         })
       : "";
 
-  const CREATE_NEW_STORY = gql`
-    mutation CreateNewStory {
-      createStory(
-        data: {
-          landmarkId: "${landmarkId}"
-          landmarkName: "${landmarkName}"
-          title: "${landmarkName} ride"
-          visits: {
-            create: {
-              landmark: {
-                connect: {  id: "${landmarkId}"  }
-              }
-            }
-          }
-          chapter: { connect: { id: "${todaysChapterId}" } }
-        }
-      ) {
-        id
-        stage
-      }
-    }
-  `;
   {
     /* have to fix findStoryIdForLandmark?.storyId    */
   }
-  {
-    /* a relational filter on \"story\" of \"Visit\" used in your mutation could not be resolved, please make sure all referred documents exist*/
-  }
-  const CREATE_NEW_VISIT = gql`
-    mutation CreateNewVisit {
-      createVisit(data: {story: {connect: {id: "${storyIdForLandmark}"}}, landmark: {connect: {id: "${landmarkId}"}}})  {
-        id
-      }
-    }
-  `;
 
   const [
     createNewStory,
     { data: newStoryData, loading: newStoryLoading, error: newStoryError },
-  ] = useMutation(CREATE_NEW_STORY);
-  const [
-    createNewChapter,
-    {
-      data: newChapterData,
-      loading: newChapterLoading,
-      error: newChapterError,
+  ] = useMutation(CREATE_NEW_STORY, {
+    variables: {
+      authLandmark: landmarkId,
+      landmarkIdentifier: landmarkId,
+      landmarkTitle: landmarkName,
+      currentChptID: todaysChapterId,
     },
-  ] = useMutation(CREATE_NEW_CHAPTER);
-  // console.log(newChapterData);
+  });
+
   const chapterMutation = newChapterData?.createChapter?.id;
   const [
     createNewVisit,
     { data: newVisitData, loading: newVisitLoading, error: newVisitError },
-  ] = useMutation(CREATE_NEW_VISIT);
+  ] = useMutation(CREATE_NEW_VISIT, {
+    variables: {
+      landmarkTracker: landmarkId,
+      storyIDLandmark: storyIdForLandmark,
+    },
+  });
   const visitMutation = newVisitData?.createVisit?.id;
-
-  // console.log(newStoryData?.createNewStory);
-  // console.log(newChapterData?.createNewChapter);
-  // console.log(newVisitData?.createVisit);
 
   let chapterDraft = newChapterData?.createNewChapter?.id;
   let storyDraft = newStoryData?.createNewStory?.id;
   let visitDraft = newVisitData?.createVisit?.id;
 
-  const PUBLISH_CHAPTER = gql`
-    mutation PublishChapter {
-      publishChapter(where: {id: "${currentChapterId}"}) {
-        publishedAt
-      }
-    }
-  `;
-  const [publishUserChapter] = useMutation(PUBLISH_CHAPTER);
+  const [publishUserChapter] = useMutation(PUBLISH_CHAPTER, {
+    variables: { currentChptID: { currentChapterId } },
+  });
 
-  const PUBLISH_STORY = gql`
-    mutation PublishStory {
-      publishStory(where: {id: "${storyDraft}"}) {
-        id
-        
-      }
-    }
-  `;
-  const [publishUserStory] = useMutation(PUBLISH_STORY);
+  const [publishUserStory] = useMutation(PUBLISH_STORY, {
+    variables: { storyDraft: { storyDraft } },
+  });
 
-  const PUBLISH_VISIT = gql`
-  mutation PublishVisit {
-    publishVisit(where: {id: "${visitDraft}"}) {
-      id
-      
-    }
-  }
-`;
-  const [publishUserVisit] = useMutation(PUBLISH_VISIT);
+  const [publishUserVisit] = useMutation(PUBLISH_VISIT, {
+    variables: { visitDraft: { visitDraft } },
+  });
 
   const newLandmarkPayload = {
     id: "",
@@ -350,18 +369,23 @@ mutation PublishJournal {
     storyId: "",
   };
 
+  console.log(journalQueryData?.journals.length);
+
   const journalLogic = () => {
     setStatus(true);
-    if (!journalQueryData) {
-      createJournal();
-      toast("registering your brand new journal & visit", {
+    if (journalQueryData?.journals.length === 0) {
+      newAuthorStepOne();
+      // createAuthor();
+      // createJournal();
+      // createNewChapter();
+      // multiple mutations in a new group to onboard new user
+      toast("registering new author, journal & visit. Welcome!", {
         onClose: () => setStatus(false),
       });
-      prepJournalForPublish();
-      publishJournal();
-    } else if (!dateComp) {
+      // prepJournalForPublish();
+      // publishJournal();
+    } else if (journalQueryData?.journals.length !== 0 && !dateComp) {
       createNewChapter();
-
       toast("creating today's data", { onClose: () => setStatus(false) });
       // publishUserChapter();
     } else if (landmarkFlagBoolean === false) {
@@ -387,15 +411,6 @@ mutation PublishJournal {
 
   return (
     <Fragment>
-      {/* <button
-        style={{width: '60px', height: '60px', border: '1px solid black', borderRadius: '60px', fontSize: '2.25em', lineHeight: '1em', cursor: 'pointer'}}
-        onClick={() => {
-          journalLogic();
-        }}
-      >
-        +
-      </button> */}
-
       <button
         disabled={status}
         type="button"
