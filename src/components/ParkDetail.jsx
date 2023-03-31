@@ -84,11 +84,7 @@ export default function ParkDetail(props, match, location) {
         {data.parks[0].landmarks
           .filter(FILTER_MAP[filter])
           .map(({ id, name, category }) => (
-            <Link
-              key={id}
-              category={category.pluralName}
-              to={`/parks/${parkId}/${id}`}
-            >
+            <Link key={id} category={category} to={`/parks/${parkId}/${id}`}>
               <p>{name}</p>
             </Link>
           ))}
