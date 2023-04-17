@@ -8,7 +8,8 @@ import "react-toastify/dist/ReactToastify.min.css";
 export default function Journal(props, match, location) {
   const { user } = useAuth0();
 
-  const { userJournalId, rawVisitData, setRawVisitData } = useManagedStory();
+  const { userJournalId, rawVisitData, setRawVisitData, setUserJournalId } =
+    useManagedStory();
 
   const AUTHOR_CHECK = gql`
     query getAuthorStatus {
@@ -89,6 +90,12 @@ export default function Journal(props, match, location) {
     data: journalQueryData,
   } = useQuery(JOURNAL_CHECK, {
     pollInterval: 10000,
+    variables: { authZeroId: user.sub },
+    onCompleted: () => {
+      journalQueryData.journals.map(({ id }) => {
+        setUserJournalId(id);
+      });
+    },
   });
 
   const {
@@ -105,9 +112,11 @@ export default function Journal(props, match, location) {
   // console.log(userVisitChapters);
   // console.log(visitQueryData?.journals?.[0].chapters.length);
 
-  if (visitQueryData?.journals?.[0].chapters.length > 0) {
+  if (visitQueryData?.journals?.[0]?.chapters?.length > 0) {
     const userChapters = visitQueryData?.journals?.[0].chapters;
     setRawVisitData(userChapters);
+  } else {
+    console.log("fresh fish");
   }
 
   console.log(rawVisitData);

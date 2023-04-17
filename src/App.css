@@ -74,7 +74,6 @@
 }
 .viewBlock {
   background-color: #eceff1;
-  width: 90%;
   min-height: 60vh;
   padding: 20px;
 }
@@ -185,4 +184,34 @@
 }
 .ldio-laceo5ga78f div {
   box-sizing: content-box;
+}
+
+.task {
+  display: flex;
+  flex-direction: column;
+  margin: 10px 0;
+  border-radius: 12px;
+  background: white;
+  border: 2px solid white;
+}
+
+.closedTask {
+  color: gray;
+  /* border: 3px solid gray; */
+}
+
+.openTask {
+  color: green;
+  /* border: 3px solid green; */
+}
+
+.stepWrapper {
+  display: flex;
+  flex-direction: row;
+  column-gap: 10px;
+}
+
+.openTask h5,
+.closedTask h5 {
+  text-align: left;
 }

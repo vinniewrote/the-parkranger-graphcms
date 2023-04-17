@@ -153,8 +153,8 @@ export default function VisitLogger(props) {
       authZeroName: user.name,
     },
     onCompleted() {
-      // localStorage.setItem("newJournalId", stepThreeData.createJournal.id);
-      setUserJournalId(stepThreeData.createJournal.id);
+      localStorage.setItem("newJournalId", stepThreeData.id);
+      // setUserJournalId(stepThreeData.createJournal.id);
       newAuthorStepFour({ authJournalID: stepThreeData.createJournal.id });
     },
   });
