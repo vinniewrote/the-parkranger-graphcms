@@ -271,11 +271,17 @@ export default function VisitLogger(props) {
     const findTodays = cleanedLandMarkArray?.filter(
       (d) => d.chpId === todaysChapterId
     );
+
     console.log(`findTodays - ${findTodays}`);
+
     const onlyLandmarks = findTodays.map((marks) => marks.landmarkId);
+
     console.log(`findTodays - ${onlyLandmarks}`);
+
     const landmarkFlag = onlyLandmarks.includes(`${landmarkId}`);
+
     console.log(`findTodays - ${landmarkFlag}`);
+
     setLandmarkFlagBoolean(landmarkFlag);
     setTodaysChapterId(isTodaysChapterId);
   }
@@ -327,6 +333,14 @@ export default function VisitLogger(props) {
       landmarkTitle: landmarkName,
       currentChptID: todaysChapterId,
     },
+    refetchQueries: [
+      { query: GET_CHAPTER_DATE }, // DocumentNode object parsed with gql
+      "GetChapterDate", // Query name
+    ],
+    onCompleted: () =>
+      console.log(
+        `created new story, refetched chapter date and kick off the landmark update`
+      ),
   });
 
   const chapterMutation = newChapterData?.createChapter?.id;
@@ -364,15 +378,6 @@ export default function VisitLogger(props) {
   };
 
   console.log(journalQueryData?.journals.length);
-
-  const newAuthorModal = () => {
-    return (
-      <div>
-        <h4>Test Header</h4>
-        <p>Test content</p>
-      </div>
-    );
-  };
 
   const journalLogic = () => {
     setStatus(true);
