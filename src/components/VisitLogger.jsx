@@ -5,7 +5,6 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
 import Button from "./styledComponents/Button";
-import { findDangerousChanges } from "graphql";
 import {
   JOURNAL_CHECK,
   GET_CHAPTER_DATE,
@@ -27,9 +26,11 @@ import {
   NEW_AUTHOR_STEP_THREE,
   NEW_AUTHOR_STEP_FOUR,
 } from "../graphql/mutations/journalMutations";
+import NewUserFlow from "./NewUserFlow";
 export default function VisitLogger(props) {
   const { user } = useAuth0();
   const [status, setStatus] = useState(false);
+  const [newUserModal, showNewUserModal] = useState(false);
   const {
     currentDate,
     dayName,
@@ -68,13 +69,6 @@ export default function VisitLogger(props) {
       });
     },
   });
-
-  // const journalMap =
-  //   journalQueryData !== undefined
-  //     ? journalQueryData.journals.map(({ id }) => {
-  //         setUserJournalId(id);
-  //       })
-  //     : "";
 
   const [
     createJournal,
@@ -153,8 +147,8 @@ export default function VisitLogger(props) {
       authZeroName: user.name,
     },
     onCompleted() {
-      // localStorage.setItem("newJournalId", stepThreeData.createJournal.id);
-      setUserJournalId(stepThreeData.createJournal.id);
+      localStorage.setItem("newJournalId", stepThreeData.id);
+      // setUserJournalId(stepThreeData.createJournal.id);
       newAuthorStepFour({ authJournalID: stepThreeData.createJournal.id });
     },
   });
@@ -371,48 +365,46 @@ export default function VisitLogger(props) {
 
   console.log(journalQueryData?.journals.length);
 
+  const newAuthorModal = () => {
+    return (
+      <div>
+        <h4>Test Header</h4>
+        <p>Test content</p>
+      </div>
+    );
+  };
+
   const journalLogic = () => {
     setStatus(true);
     if (journalQueryData?.journals.length === 0) {
-      newAuthorStepOne();
-      // createAuthor();
-      // createJournal();
-      // createNewChapter();
-      // multiple mutations in a new group to onboard new user
-      toast("registering new author, journal & visit. Welcome!", {
+      showNewUserModal(true);
+      toast("You need to register your journal before tracking your ride", {
         onClose: () => setStatus(false),
       });
-      // prepJournalForPublish();
-      // publishJournal();
     } else if (journalQueryData?.journals.length !== 0 && !dateComp) {
       createNewChapter();
       toast("creating today's data", { onClose: () => setStatus(false) });
-      // publishUserChapter();
     } else if (landmarkFlagBoolean === false) {
       createNewStory();
-
       toast("creating your new story", { onClose: () => setStatus(false) });
-      // publishUserStory();
     } else if (
       landmarkFlagBoolean === true &&
       storyIdForLandmark !== "undefined"
     ) {
       createNewVisit();
       toast("updating your story & visit", { onClose: () => setStatus(false) });
-      // publishUserVisit();
     } else if (landmarkFlagBoolean === false) {
       createNewStory();
       toast("creating your new landmark story", {
         onClose: () => setStatus(false),
       });
-      // publishUserStory();
     }
   };
 
   return (
     <Fragment>
       <button
-        disabled={status}
+        disabled={journalQueryData?.journals.length === 0}
         type="button"
         style={{
           width: "60px",
@@ -430,7 +422,6 @@ export default function VisitLogger(props) {
       >
         {/* {status.children || 'Submit'} */}+{status}
       </button>
-
       <ToastContainer />
     </Fragment>
   );

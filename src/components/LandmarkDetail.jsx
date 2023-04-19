@@ -1,16 +1,58 @@
 import React, { Fragment } from "react";
 import VisitLogger from "./VisitLogger";
 import { useQuery, gql } from "@apollo/client";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useManagedStory } from "../contexts/StoryContext";
+import { JOURNAL_CHECK, AUTHOR_CHECK } from "../graphql/queries/journalQueries";
 import {
   InfoBlockWrapper,
   LoggingCountContainer,
   SpecsBlockWrapper,
 } from "../styledComponents/LandmarkDetails_styled";
+import NewUserFlow from "./NewUserFlow";
+import { NEW_AUTHOR_STEP_FOUR } from "../graphql/mutations/journalMutations";
 
 export default function LandmarkDetail(props, match) {
   const {
     params: { id },
   } = props.match;
+  const { user } = useAuth0();
+  const { userJournalId, setUserJournalId, newUserStatus, setNewUserStatus } =
+    useManagedStory();
+
+  const {
+    loading: journalQueryLoading,
+    error: journalQueryError,
+    data: journalQueryData,
+  } = useQuery(JOURNAL_CHECK, {
+    pollInterval: 10000,
+    variables: { authZeroId: user.sub },
+    onCompleted: () => {
+      journalQueryData.journals.map(({ id }) => {
+        setUserJournalId(id);
+      });
+    },
+  });
+
+  const {
+    loading: authorQueryLoading,
+    error: authorQueryError,
+    data: authorQueryData,
+  } = useQuery(AUTHOR_CHECK, {
+    pollInterval: 10000,
+    variables: { authZeroEmail: user.email },
+  });
+
+  console.log(authorQueryData?.author);
+  console.log(journalQueryData);
+
+  const deactivateAuthorStep = authorQueryData?.author?.auth0id !== null;
+  console.log(`deactivated author step: ${deactivateAuthorStep}`);
+
+  const newUserCriteria =
+    authorQueryData?.author === null || journalQueryData?.journals.length === 0;
+
+  console.log(newUserCriteria);
 
   const LANDMARK_DETAILS = gql`
     query GetLandmarkDetails {
@@ -70,6 +112,10 @@ export default function LandmarkDetail(props, match) {
 
   return (
     <Fragment>
+      {(newUserCriteria || newUserStatus === true) && (
+        <NewUserFlow style={{ position: "absolute" }} />
+      )}
+      {/* <NewUserFlow /> */}
       {/* <div>Detail about the landmark goes here </div>
       <h4>{id}</h4> */}
       <Fragment>

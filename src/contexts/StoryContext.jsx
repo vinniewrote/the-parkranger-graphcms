@@ -15,6 +15,7 @@ export function ManageStory({ children }) {
   const [currentChapterId, setCurentChapterId] = useState(null);
   const [rawVisitData, setRawVisitData] = useState([]);
   const [landmarkFlagBoolean, setLandmarkFlagBoolean] = useState(null);
+  const [newUserStatus, setNewUserStatus] = useState(null);
   const newDate = new Date();
   const currentDate = newDate.toISOString();
   const currentDay = newDate.getDate().toString().padStart(2, "0");
@@ -71,6 +72,8 @@ export function ManageStory({ children }) {
     setTodaysChapterId,
     landmarkFlagBoolean,
     setLandmarkFlagBoolean,
+    newUserStatus,
+    setNewUserStatus,
   };
 
   return (
