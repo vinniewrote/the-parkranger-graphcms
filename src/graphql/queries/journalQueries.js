@@ -1,5 +1,16 @@
 import { gql } from "@apollo/client";
 
+export const AUTHOR_CHECK = gql`
+  query getAuthorStatus($authZeroEmail: String!) {
+    author(where: { email: $authZeroEmail }) {
+      bio
+      email
+      name
+      auth0id
+    }
+  }
+`;
+
 export const JOURNAL_CHECK = gql`
   query getJournalStatus($authZeroId: String!) {
     journals(where: { author: { auth0id: $authZeroId } }) {
