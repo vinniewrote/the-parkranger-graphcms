@@ -48,6 +48,10 @@ export default function VisitLogger(props) {
     setTodaysChapterId,
     landmarkFlagBoolean,
     setLandmarkFlagBoolean,
+    latestVisitId,
+    setLatestVisitId,
+    setLatestStoryId,
+    latestStoryId,
   } = useManagedStory();
   const { landmarkId, landmarkName } = props;
 
@@ -102,7 +106,7 @@ export default function VisitLogger(props) {
       dayOfWeek: dayName,
     },
     onCompleted() {
-      console.log(`post author created  ${userJournalId}`);
+      publishUserChapter();
     },
   });
 
@@ -310,14 +314,19 @@ export default function VisitLogger(props) {
   } = useQuery(CHECK_FOR_STORYID, {
     variables: { currentChapterId: currentChapterId },
     pollInterval: 10000,
+    onCompleted() {
+      storyQueryData.stories.map(({ id }) => {
+        setSavedStoryId(id);
+      });
+    },
   });
 
-  const currentStoryMap =
-    storyQueryData !== undefined
-      ? storyQueryData.stories.map(({ id }) => {
-          setSavedStoryId(id);
-        })
-      : "";
+  // const currentStoryMap =
+  //   storyQueryData !== undefined
+  //     ? storyQueryData.stories.map(({ id }) => {
+  //         setSavedStoryId(id);
+  //       })
+  //     : "";
 
   {
     /* have to fix findStoryIdForLandmark?.storyId    */
@@ -337,10 +346,10 @@ export default function VisitLogger(props) {
       { query: GET_CHAPTER_DATE }, // DocumentNode object parsed with gql
       "GetChapterDate", // Query name
     ],
-    onCompleted: () =>
-      console.log(
-        `created new story, refetched chapter date and kick off the landmark update`
-      ),
+    onCompleted() {
+      setLatestStoryId(newStoryData?.createNewStory?.id);
+      publishUserStory();
+    },
   });
 
   const chapterMutation = newChapterData?.createChapter?.id;
@@ -352,23 +361,35 @@ export default function VisitLogger(props) {
       landmarkTracker: landmarkId,
       storyIDLandmark: storyIdForLandmark,
     },
+    onCompleted() {
+      setLatestVisitId(newVisitData?.createVisit?.id);
+      publishUserVisit();
+    },
   });
   const visitMutation = newVisitData?.createVisit?.id;
 
   let chapterDraft = newChapterData?.createNewChapter?.id;
-  let storyDraft = newStoryData?.createNewStory?.id;
-  let visitDraft = newVisitData?.createVisit?.id;
+  // let storyDraft = newStoryData?.createNewStory?.id;
+  // let visitDraft = newVisitData?.createVisit?.id;
+
+  // console.log(`visitdraftid ${visitDraft}`);
 
   const [publishUserChapter] = useMutation(PUBLISH_CHAPTER, {
     variables: { currentChptID: { currentChapterId } },
+    onCompleted() {
+      publishUserStory();
+    },
   });
 
   const [publishUserStory] = useMutation(PUBLISH_STORY, {
-    variables: { storyDraft: { storyDraft } },
+    variables: { storyDraft: latestStoryId },
+    onCompleted() {
+      publishUserVisit();
+    },
   });
 
   const [publishUserVisit] = useMutation(PUBLISH_VISIT, {
-    variables: { visitDraft: { visitDraft } },
+    variables: { visitDraft: latestVisitId },
   });
 
   const newLandmarkPayload = {
@@ -409,23 +430,15 @@ export default function VisitLogger(props) {
   return (
     <Fragment>
       <button
+        className="css-button-sliding-to-bottom--green"
         disabled={journalQueryData?.journals.length === 0}
         type="button"
-        style={{
-          width: "60px",
-          height: "60px",
-          border: "1px solid black",
-          borderRadius: "60px",
-          fontSize: "2.25em",
-          lineHeight: "1em",
-          cursor: "pointer",
-          margin: "auto 0",
-        }}
         onClick={() => {
           journalLogic();
         }}
       >
-        {/* {status.children || 'Submit'} */}+{status}
+        <span style={{ fontSize: "2em" }}>+</span>
+        {status}
       </button>
       <ToastContainer />
     </Fragment>

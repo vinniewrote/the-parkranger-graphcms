@@ -16,6 +16,8 @@ export function ManageStory({ children }) {
   const [rawVisitData, setRawVisitData] = useState([]);
   const [landmarkFlagBoolean, setLandmarkFlagBoolean] = useState(null);
   const [newUserStatus, setNewUserStatus] = useState(null);
+  const [latestStoryId, setLatestStoryId] = useState(null);
+  const [latestVisitId, setLatestVisitId] = useState(null);
   const newDate = new Date();
   const currentDate = newDate.toISOString();
   const currentDay = newDate.getDate().toString().padStart(2, "0");
@@ -74,6 +76,10 @@ export function ManageStory({ children }) {
     setLandmarkFlagBoolean,
     newUserStatus,
     setNewUserStatus,
+    latestVisitId,
+    setLatestVisitId,
+    latestStoryId,
+    setLatestStoryId,
   };
 
   return (
