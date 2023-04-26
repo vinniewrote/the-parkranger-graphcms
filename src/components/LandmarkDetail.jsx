@@ -145,6 +145,9 @@ export default function LandmarkDetail(props, match) {
               <InfoBlockWrapper>
                 <LoggingCountContainer>
                   <div style={{ width: "70%" }}>
+                    <h4 style={{ textAlign: "left", color: "white" }}>
+                      Your Visits
+                    </h4>
                     <p
                       style={{
                         color: "#ffffff",

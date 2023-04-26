@@ -1,10 +1,9 @@
 import React, { Fragment, useState } from "react";
-import { useQuery, gql, useMutation } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import { useManagedStory } from "../contexts/StoryContext";
 import { useAuth0 } from "@auth0/auth0-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
-import Button from "./styledComponents/Button";
 import {
   JOURNAL_CHECK,
   GET_CHAPTER_DATE,
@@ -22,7 +21,7 @@ import {
   PUBLISH_STORY,
   PUBLISH_VISIT,
 } from "../graphql/mutations/journalMutations";
-import NewUserFlow from "./NewUserFlow";
+
 export default function VisitLogger(props) {
   const { user } = useAuth0();
   const [status, setStatus] = useState(false);
@@ -56,12 +55,6 @@ export default function VisitLogger(props) {
   let bundleArray = [];
   let landmarkArray = [];
   let cleanedLandMarkArray = [];
-
-  const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
-    variables: {
-      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
-    },
-  });
 
   const {
     loading: journalQueryLoading,
@@ -125,60 +118,7 @@ export default function VisitLogger(props) {
     onCompleted: () => console.log(`post author created  ${userJournalId}`),
   });
 
-  // const [
-  //   newAuthorStepFour,
-  //   { data: stepFourData, loading: stepFourLoading, error: stepFourError },
-  // ] = useMutation(NEW_AUTHOR_STEP_FOUR, {
-  //   variables: {
-  //     authLandmark: landmarkId,
-  //     landmarkIdentifier: landmarkId,
-  //     authJournalID: userJournalId,
-  //     currentDate: currentDate,
-  //     dayOfWeek: dayName,
-  //   },
-  //   onCompleted() {
-  //     console.log("mission accomplished");
-  //     publishJournal();
-  //   },
-  // });
-
-  // const [
-  //   newAuthorStepThree,
-  //   { data: stepThreeData, loading: stepThreeLoading, error: stepThreeError },
-  // ] = useMutation(NEW_AUTHOR_STEP_THREE, {
-  //   variables: {
-  //     authZeroId: user.sub,
-  //     authZeroEmail: user.email,
-  //     authZeroName: user.name,
-  //   },
-  //   onCompleted() {
-  //     localStorage.setItem("newJournalId", stepThreeData.id);
-  //     // setUserJournalId(stepThreeData.createJournal.id);
-  //     newAuthorStepFour({ authJournalID: stepThreeData.createJournal.id });
-  //   },
-  // });
-
-  // const [newAuthorStepTwo] = useMutation(NEW_AUTHOR_STEP_TWO, {
-  //   variables: {
-  //     authZeroEmail: user.email,
-  //   },
-  //   onCompleted: () => newAuthorStepThree(),
-  // });
-
-  // const [newAuthorStepOne] = useMutation(NEW_AUTHOR_STEP_ONE, {
-  //   variables: {
-  //     authZeroId: user.sub,
-  //     authZeroEmail: user.email,
-  //     authZeroName: user.name,
-  //   },
-  //   onCompleted: () => newAuthorStepTwo(),
-  // });
-
   const journalMutationId = newJournaldata?.createJournal?.id;
-
-  // const prepJournalForPublish = () => {
-  //   setUserJournalId(journalMutationId);
-  // };
 
   const {
     loading: chapterQueryLoading,
@@ -217,7 +157,6 @@ export default function VisitLogger(props) {
     });
 
   if (nArr.length > 0) {
-    //compare current date to date array
     const dateComp = nArr.includes(todaysDate);
     setDoDatesMatch(dateComp);
   }
@@ -367,6 +306,12 @@ export default function VisitLogger(props) {
 
   const [publishUserVisit] = useMutation(PUBLISH_VISIT, {
     variables: { visitDraft: { visitDraft } },
+  });
+
+  const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
+    variables: {
+      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
+    },
   });
 
   const newLandmarkPayload = {

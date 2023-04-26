@@ -3,7 +3,7 @@ import styled from "styled-components";
 export const InfoBlockWrapper = styled.div`
   background: #fff;
   border: 1px solid #fff;
-  border-radius: 8px;
+  border-radius: 12px;
   width: 85%;
   padding: 20px;
   margin: 0 auto;
