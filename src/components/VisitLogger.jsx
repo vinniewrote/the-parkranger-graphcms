@@ -21,10 +21,6 @@ import {
   PUBLISH_CHAPTER,
   PUBLISH_STORY,
   PUBLISH_VISIT,
-  NEW_AUTHOR_STEP_ONE,
-  NEW_AUTHOR_STEP_TWO,
-  NEW_AUTHOR_STEP_THREE,
-  NEW_AUTHOR_STEP_FOUR,
 } from "../graphql/mutations/journalMutations";
 import NewUserFlow from "./NewUserFlow";
 export default function VisitLogger(props) {
@@ -48,8 +44,18 @@ export default function VisitLogger(props) {
     setTodaysChapterId,
     landmarkFlagBoolean,
     setLandmarkFlagBoolean,
+    storyIdForLandmark,
+    setStoryIdForLandmark,
+    doDatesMatch,
+    setDoDatesMatch,
   } = useManagedStory();
   const { landmarkId, landmarkName } = props;
+
+  let nArr = [];
+  let storyArr = [];
+  let bundleArray = [];
+  let landmarkArray = [];
+  let cleanedLandMarkArray = [];
 
   const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
     variables: {
@@ -119,55 +125,54 @@ export default function VisitLogger(props) {
     onCompleted: () => console.log(`post author created  ${userJournalId}`),
   });
 
-  const [
-    newAuthorStepFour,
-    { data: stepFourData, loading: stepFourLoading, error: stepFourError },
-  ] = useMutation(NEW_AUTHOR_STEP_FOUR, {
-    variables: {
-      authLandmark: landmarkId,
-      landmarkIdentifier: landmarkId,
-      authJournalID: userJournalId,
-      currentDate: currentDate,
-      dayOfWeek: dayName,
-    },
-    onCompleted() {
-      console.log("mission accomplished");
-      publishJournal();
-    },
-    //publish that stuff
-  });
+  // const [
+  //   newAuthorStepFour,
+  //   { data: stepFourData, loading: stepFourLoading, error: stepFourError },
+  // ] = useMutation(NEW_AUTHOR_STEP_FOUR, {
+  //   variables: {
+  //     authLandmark: landmarkId,
+  //     landmarkIdentifier: landmarkId,
+  //     authJournalID: userJournalId,
+  //     currentDate: currentDate,
+  //     dayOfWeek: dayName,
+  //   },
+  //   onCompleted() {
+  //     console.log("mission accomplished");
+  //     publishJournal();
+  //   },
+  // });
 
-  const [
-    newAuthorStepThree,
-    { data: stepThreeData, loading: stepThreeLoading, error: stepThreeError },
-  ] = useMutation(NEW_AUTHOR_STEP_THREE, {
-    variables: {
-      authZeroId: user.sub,
-      authZeroEmail: user.email,
-      authZeroName: user.name,
-    },
-    onCompleted() {
-      localStorage.setItem("newJournalId", stepThreeData.id);
-      // setUserJournalId(stepThreeData.createJournal.id);
-      newAuthorStepFour({ authJournalID: stepThreeData.createJournal.id });
-    },
-  });
+  // const [
+  //   newAuthorStepThree,
+  //   { data: stepThreeData, loading: stepThreeLoading, error: stepThreeError },
+  // ] = useMutation(NEW_AUTHOR_STEP_THREE, {
+  //   variables: {
+  //     authZeroId: user.sub,
+  //     authZeroEmail: user.email,
+  //     authZeroName: user.name,
+  //   },
+  //   onCompleted() {
+  //     localStorage.setItem("newJournalId", stepThreeData.id);
+  //     // setUserJournalId(stepThreeData.createJournal.id);
+  //     newAuthorStepFour({ authJournalID: stepThreeData.createJournal.id });
+  //   },
+  // });
 
-  const [newAuthorStepTwo] = useMutation(NEW_AUTHOR_STEP_TWO, {
-    variables: {
-      authZeroEmail: user.email,
-    },
-    onCompleted: () => newAuthorStepThree(),
-  });
+  // const [newAuthorStepTwo] = useMutation(NEW_AUTHOR_STEP_TWO, {
+  //   variables: {
+  //     authZeroEmail: user.email,
+  //   },
+  //   onCompleted: () => newAuthorStepThree(),
+  // });
 
-  const [newAuthorStepOne] = useMutation(NEW_AUTHOR_STEP_ONE, {
-    variables: {
-      authZeroId: user.sub,
-      authZeroEmail: user.email,
-      authZeroName: user.name,
-    },
-    onCompleted: () => newAuthorStepTwo(),
-  });
+  // const [newAuthorStepOne] = useMutation(NEW_AUTHOR_STEP_ONE, {
+  //   variables: {
+  //     authZeroId: user.sub,
+  //     authZeroEmail: user.email,
+  //     authZeroName: user.name,
+  //   },
+  //   onCompleted: () => newAuthorStepTwo(),
+  // });
 
   const journalMutationId = newJournaldata?.createJournal?.id;
 
@@ -198,22 +203,24 @@ export default function VisitLogger(props) {
   });
 
   const currentChapterDate = chapterQueryData;
-  let nArr = [];
+
   let chapterIds = [];
   // console.log(chapterQueryData?.chapters);
   const chapterMap =
-    chapterQueryData !== undefined
-      ? chapterQueryData.chapters.map(({ id, date }) => {
-          nArr.push(date);
-          if (date === todaysDate) {
-            console.log("over here");
-            setCurentChapterId(id);
-          }
-        })
-      : "";
+    chapterQueryData !== undefined &&
+    chapterQueryData.chapters.map(({ id, date }) => {
+      nArr.push(date);
+      if (date === todaysDate) {
+        console.log("over here");
+        setCurentChapterId(id);
+      }
+    });
 
-  //compare current date to date array
-  const dateComp = nArr.includes(todaysDate);
+  if (nArr.length > 0) {
+    //compare current date to date array
+    const dateComp = nArr.includes(todaysDate);
+    setDoDatesMatch(dateComp);
+  }
 
   const {
     loading: landmarkQueryLoading,
@@ -227,28 +234,21 @@ export default function VisitLogger(props) {
     pollInterval: 10000,
   });
 
-  let storyArr = [];
-  let bundleArray = [];
-  let landmarkArray = [];
-
   const storyMap =
-    landmarkQueryData !== undefined
-      ? landmarkQueryData.stories.map(({ id, landmarkId }) => {
-          storyArr.push(landmarkId);
-          bundleArray.push({ landmarkId, storyId: id });
-        })
-      : "";
+    landmarkQueryData !== undefined &&
+    landmarkQueryData.stories.map(({ id, landmarkId }) => {
+      storyArr.push(landmarkId);
+      bundleArray.push({ landmarkId, storyId: id });
+    });
 
   const landmarkMap =
-    chapterQueryData !== undefined
-      ? chapterQueryData.chapters.map(({ id, stories }) => {
-          // stories.map(({ id, landmarkId }) => {
-          //   landmarkArray.push({ landmarkId, storyId: id });
-          // });
-          landmarkArray.push({ chapterId: id, stories });
-        })
-      : "";
-  let cleanedLandMarkArray = [];
+    chapterQueryData !== undefined &&
+    chapterQueryData.chapters.map(({ id, stories }) => {
+      // stories.map(({ id, landmarkId }) => {
+      //   landmarkArray.push({ landmarkId, storyId: id });
+      // });
+      landmarkArray.push({ chapterId: id, stories });
+    });
 
   const cleanLandmark = landmarkArray.map(
     (landmark, id, chapterId, stories) => {
@@ -286,16 +286,19 @@ export default function VisitLogger(props) {
     setTodaysChapterId(isTodaysChapterId);
   }
 
-  const ldmkComp = storyArr.includes(landmarkId);
-  const checkForLandmark = bundleArray.some((b) => b.landmarkId === landmarkId);
-  const findStoryIdForLandmark = bundleArray.find(
-    (b) => b.landmarkId === landmarkId
-  );
-  const storyIdForLandmark = findStoryIdForLandmark?.storyId;
+  // const ldmkComp = storyArr.includes(landmarkId);
+  if (bundleArray.length > 0) {
+    const findStoryIdForLandmark = bundleArray.find(
+      (b) => b.landmarkId === landmarkId
+    );
+    const storyIdToLdmk = findStoryIdForLandmark?.storyId;
+    setStoryIdForLandmark(storyIdToLdmk);
+  }
+  // const checkForLandmark = bundleArray.some((b) => b.landmarkId === landmarkId);
 
   console.log(landmarkQueryData);
   console.log(bundleArray);
-  console.log(findStoryIdForLandmark);
+  // console.log(findStoryIdForLandmark);
   console.log(storyIdForLandmark);
   console.log(userJournalId);
 
@@ -313,15 +316,10 @@ export default function VisitLogger(props) {
   });
 
   const currentStoryMap =
-    storyQueryData !== undefined
-      ? storyQueryData.stories.map(({ id }) => {
-          setSavedStoryId(id);
-        })
-      : "";
-
-  {
-    /* have to fix findStoryIdForLandmark?.storyId    */
-  }
+    storyQueryData !== undefined &&
+    storyQueryData.stories.map(({ id }) => {
+      setSavedStoryId(id);
+    });
 
   const [
     createNewStory,
@@ -386,7 +384,7 @@ export default function VisitLogger(props) {
       toast("You need to register your journal before tracking your ride", {
         onClose: () => setStatus(false),
       });
-    } else if (journalQueryData?.journals.length !== 0 && !dateComp) {
+    } else if (journalQueryData?.journals.length !== 0 && !doDatesMatch) {
       createNewChapter();
       toast("creating today's data", { onClose: () => setStatus(false) });
     } else if (landmarkFlagBoolean === false) {
