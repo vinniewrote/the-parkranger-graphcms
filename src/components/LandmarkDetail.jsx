@@ -8,6 +8,7 @@ import {
   InfoBlockWrapper,
   LoggingCountContainer,
   SpecsBlockWrapper,
+  YourVisitsBlock,
 } from "../styledComponents/LandmarkDetails_styled";
 import NewUserFlow from "./NewUserFlow";
 import { NEW_AUTHOR_STEP_FOUR } from "../graphql/mutations/journalMutations";
@@ -144,19 +145,10 @@ export default function LandmarkDetail(props, match) {
               <h3>Your Visits</h3>
               <InfoBlockWrapper>
                 <LoggingCountContainer>
-                  <div style={{ width: "70%" }}>
-                    <p
-                      style={{
-                        color: "#ffffff",
-                        textAlign: "left",
-                        fontSize: "38px",
-                        lineHeight: "42px",
-                        fontWeight: "300",
-                      }}
-                    >
-                      0
-                    </p>
-                  </div>
+                  <YourVisitsBlock>
+                    <h4>Your Visits</h4>
+                    <p>0</p>
+                  </YourVisitsBlock>
                   <VisitLogger
                     key={`${name} - ${id}`}
                     landmarkId={id}
