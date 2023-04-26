@@ -11,16 +11,15 @@ import {
   CHECK_FOR_LANDMARKS,
 } from "../graphql/queries/journalQueries.js";
 import {
-  CREATE_NEW_AUTHOR,
   CREATE_NEW_CHAPTER,
   PUBLISH_JOURNAL,
-  CREATE_NEW_JOURNAL,
   CREATE_NEW_STORY,
   CREATE_NEW_VISIT,
   PUBLISH_CHAPTER,
   PUBLISH_STORY,
   PUBLISH_VISIT,
 } from "../graphql/mutations/journalMutations";
+import { LoggingButton } from "../styledComponents/VisitLogger_styled";
 
 export default function VisitLogger(props) {
   const { user } = useAuth0();
@@ -70,22 +69,6 @@ export default function VisitLogger(props) {
   });
 
   const [
-    createJournal,
-    {
-      data: newJournaldata,
-      loading: newJournalLoading,
-      error: newJournalError,
-    },
-  ] = useMutation(CREATE_NEW_JOURNAL, {
-    variables: {
-      authZeroEmail: user.email,
-      authZeroName: user.name,
-      authZeroId: user.sub,
-    },
-    // onCompleted: setUserJournalId(journalMutationId),
-  });
-
-  const [
     createNewChapter,
     {
       data: newChapterData,
@@ -105,20 +88,18 @@ export default function VisitLogger(props) {
     },
   });
 
-  const [createAuthor] = useMutation(CREATE_NEW_AUTHOR, {
-    variables: {
-      authZeroId: user.sub,
-      authZeroEmail: user.email,
-      authZeroName: user.name,
-    },
-    refetchQueries: [
-      { query: JOURNAL_CHECK }, // DocumentNode object parsed with gql
-      "getJournalStatus", // Query name
-    ],
-    onCompleted: () => console.log(`post author created  ${userJournalId}`),
-  });
-
-  const journalMutationId = newJournaldata?.createJournal?.id;
+  // const [createAuthor] = useMutation(CREATE_NEW_AUTHOR, {
+  //   variables: {
+  //     authZeroId: user.sub,
+  //     authZeroEmail: user.email,
+  //     authZeroName: user.name,
+  //   },
+  //   refetchQueries: [
+  //     { query: JOURNAL_CHECK }, // DocumentNode object parsed with gql
+  //     "getJournalStatus", // Query name
+  //   ],
+  //   onCompleted: () => console.log(`post author created  ${userJournalId}`),
+  // });
 
   const {
     loading: chapterQueryLoading,
@@ -142,10 +123,6 @@ export default function VisitLogger(props) {
     },
   });
 
-  const currentChapterDate = chapterQueryData;
-
-  let chapterIds = [];
-  // console.log(chapterQueryData?.chapters);
   const chapterMap =
     chapterQueryData !== undefined &&
     chapterQueryData.chapters.map(({ id, date }) => {
@@ -351,25 +328,15 @@ export default function VisitLogger(props) {
 
   return (
     <Fragment>
-      <button
+      <LoggingButton
         disabled={journalQueryData?.journals.length === 0}
         type="button"
-        style={{
-          width: "60px",
-          height: "60px",
-          border: "1px solid black",
-          borderRadius: "60px",
-          fontSize: "2.25em",
-          lineHeight: "1em",
-          cursor: "pointer",
-          margin: "auto 0",
-        }}
         onClick={() => {
           journalLogic();
         }}
       >
-        {/* {status.children || 'Submit'} */}+{status}
-      </button>
+        <span>+</span>
+      </LoggingButton>
       <ToastContainer />
     </Fragment>
   );
