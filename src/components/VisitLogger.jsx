@@ -1,10 +1,9 @@
 import React, { Fragment, useState } from "react";
-import { useQuery, gql, useMutation } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import { useManagedStory } from "../contexts/StoryContext";
 import { useAuth0 } from "@auth0/auth0-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.min.css";
-import Button from "./styledComponents/Button";
 import {
   JOURNAL_CHECK,
   GET_CHAPTER_DATE,
@@ -12,21 +11,15 @@ import {
   CHECK_FOR_LANDMARKS,
 } from "../graphql/queries/journalQueries.js";
 import {
-  CREATE_NEW_AUTHOR,
   CREATE_NEW_CHAPTER,
   PUBLISH_JOURNAL,
-  CREATE_NEW_JOURNAL,
   CREATE_NEW_STORY,
   CREATE_NEW_VISIT,
   PUBLISH_CHAPTER,
   PUBLISH_STORY,
   PUBLISH_VISIT,
-  NEW_AUTHOR_STEP_ONE,
-  NEW_AUTHOR_STEP_TWO,
-  NEW_AUTHOR_STEP_THREE,
-  NEW_AUTHOR_STEP_FOUR,
 } from "../graphql/mutations/journalMutations";
-import NewUserFlow from "./NewUserFlow";
+
 export default function VisitLogger(props) {
   const { user } = useAuth0();
   const [status, setStatus] = useState(false);
@@ -51,6 +44,12 @@ export default function VisitLogger(props) {
   } = useManagedStory();
   const { landmarkId, landmarkName } = props;
 
+  let storyArr = [];
+  let bundleArray = [];
+  let landmarkArray = [];
+  let nArr = [];
+  let cleanedLandMarkArray = [];
+
   const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
     variables: {
       authJournalId: userJournalId || localStorage.getItem("newJournalId"),
@@ -68,22 +67,6 @@ export default function VisitLogger(props) {
         setUserJournalId(id);
       });
     },
-  });
-
-  const [
-    createJournal,
-    {
-      data: newJournaldata,
-      loading: newJournalLoading,
-      error: newJournalError,
-    },
-  ] = useMutation(CREATE_NEW_JOURNAL, {
-    variables: {
-      authZeroEmail: user.email,
-      authZeroName: user.name,
-      authZeroId: user.sub,
-    },
-    // onCompleted: setUserJournalId(journalMutationId),
   });
 
   const [
@@ -105,75 +88,6 @@ export default function VisitLogger(props) {
       console.log(`post author created  ${userJournalId}`);
     },
   });
-
-  const [createAuthor] = useMutation(CREATE_NEW_AUTHOR, {
-    variables: {
-      authZeroId: user.sub,
-      authZeroEmail: user.email,
-      authZeroName: user.name,
-    },
-    refetchQueries: [
-      { query: JOURNAL_CHECK }, // DocumentNode object parsed with gql
-      "getJournalStatus", // Query name
-    ],
-    onCompleted: () => console.log(`post author created  ${userJournalId}`),
-  });
-
-  const [
-    newAuthorStepFour,
-    { data: stepFourData, loading: stepFourLoading, error: stepFourError },
-  ] = useMutation(NEW_AUTHOR_STEP_FOUR, {
-    variables: {
-      authLandmark: landmarkId,
-      landmarkIdentifier: landmarkId,
-      authJournalID: userJournalId,
-      currentDate: currentDate,
-      dayOfWeek: dayName,
-    },
-    onCompleted() {
-      console.log("mission accomplished");
-      publishJournal();
-    },
-    //publish that stuff
-  });
-
-  const [
-    newAuthorStepThree,
-    { data: stepThreeData, loading: stepThreeLoading, error: stepThreeError },
-  ] = useMutation(NEW_AUTHOR_STEP_THREE, {
-    variables: {
-      authZeroId: user.sub,
-      authZeroEmail: user.email,
-      authZeroName: user.name,
-    },
-    onCompleted() {
-      localStorage.setItem("newJournalId", stepThreeData.id);
-      // setUserJournalId(stepThreeData.createJournal.id);
-      newAuthorStepFour({ authJournalID: stepThreeData.createJournal.id });
-    },
-  });
-
-  const [newAuthorStepTwo] = useMutation(NEW_AUTHOR_STEP_TWO, {
-    variables: {
-      authZeroEmail: user.email,
-    },
-    onCompleted: () => newAuthorStepThree(),
-  });
-
-  const [newAuthorStepOne] = useMutation(NEW_AUTHOR_STEP_ONE, {
-    variables: {
-      authZeroId: user.sub,
-      authZeroEmail: user.email,
-      authZeroName: user.name,
-    },
-    onCompleted: () => newAuthorStepTwo(),
-  });
-
-  const journalMutationId = newJournaldata?.createJournal?.id;
-
-  // const prepJournalForPublish = () => {
-  //   setUserJournalId(journalMutationId);
-  // };
 
   const {
     loading: chapterQueryLoading,
@@ -197,10 +111,6 @@ export default function VisitLogger(props) {
     },
   });
 
-  const currentChapterDate = chapterQueryData;
-  let nArr = [];
-  let chapterIds = [];
-  // console.log(chapterQueryData?.chapters);
   const chapterMap =
     chapterQueryData !== undefined
       ? chapterQueryData.chapters.map(({ id, date }) => {
@@ -227,10 +137,6 @@ export default function VisitLogger(props) {
     pollInterval: 10000,
   });
 
-  let storyArr = [];
-  let bundleArray = [];
-  let landmarkArray = [];
-
   const storyMap =
     landmarkQueryData !== undefined
       ? landmarkQueryData.stories.map(({ id, landmarkId }) => {
@@ -248,7 +154,6 @@ export default function VisitLogger(props) {
           landmarkArray.push({ chapterId: id, stories });
         })
       : "";
-  let cleanedLandMarkArray = [];
 
   const cleanLandmark = landmarkArray.map(
     (landmark, id, chapterId, stories) => {
@@ -293,11 +198,11 @@ export default function VisitLogger(props) {
   );
   const storyIdForLandmark = findStoryIdForLandmark?.storyId;
 
-  console.log(landmarkQueryData);
-  console.log(bundleArray);
-  console.log(findStoryIdForLandmark);
-  console.log(storyIdForLandmark);
-  console.log(userJournalId);
+  // console.log(landmarkQueryData);
+  // console.log(bundleArray);
+  // console.log(findStoryIdForLandmark);
+  // console.log(storyIdForLandmark);
+  // console.log(userJournalId);
 
   console.log(`landmarkid - ${landmarkId}`);
   console.log(`landmarkname - ${landmarkName}`);
@@ -310,6 +215,11 @@ export default function VisitLogger(props) {
   } = useQuery(CHECK_FOR_STORYID, {
     variables: { currentChapterId: currentChapterId },
     pollInterval: 10000,
+    onCompleted() {
+      storyQueryData.stories.map(({ id }) => {
+        setSavedStoryId(id);
+      });
+    },
   });
 
   const currentStoryMap =
@@ -371,14 +281,6 @@ export default function VisitLogger(props) {
     variables: { visitDraft: { visitDraft } },
   });
 
-  const newLandmarkPayload = {
-    id: "",
-    landmarkId: `${landmarkId}`,
-    storyId: "",
-  };
-
-  console.log(journalQueryData?.journals.length);
-
   const journalLogic = () => {
     setStatus(true);
     if (journalQueryData?.journals.length === 0) {
@@ -398,11 +300,6 @@ export default function VisitLogger(props) {
     ) {
       createNewVisit();
       toast("updating your story & visit", { onClose: () => setStatus(false) });
-    } else if (landmarkFlagBoolean === false) {
-      createNewStory();
-      toast("creating your new landmark story", {
-        onClose: () => setStatus(false),
-      });
     }
   };
 
@@ -425,7 +322,7 @@ export default function VisitLogger(props) {
           journalLogic();
         }}
       >
-        {/* {status.children || 'Submit'} */}+{status}
+        +{status}
       </button>
       <ToastContainer />
     </Fragment>
