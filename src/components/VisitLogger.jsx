@@ -158,9 +158,9 @@ export default function VisitLogger(props) {
       "GetChapterDate", // Query name
     ],
     onCompleted() {
-      console.log(newStoryData);
-      console.log(`storyid: ${newStoryData.createStory.id}`);
-      console.log(`visitid: ${newStoryData.createStory.visits[0].id}`);
+      setCurrentStoryId(newStoryData.createStory.id);
+      setCurrentVisitId(newStoryData.createStory.visits[0].id);
+      publishUserStory();
     },
   });
 
@@ -173,8 +173,9 @@ export default function VisitLogger(props) {
       storyIDLandmark: storyIdForLandmark,
     },
     onCompleted() {
-      console.log(newVisitData);
-      console.log(`visitid: ${newVisitData.createVisit.id}`);
+      // console.log(newVisitData);
+      setCurrentVisitId(newVisitData.createVisit.id);
+      publishUserVisit();
     },
   });
 
