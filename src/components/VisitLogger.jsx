@@ -32,7 +32,11 @@ export default function VisitLogger(props) {
     userJournalId,
     setUserJournalId,
     currentChapterId,
+    currentStoryId,
+    currentVisitId,
     setCurentChapterId,
+    setCurrentStoryId,
+    setCurrentVisitId,
     savedStoryId,
     setSavedStoryId,
     savedLandmarkId,
@@ -55,6 +59,8 @@ export default function VisitLogger(props) {
   let landmarkArray = [];
   let cleanedLandMarkArray = [];
 
+  /************************************************ QUERIES *****************************************************/
+
   const {
     loading: journalQueryLoading,
     error: journalQueryError,
@@ -67,39 +73,6 @@ export default function VisitLogger(props) {
       });
     },
   });
-
-  const [
-    createNewChapter,
-    {
-      data: newChapterData,
-      loading: newChapterLoading,
-      error: newChapterError,
-    },
-  ] = useMutation(CREATE_NEW_CHAPTER, {
-    variables: {
-      authLandmark: landmarkId,
-      landmarkIdentifier: landmarkId,
-      authJournalID: userJournalId,
-      currentDate: currentDate,
-      dayOfWeek: dayName,
-    },
-    onCompleted() {
-      console.log(`post author created  ${userJournalId}`);
-    },
-  });
-
-  // const [createAuthor] = useMutation(CREATE_NEW_AUTHOR, {
-  //   variables: {
-  //     authZeroId: user.sub,
-  //     authZeroEmail: user.email,
-  //     authZeroName: user.name,
-  //   },
-  //   refetchQueries: [
-  //     { query: JOURNAL_CHECK }, // DocumentNode object parsed with gql
-  //     "getJournalStatus", // Query name
-  //   ],
-  //   onCompleted: () => console.log(`post author created  ${userJournalId}`),
-  // });
 
   const {
     loading: chapterQueryLoading,
@@ -123,6 +96,112 @@ export default function VisitLogger(props) {
     },
   });
 
+  const {
+    loading: storyQueryLoading,
+    error: storyQueryError,
+    data: storyQueryData,
+  } = useQuery(CHECK_FOR_STORYID, {
+    variables: { currentChapterId: currentChapterId },
+    pollInterval: 10000,
+  });
+
+  const {
+    loading: landmarkQueryLoading,
+    error: landmarkQueryError,
+    data: landmarkQueryData,
+  } = useQuery(CHECK_FOR_LANDMARKS, {
+    variables: {
+      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
+      currentDate: currentDate,
+    },
+    pollInterval: 10000,
+  });
+
+  /************************************************ MUTATIONS *****************************************************/
+
+  const [
+    createNewChapter,
+    {
+      data: newChapterData,
+      loading: newChapterLoading,
+      error: newChapterError,
+    },
+  ] = useMutation(CREATE_NEW_CHAPTER, {
+    variables: {
+      authLandmark: landmarkId,
+      landmarkIdentifier: landmarkId,
+      authJournalID: userJournalId,
+      currentDate: currentDate,
+      dayOfWeek: dayName,
+    },
+    onCompleted() {
+      // console.log(newChapterData);
+      setCurentChapterId(newChapterData.createChapter.id);
+      setCurrentStoryId(newChapterData.createChapter.stories[0].id);
+      setCurrentVisitId(newChapterData.createChapter.stories[0].visits[0].id);
+      publishUserChapter();
+    },
+  });
+
+  const [
+    createNewStory,
+    { data: newStoryData, loading: newStoryLoading, error: newStoryError },
+  ] = useMutation(CREATE_NEW_STORY, {
+    variables: {
+      authLandmark: landmarkId,
+      landmarkIdentifier: landmarkId,
+      landmarkTitle: landmarkName,
+      currentChptID: todaysChapterId,
+    },
+    refetchQueries: [
+      { query: GET_CHAPTER_DATE }, // DocumentNode object parsed with gql
+      "GetChapterDate", // Query name
+    ],
+    onCompleted() {
+      setCurrentStoryId(newStoryData.createStory.id);
+      setCurrentVisitId(newStoryData.createStory.visits[0].id);
+      publishUserStory();
+    },
+  });
+
+  const [
+    createNewVisit,
+    { data: newVisitData, loading: newVisitLoading, error: newVisitError },
+  ] = useMutation(CREATE_NEW_VISIT, {
+    variables: {
+      landmarkTracker: landmarkId,
+      storyIDLandmark: storyIdForLandmark,
+    },
+    onCompleted() {
+      // console.log(newVisitData);
+      setCurrentVisitId(newVisitData.createVisit.id);
+      publishUserVisit();
+    },
+  });
+
+  const [publishUserChapter] = useMutation(PUBLISH_CHAPTER, {
+    variables: { currentChptID: currentChapterId },
+    onCompleted() {
+      publishUserStory();
+    },
+  });
+
+  const [publishUserStory] = useMutation(PUBLISH_STORY, {
+    variables: { storyDraft: currentStoryId },
+    onCompleted() {
+      publishUserVisit();
+    },
+  });
+
+  const [publishUserVisit] = useMutation(PUBLISH_VISIT, {
+    variables: { visitDraft: currentVisitId },
+    onCompleted() {
+      console.log("publishing done");
+    },
+  });
+
+  /************************************************ HELPER FUNCTIONS *****************************************************/
+
   const chapterMap =
     chapterQueryData !== undefined &&
     chapterQueryData.chapters.map(({ id, date }) => {
@@ -138,18 +217,6 @@ export default function VisitLogger(props) {
     setDoDatesMatch(dateComp);
   }
 
-  const {
-    loading: landmarkQueryLoading,
-    error: landmarkQueryError,
-    data: landmarkQueryData,
-  } = useQuery(CHECK_FOR_LANDMARKS, {
-    variables: {
-      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
-      currentDate: currentDate,
-    },
-    pollInterval: 10000,
-  });
-
   const storyMap =
     landmarkQueryData !== undefined &&
     landmarkQueryData.stories.map(({ id, landmarkId }) => {
@@ -160,9 +227,6 @@ export default function VisitLogger(props) {
   const landmarkMap =
     chapterQueryData !== undefined &&
     chapterQueryData.chapters.map(({ id, stories }) => {
-      // stories.map(({ id, landmarkId }) => {
-      //   landmarkArray.push({ landmarkId, storyId: id });
-      // });
       landmarkArray.push({ chapterId: id, stories });
     });
 
@@ -188,21 +252,20 @@ export default function VisitLogger(props) {
       (d) => d.chpId === todaysChapterId
     );
 
-    console.log(`findTodays - ${findTodays}`);
+    // console.log(`findTodays - ${findTodays}`);
 
     const onlyLandmarks = findTodays.map((marks) => marks.landmarkId);
 
-    console.log(`findTodays - ${onlyLandmarks}`);
+    // console.log(`findTodays - ${onlyLandmarks}`);
 
     const landmarkFlag = onlyLandmarks.includes(`${landmarkId}`);
 
-    console.log(`findTodays - ${landmarkFlag}`);
+    // console.log(`findTodays - ${landmarkFlag}`);
 
     setLandmarkFlagBoolean(landmarkFlag);
     setTodaysChapterId(isTodaysChapterId);
   }
 
-  // const ldmkComp = storyArr.includes(landmarkId);
   if (bundleArray.length > 0) {
     const findStoryIdForLandmark = bundleArray.find(
       (b) => b.landmarkId === landmarkId
@@ -210,26 +273,10 @@ export default function VisitLogger(props) {
     const storyIdToLdmk = findStoryIdForLandmark?.storyId;
     setStoryIdForLandmark(storyIdToLdmk);
   }
-  // const checkForLandmark = bundleArray.some((b) => b.landmarkId === landmarkId);
-
-  console.log(landmarkQueryData);
-  console.log(bundleArray);
-  // console.log(findStoryIdForLandmark);
-  console.log(storyIdForLandmark);
-  console.log(userJournalId);
 
   console.log(`landmarkid - ${landmarkId}`);
   console.log(`landmarkname - ${landmarkName}`);
   console.log(`todayschpid - ${todaysChapterId}`);
-
-  const {
-    loading: storyQueryLoading,
-    error: storyQueryError,
-    data: storyQueryData,
-  } = useQuery(CHECK_FOR_STORYID, {
-    variables: { currentChapterId: currentChapterId },
-    pollInterval: 10000,
-  });
 
   const currentStoryMap =
     storyQueryData !== undefined &&
@@ -237,67 +284,13 @@ export default function VisitLogger(props) {
       setSavedStoryId(id);
     });
 
-  const [
-    createNewStory,
-    { data: newStoryData, loading: newStoryLoading, error: newStoryError },
-  ] = useMutation(CREATE_NEW_STORY, {
-    variables: {
-      authLandmark: landmarkId,
-      landmarkIdentifier: landmarkId,
-      landmarkTitle: landmarkName,
-      currentChptID: todaysChapterId,
-    },
-    refetchQueries: [
-      { query: GET_CHAPTER_DATE }, // DocumentNode object parsed with gql
-      "GetChapterDate", // Query name
-    ],
-    onCompleted: () =>
-      console.log(
-        `created new story, refetched chapter date and kick off the landmark update`
-      ),
-  });
+  // const chapterMutation = newChapterData?.createChapter?.id;
 
-  const chapterMutation = newChapterData?.createChapter?.id;
-  const [
-    createNewVisit,
-    { data: newVisitData, loading: newVisitLoading, error: newVisitError },
-  ] = useMutation(CREATE_NEW_VISIT, {
-    variables: {
-      landmarkTracker: landmarkId,
-      storyIDLandmark: storyIdForLandmark,
-    },
-  });
-  const visitMutation = newVisitData?.createVisit?.id;
+  // const visitMutation = newVisitData?.createVisit?.id;
 
-  let chapterDraft = newChapterData?.createNewChapter?.id;
-  let storyDraft = newStoryData?.createNewStory?.id;
-  let visitDraft = newVisitData?.createVisit?.id;
+  // let chapterDraft = newChapterData?.createNewChapter?.id;
 
-  const [publishUserChapter] = useMutation(PUBLISH_CHAPTER, {
-    variables: { currentChptID: { currentChapterId } },
-  });
-
-  const [publishUserStory] = useMutation(PUBLISH_STORY, {
-    variables: { storyDraft: { storyDraft } },
-  });
-
-  const [publishUserVisit] = useMutation(PUBLISH_VISIT, {
-    variables: { visitDraft: { visitDraft } },
-  });
-
-  const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
-    variables: {
-      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
-    },
-  });
-
-  const newLandmarkPayload = {
-    id: "",
-    landmarkId: `${landmarkId}`,
-    storyId: "",
-  };
-
-  console.log(journalQueryData?.journals.length);
+  /************************************************ JOURNAL LOGIC **************************************************/
 
   const journalLogic = () => {
     setStatus(true);
