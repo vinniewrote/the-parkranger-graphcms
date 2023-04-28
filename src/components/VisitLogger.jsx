@@ -196,7 +196,13 @@ export default function VisitLogger(props) {
   const [publishUserVisit] = useMutation(PUBLISH_VISIT, {
     variables: { visitDraft: currentVisitId },
     onCompleted() {
-      console.log("publishing done");
+      publishJournal();
+    },
+  });
+
+  const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
+    variables: {
+      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
     },
   });
 
