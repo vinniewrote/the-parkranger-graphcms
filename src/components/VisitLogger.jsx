@@ -160,7 +160,7 @@ export default function VisitLogger(props) {
     onCompleted() {
       setCurrentStoryId(newStoryData.createStory.id);
       setCurrentVisitId(newStoryData.createStory.visits[0].id);
-      publishUserStory();
+      publishUserChapter();
     },
   });
 
@@ -175,7 +175,7 @@ export default function VisitLogger(props) {
     onCompleted() {
       // console.log(newVisitData);
       setCurrentVisitId(newVisitData.createVisit.id);
-      publishUserVisit();
+      publishUserChapter();
     },
   });
 
