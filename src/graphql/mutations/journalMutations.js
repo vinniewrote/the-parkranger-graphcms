@@ -95,6 +95,12 @@ export const CREATE_NEW_CHAPTER = gql`
       }
     ) {
       id
+      stories {
+        id
+        visits {
+          id
+        }
+      }
     }
   }
 `;
@@ -174,6 +180,9 @@ export const CREATE_NEW_STORY = gql`
       }
     ) {
       id
+      visits {
+        id
+      }
     }
   }
 `;
@@ -192,7 +201,7 @@ export const CREATE_NEW_VISIT = gql`
 `;
 
 export const PUBLISH_CHAPTER = gql`
-  mutation PublishChapter($currentChptID: String!) {
+  mutation PublishChapter($currentChptID: ID) {
     publishChapter(where: { id: $currentChptID }) {
       publishedAt
     }
@@ -200,7 +209,7 @@ export const PUBLISH_CHAPTER = gql`
 `;
 
 export const PUBLISH_STORY = gql`
-  mutation PublishStory($storyDraft: String!) {
+  mutation PublishStory($storyDraft: ID) {
     publishStory(where: { id: $storyDraft }) {
       id
     }
@@ -208,7 +217,7 @@ export const PUBLISH_STORY = gql`
 `;
 
 export const PUBLISH_VISIT = gql`
-  mutation PublishVisit($visitDraft: String!) {
+  mutation PublishVisit($visitDraft: ID) {
     publishVisit(where: { id: $visitDraft }) {
       id
     }

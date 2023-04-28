@@ -7,6 +7,7 @@ import {
   NEW_AUTHOR_STEP_ONE,
   NEW_AUTHOR_STEP_TWO,
   NEW_AUTHOR_STEP_THREE,
+  PUBLISH_JOURNAL,
 } from "../graphql/mutations/journalMutations";
 import { useManagedStory } from "../contexts/StoryContext";
 import "react-toastify/dist/ReactToastify.min.css";
@@ -68,6 +69,12 @@ export default function NewUserFlow() {
       authZeroName: user.name,
     },
     onCompleted: () => newAuthorStepTwo(),
+  });
+
+  const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
+    variables: {
+      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
+    },
   });
 
   return (
@@ -149,6 +156,7 @@ export default function NewUserFlow() {
             style={{}}
             onClick={(event) => {
               event.preventDefault();
+              publishJournal();
               setNewUserStatus(false);
               toast("taking you to your journal");
             }}

@@ -13,6 +13,8 @@ export function ManageStory({ children }) {
   const [todaysChapterId, setTodaysChapterId] = useState([]);
   const [userJournalId, setUserJournalId] = useState(null);
   const [currentChapterId, setCurentChapterId] = useState(null);
+  const [currentStoryId, setCurrentStoryId] = useState(null);
+  const [currentVisitId, setCurrentVisitId] = useState(null);
   const [rawVisitData, setRawVisitData] = useState([]);
   const [landmarkFlagBoolean, setLandmarkFlagBoolean] = useState(null);
   const [newUserStatus, setNewUserStatus] = useState(null);
@@ -80,6 +82,10 @@ export function ManageStory({ children }) {
     setStoryIdForLandmark,
     doDatesMatch,
     setDoDatesMatch,
+    currentStoryId,
+    currentVisitId,
+    setCurrentStoryId,
+    setCurrentVisitId,
   };
 
   return (
