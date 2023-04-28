@@ -134,20 +134,10 @@ export default function VisitLogger(props) {
       currentDate: currentDate,
       dayOfWeek: dayName,
     },
-    // refetchQueries: [
-    //   { query: GET_CHAPTER_DATE }, // DocumentNode object parsed with gql
-    //   "GetChapterDate", // Query name
-    // ],
     onCompleted() {
-      console.log(newChapterData);
-      // set the current chapterid, current storyId and current visit id
+      // console.log(newChapterData);
       setCurentChapterId(newChapterData.createChapter.id);
-      // console.log(`chapterid: ${newChapterData.createChapter.id}`);
-      // console.log(`storyid: ${newChapterData.createChapter.stories[0].id}`);
       setCurrentStoryId(newChapterData.createChapter.stories[0].id);
-      // console.log(
-      //   `visitid: ${newChapterData.createChapter.stories[0].visits[0].id}`
-      // );
       setCurrentVisitId(newChapterData.createChapter.stories[0].visits[0].id);
       publishUserChapter();
     },
@@ -206,12 +196,6 @@ export default function VisitLogger(props) {
     variables: { visitDraft: currentVisitId },
     onCompleted() {
       console.log("publishing done");
-    },
-  });
-
-  const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
-    variables: {
-      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
     },
   });
 
