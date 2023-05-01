@@ -75,6 +75,7 @@ export const CREATE_NEW_CHAPTER = gql`
   mutation CreateNewChapter(
     $authLandmark: String
     $landmarkIdentifier: ID
+    $landmarkTitle: String!
     $authJournalID: ID!
     $currentDate: Date
     $dayOfWeek: String
@@ -86,6 +87,7 @@ export const CREATE_NEW_CHAPTER = gql`
         stories: {
           create: {
             landmarkId: $authLandmark
+            landmarkName: $landmarkTitle
             visits: {
               create: { landmark: { connect: { id: $landmarkIdentifier } } }
             }
