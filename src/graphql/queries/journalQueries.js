@@ -55,3 +55,32 @@ export const CHECK_FOR_LANDMARKS = gql`
     }
   }
 `;
+
+export const GET_USER_VISIT_DATA = gql`
+  query getUserVisitData($authZeroId: String!) {
+    journals(where: { author: { auth0id: $authZeroId } }) {
+      chapters {
+        date
+        id
+        title
+        stories {
+          id
+          landmarkId
+          landmarkName
+          title
+          visits {
+            id
+            landmark {
+              id
+              name
+              park {
+                id
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;

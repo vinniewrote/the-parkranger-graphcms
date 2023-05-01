@@ -130,6 +130,7 @@ export default function VisitLogger(props) {
     variables: {
       authLandmark: landmarkId,
       landmarkIdentifier: landmarkId,
+      landmarkTitle: landmarkName,
       authJournalID: userJournalId,
       currentDate: currentDate,
       dayOfWeek: dayName,
