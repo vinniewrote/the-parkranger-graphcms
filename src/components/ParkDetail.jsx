@@ -4,13 +4,14 @@ import { useQuery } from "@apollo/client";
 import FilterButton from "./FilterButton";
 import Logout from "../components/LogoutButton";
 import { LANDMARK_LISTING } from "../graphql/queries/journalQueries";
+import { useManagedStory } from "../contexts/StoryContext";
 
 const FILTER_MAP = {
   All: () => true,
-  Coasters: (category) => category === "Coasters",
-  Shops: (category) => category === "shops",
-  Attractions: (category) => category === "attractions",
-  Restaurants: (category) => category === "restaurants",
+  Coasters: (property) => property.category.pluralName === "Coasters",
+  Shops: (property) => property.category.pluralName === "Shops",
+  Attractions: (property) => property.category.pluralName === "Attractions",
+  Restaurants: (property) => property.category.pluralName === "Restaurants",
 };
 
 const FILTER_NAMES = Object.keys(FILTER_MAP);
@@ -20,15 +21,10 @@ export default function ParkDetail(props, match, location) {
     params: { parkId },
   } = props.match;
 
-  const [filter, setFilter] = useState("All");
+  const { filter, setFilter } = useManagedStory();
 
   const filterList = FILTER_NAMES.map((name) => (
-    <FilterButton
-      key={name}
-      name={name}
-      isPressed={name === filter}
-      setFilter={setFilter}
-    />
+    <FilterButton key={name} name={name} />
   ));
 
   const { loading, error, data } = useQuery(LANDMARK_LISTING, {
@@ -38,7 +34,8 @@ export default function ParkDetail(props, match, location) {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
-
+  console.log(data.parks[0].landmarks);
+  console.log(FILTER_MAP[filter]);
   return (
     <Fragment>
       <div className="topBlock">
@@ -49,13 +46,15 @@ export default function ParkDetail(props, match, location) {
 
       {filterList}
       <Fragment>
-        {data.parks[0].landmarks
-          .filter(FILTER_MAP[filter])
-          .map(({ id, name, category }) => (
-            <Link key={id} category={category} to={`/parks/${parkId}/${id}`}>
-              <p>{name}</p>
-            </Link>
-          ))}
+        {data.parks[0].landmarks.filter(FILTER_MAP[filter]).map((property) => (
+          <Link
+            key={property.id}
+            category={property.category.pluralName}
+            to={`/parks/${parkId}/${property.id}`}
+          >
+            <p>{property.name}</p>
+          </Link>
+        ))}
       </Fragment>
     </Fragment>
   );
