@@ -59,6 +59,9 @@
   background-color: #8bc34a;
   height: 30vh;
 }
+.topBlock p {
+  margin: 0;
+}
 .profileTopBlock {
   background-color: #29333b;
   height: 25vh;
@@ -72,10 +75,14 @@
   border: 1px solid #ffffff;
   border-radius: 40px 40px 0 0;
 }
+.contentBlock {
+  background-color: #eceff1;
+  min-height: 60vh;
+}
 .viewBlock {
   background-color: #eceff1;
   min-height: 60vh;
-  padding: 20px;
+  /* padding: 20px; */
 }
 .viewBlock h3 {
   margin-top: 0;

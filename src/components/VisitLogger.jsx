@@ -23,7 +23,7 @@ import { LoggingButton } from "../styledComponents/VisitLogger_styled";
 
 export default function VisitLogger(props) {
   const { user } = useAuth0();
-  const [status, setStatus] = useState(false);
+  const [setStatus] = useState(false);
   const [newUserModal, showNewUserModal] = useState(false);
   const {
     currentDate,
@@ -37,11 +37,7 @@ export default function VisitLogger(props) {
     setCurentChapterId,
     setCurrentStoryId,
     setCurrentVisitId,
-    savedStoryId,
     setSavedStoryId,
-    savedLandmarkId,
-    setSavedLandmarkId,
-    STATUS,
     todaysChapterId,
     setTodaysChapterId,
     landmarkFlagBoolean,
@@ -155,7 +151,7 @@ export default function VisitLogger(props) {
       currentChptID: todaysChapterId,
     },
     refetchQueries: [
-      { query: GET_CHAPTER_DATE }, // DocumentNode object parsed with gql
+      { query: GET_CHAPTER_DATE }, // DocumentNode object parsed
       "GetChapterDate", // Query name
     ],
     onCompleted() {

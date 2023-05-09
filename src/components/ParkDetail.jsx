@@ -1,20 +1,9 @@
 import React, { Fragment, useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import FilterButton from "./FilterButton";
-
-// import useState
-// add filter hooks
-// define filters for coasters, shops, attractions and restaurants
-// use const FILTER_NAMES = Object.keys(FILTER_MAP); to get all the filter names (coasters, shops, etc)
-// render the filter buttons using the below map
-
-{
-  /* const filterList = FILTER_NAMES.map((name) => (
-  <FilterButton key={name} name={name}/>
-));
-*/
-}
+import Logout from "../components/LogoutButton";
+import { LANDMARK_LISTING } from "../graphql/queries/journalQueries";
 
 const FILTER_MAP = {
   All: () => true,
@@ -42,42 +31,21 @@ export default function ParkDetail(props, match, location) {
     />
   ));
 
-  const LANDMARK_LISTING = gql`
-  query GetLandmarkListing {
-    parks(where: {parkId: "${parkId}"}) {
-      id
-      name
-      
-      landmarks {
-        id
-        name
-        operationalStatus
-          category {
-          id
-          name
-          pluralName
-        }
-      }
-    }
-  }
-`;
-
-  const { loading, error, data } = useQuery(LANDMARK_LISTING);
+  const { loading, error, data } = useQuery(LANDMARK_LISTING, {
+    variables: { propertyId: parkId },
+    pollInterval: 10000,
+  });
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
   return (
     <Fragment>
-      <div>{parkId}</div>
-
-      {/* <div className="park-filter">
-        <button>all</button>
-        <button>coasters</button>
-        <button>attractions</button>
-        <button>restaurants</button>
-        <button>shops</button>
-      </div> */}
+      <div className="topBlock">
+        <Logout />
+        <h1>Parks and Maps</h1>
+        <h2>{parkId}</h2>
+      </div>
 
       {filterList}
       <Fragment>
