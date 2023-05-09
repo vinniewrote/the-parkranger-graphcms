@@ -84,3 +84,87 @@ export const GET_USER_VISIT_DATA = gql`
     }
   }
 `;
+
+export const PARK_LISTING = gql`
+  query GetParkListing {
+    parks {
+      id
+      parkId
+      name
+      openingDay
+      openingMonth
+      openingYear
+    }
+  }
+`;
+
+export const LANDMARK_LISTING = gql`
+  query GetLandmarkListing($propertyId: String) {
+    parks(where: { parkId: $propertyId }) {
+      id
+      name
+
+      landmarks {
+        id
+        name
+        operationalStatus
+        category {
+          id
+          name
+          pluralName
+        }
+      }
+    }
+  }
+`;
+
+export const LANDMARK_DETAILS = gql`
+  query GetLandmarkDetails($propertyId: ID) {
+    landmarks(where: { id: $propertyId }) {
+      id
+      name
+      height
+      inversions
+      length
+      heightRestriction
+      gForce
+      externalLink
+      duration
+      drop
+      createdAt
+      openingMonth
+      openingDay
+      openingYear
+      closingDay
+      closingMonth
+      closingYear
+      operationalStatus
+      speed
+      designer {
+        name
+        id
+      }
+      location {
+        latitude
+        longitude
+      }
+
+      summary
+      colorPalette {
+        hex
+      }
+      visits {
+        id
+        title
+        date
+      }
+      park {
+        name
+      }
+      area {
+        id
+        name
+      }
+    }
+  }
+`;

@@ -1,6 +1,6 @@
-import React, { Fragment, useState } from "react";
+import React from "react";
 import { ToastContainer, toast } from "react-toastify";
-import { useQuery, gql, useMutation } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import { useAuth0 } from "@auth0/auth0-react";
 import { JOURNAL_CHECK, AUTHOR_CHECK } from "../graphql/queries/journalQueries";
 import {
@@ -40,20 +40,17 @@ export default function NewUserFlow() {
     },
   });
 
-  const [newAuthorStepThree, { data, loading, error }] = useMutation(
-    NEW_AUTHOR_STEP_THREE,
-    {
-      variables: {
-        authZeroId: user.sub,
-        authZeroEmail: user.email,
-        authZeroName: user.name,
-      },
+  const [newAuthorStepThree] = useMutation(NEW_AUTHOR_STEP_THREE, {
+    variables: {
+      authZeroId: user.sub,
+      authZeroEmail: user.email,
+      authZeroName: user.name,
+    },
 
-      onCompleted() {
-        console.log("step 3 done");
-      },
-    }
-  );
+    onCompleted() {
+      console.log("step 3 done");
+    },
+  });
 
   const [newAuthorStepTwo] = useMutation(NEW_AUTHOR_STEP_TWO, {
     variables: {

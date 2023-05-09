@@ -1,19 +1,8 @@
 import React, { Fragment } from "react";
 import { Link } from "react-router-dom";
-import { useQuery, gql } from "@apollo/client";
-
-const PARK_LISTING = gql`
-  query GetParkListing {
-    parks {
-      id
-      parkId
-      name
-      openingDay
-      openingMonth
-      openingYear
-    }
-  }
-`;
+import { useQuery } from "@apollo/client";
+import Logout from "../components/LogoutButton";
+import { PARK_LISTING } from "../graphql/queries/journalQueries";
 
 export default function Parks() {
   const { loading, error, data } = useQuery(PARK_LISTING);
@@ -23,7 +12,12 @@ export default function Parks() {
 
   return (
     <Fragment>
-      <h3>Parks and Maps</h3>
+      <div className="topBlock">
+        <Logout />
+        <h1>Parks and Maps</h1>
+        <h2>Subheader Text</h2>
+      </div>
+      {/* <h3>Parks and Maps</h3> */}
 
       <Fragment>
         {data.parks.map(({ id, parkId, name }) => (

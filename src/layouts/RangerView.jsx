@@ -10,13 +10,12 @@ import Splash from "../components/Splash";
 export default function RangerView({ children }) {
   return (
     <div className="rangerView">
-      <div className="topBlock">
-        <p>v0.97.3</p>
+      {/* <div className="topBlock">
         <Logout />
         <h1>Page Header</h1>
         <h2>Subheader Text</h2>
-      </div>
-      <div className="viewBlock">
+      </div> */}
+      <div className="contentBlock">
         <Switch>
           <Route path="/parks/:parkId/:id" component={LandmarkDetail} />
           <Route path="/parks/:parkId" component={ParkDetail} />

@@ -1,9 +1,13 @@
 import React, { Fragment } from "react";
 import VisitLogger from "./VisitLogger";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useManagedStory } from "../contexts/StoryContext";
-import { JOURNAL_CHECK, AUTHOR_CHECK } from "../graphql/queries/journalQueries";
+import {
+  JOURNAL_CHECK,
+  AUTHOR_CHECK,
+  LANDMARK_DETAILS,
+} from "../graphql/queries/journalQueries";
 import {
   InfoBlockWrapper,
   LoggingCountContainer,
@@ -11,15 +15,14 @@ import {
   YourVisitsBlock,
 } from "../styledComponents/LandmarkDetails_styled";
 import NewUserFlow from "./NewUserFlow";
-import { NEW_AUTHOR_STEP_FOUR } from "../graphql/mutations/journalMutations";
+import Logout from "../components/LogoutButton";
 
 export default function LandmarkDetail(props, match) {
   const {
     params: { id },
   } = props.match;
   const { user } = useAuth0();
-  const { userJournalId, setUserJournalId, newUserStatus, setNewUserStatus } =
-    useManagedStory();
+  const { setUserJournalId, newUserStatus } = useManagedStory();
 
   const {
     loading: journalQueryLoading,
@@ -44,6 +47,10 @@ export default function LandmarkDetail(props, match) {
     variables: { authZeroEmail: user.email },
   });
 
+  const { loading, error, data } = useQuery(LANDMARK_DETAILS, {
+    variables: { propertyId: `${id}` },
+  });
+
   console.log(authorQueryData?.author);
   console.log(journalQueryData);
 
@@ -55,58 +62,6 @@ export default function LandmarkDetail(props, match) {
 
   console.log(newUserCriteria);
 
-  const LANDMARK_DETAILS = gql`
-    query GetLandmarkDetails {
-      landmarks(where: {id: "${id}"}) {
-        id
-        name
-        height
-        inversions
-        length
-        heightRestriction
-        gForce
-        externalLink
-        duration
-        drop
-        createdAt
-        openingMonth
-        openingDay
-        openingYear
-        closingDay
-        closingMonth
-        closingYear
-        operationalStatus
-        speed
-        designer {
-          name
-          id
-        }
-        location {
-          latitude
-          longitude
-        }
-        
-        summary
-        colorPalette {
-          hex
-        }
-        visits {
-        id
-        title
-        date
-      }
-      park {
-        name
-      }
-      area {
-        id
-        name
-      }
-      }
-    }
-  `;
-
-  const { loading, error, data } = useQuery(LANDMARK_DETAILS);
   // console.log(data);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
@@ -116,9 +71,7 @@ export default function LandmarkDetail(props, match) {
       {(newUserCriteria || newUserStatus === true) && (
         <NewUserFlow style={{ position: "absolute" }} />
       )}
-      {/* <NewUserFlow /> */}
-      {/* <div>Detail about the landmark goes here </div>
-      <h4>{id}</h4> */}
+
       <Fragment>
         {data.landmarks.map(
           ({
@@ -138,10 +91,14 @@ export default function LandmarkDetail(props, match) {
             area,
           }) => (
             <div key={`Landmark Detail -  ${id}`}>
-              <h2 key={`${name} - ${id}`}>{name}</h2>
-              <p key={`${openingYear} - ${id}`}>
-                {openingYear !== null ? `@ ${openingYear}` : ""}
-              </p>
+              <div className="topBlock">
+                <Logout />
+                <h2 key={`${name} - ${id}`}>{name}</h2>
+                <p key={`${openingYear} - ${id}`}>
+                  {openingYear !== null ? `@ ${openingYear}` : ""}
+                </p>
+              </div>
+
               <h3>Your Visits</h3>
               <InfoBlockWrapper>
                 <LoggingCountContainer>
@@ -190,11 +147,6 @@ export default function LandmarkDetail(props, match) {
 
               <h3>Theme</h3>
               <InfoBlockWrapper>
-                {/* {console.log(colorPalette[0].hex)} 
-                {colorPalette.map((color, index) => {
-                  // <p>{color.hex}</p>;
-                })}
-                */}
                 <div
                   key={`${colorPalette} - ${id} - Block1`}
                   style={{
