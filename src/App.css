@@ -222,3 +222,10 @@
 .closedTask h5 {
   text-align: left;
 }
+
+.filtered {
+  background: #eaddc9 !important;
+}
+.empty {
+  display: none;
+}
