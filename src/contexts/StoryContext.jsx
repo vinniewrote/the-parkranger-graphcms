@@ -20,7 +20,8 @@ export function ManageStory({ children }) {
   const [newUserStatus, setNewUserStatus] = useState(null);
   const [storyIdForLandmark, setStoryIdForLandmark] = useState(null);
   const [doDatesMatch, setDoDatesMatch] = useState(null);
-  const [filter, setFilter] = useState("All");
+  const [filter, setFilter] = useState("Coasters");
+  const [emptyFilters, setEmptyFilters] = useState(null);
   const newDate = new Date();
   const currentDate = newDate.toISOString();
   const currentDay = newDate.getDate().toString().padStart(2, "0");
@@ -89,6 +90,8 @@ export function ManageStory({ children }) {
     setCurrentVisitId,
     filter,
     setFilter,
+    emptyFilters,
+    setEmptyFilters,
   };
 
   return (
