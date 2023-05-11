@@ -9,6 +9,7 @@ import {
   GET_CHAPTER_DATE,
   CHECK_FOR_STORYID,
   CHECK_FOR_LANDMARKS,
+  VISIT_LANDMARK_CHECK,
 } from "../graphql/queries/journalQueries.js";
 import {
   CREATE_NEW_CHAPTER,
@@ -20,10 +21,14 @@ import {
   PUBLISH_VISIT,
 } from "../graphql/mutations/journalMutations";
 import { LoggingButton } from "../styledComponents/VisitLogger_styled";
+import {
+  YourVisitsBlock,
+  LoggingCountContainer,
+} from "../styledComponents/LandmarkDetails_styled";
 
 export default function VisitLogger(props) {
   const { user } = useAuth0();
-  const [setStatus] = useState(false);
+  const [status, setStatus] = useState(false);
   const [newUserModal, showNewUserModal] = useState(false);
   const {
     currentDate,
@@ -46,6 +51,8 @@ export default function VisitLogger(props) {
     setStoryIdForLandmark,
     doDatesMatch,
     setDoDatesMatch,
+    rawVisitCount,
+    setRawVisitCount,
   } = useManagedStory();
   const { landmarkId, landmarkName } = props;
 
@@ -56,6 +63,12 @@ export default function VisitLogger(props) {
   let cleanedLandMarkArray = [];
 
   /************************************************ QUERIES *****************************************************/
+  const { loading, error, data } = useQuery(VISIT_LANDMARK_CHECK, {
+    variables: { currentPropertyId: landmarkId },
+    onCompleted: () => {
+      setRawVisitCount(data);
+    },
+  });
 
   const {
     loading: journalQueryLoading,
@@ -185,6 +198,7 @@ export default function VisitLogger(props) {
 
   const [publishUserStory] = useMutation(PUBLISH_STORY, {
     variables: { storyDraft: currentStoryId },
+
     onCompleted() {
       publishUserVisit();
     },
@@ -192,6 +206,7 @@ export default function VisitLogger(props) {
 
   const [publishUserVisit] = useMutation(PUBLISH_VISIT, {
     variables: { visitDraft: currentVisitId },
+    refetchQueries: [{ query: VISIT_LANDMARK_CHECK }, "CheckLandmarkForVisits"],
     onCompleted() {
       publishJournal();
     },
@@ -324,16 +339,27 @@ export default function VisitLogger(props) {
 
   return (
     <Fragment>
-      <LoggingButton
-        disabled={journalQueryData?.journals.length === 0}
-        type="button"
-        onClick={() => {
-          journalLogic();
-        }}
-      >
-        <span>+</span>
-      </LoggingButton>
-      <ToastContainer />
+      <LoggingCountContainer>
+        <YourVisitsBlock>
+          <h4>Your Visits</h4>
+          <p>{rawVisitCount?.visits.length}</p>
+        </YourVisitsBlock>
+        <LoggingButton
+          disabled={journalQueryData?.journals.length === 0}
+          type="button"
+          onClick={() => {
+            journalLogic();
+          }}
+        >
+          <span>+</span>
+        </LoggingButton>
+        <ToastContainer />
+      </LoggingCountContainer>
+      <p>
+        {rawVisitCount?.visits.length > 0
+          ? "Welcome Back"
+          : "You havent been here yet"}
+      </p>
     </Fragment>
   );
 }

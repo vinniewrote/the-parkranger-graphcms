@@ -98,6 +98,18 @@ export const PARK_LISTING = gql`
   }
 `;
 
+export const VISIT_LANDMARK_CHECK = gql`
+  query CheckLandmarkForVisits($currentPropertyId: ID) {
+    visits(where: { landmark: { id: $currentPropertyId } }) {
+      id
+      landmark {
+        id
+        name
+      }
+    }
+  }
+`;
+
 export const LANDMARK_LISTING = gql`
   query GetLandmarkListing($propertyId: String) {
     parks(where: { parkId: $propertyId }) {

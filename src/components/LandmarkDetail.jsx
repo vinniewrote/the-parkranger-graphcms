@@ -22,7 +22,7 @@ export default function LandmarkDetail(props, match) {
     params: { id },
   } = props.match;
   const { user } = useAuth0();
-  const { setUserJournalId, newUserStatus } = useManagedStory();
+  const { setUserJournalId, newUserStatus, rawVisitCount } = useManagedStory();
 
   const {
     loading: journalQueryLoading,
@@ -101,18 +101,16 @@ export default function LandmarkDetail(props, match) {
 
               <h3>Your Visits</h3>
               <InfoBlockWrapper>
-                <LoggingCountContainer>
-                  <YourVisitsBlock>
-                    <h4>Your Visits</h4>
-                    <p>0</p>
-                  </YourVisitsBlock>
-                  <VisitLogger
-                    key={`${name} - ${id}`}
-                    landmarkId={id}
-                    landmarkName={name}
-                  />
-                </LoggingCountContainer>
-                <p>You havent been here yet</p>
+                <VisitLogger
+                  key={`${name} - ${id}`}
+                  landmarkId={id}
+                  landmarkName={name}
+                />
+                {/* <p>
+                  {rawVisitCount?.visits.length > 0
+                    ? "Welcome Back"
+                    : "You havent been here yet"}
+                </p> */}
               </InfoBlockWrapper>
               <h3>Location</h3>
               <InfoBlockWrapper>
