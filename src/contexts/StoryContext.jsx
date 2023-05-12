@@ -22,7 +22,7 @@ export function ManageStory({ children }) {
   const [doDatesMatch, setDoDatesMatch] = useState(null);
   const [filter, setFilter] = useState("Coasters");
   const [emptyFilters, setEmptyFilters] = useState(null);
-  const [rawVisitCount, setRawVisitCount] = useState(null);
+  // const [rawVisitCount, setRawVisitCount] = useState(null);
   const newDate = new Date();
   const currentDate = newDate.toISOString();
   const currentDay = newDate.getDate().toString().padStart(2, "0");
@@ -93,8 +93,8 @@ export function ManageStory({ children }) {
     setFilter,
     emptyFilters,
     setEmptyFilters,
-    rawVisitCount,
-    setRawVisitCount,
+    // rawVisitCount,
+    // setRawVisitCount,
   };
 
   return (

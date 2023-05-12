@@ -30,6 +30,7 @@ export default function VisitLogger(props) {
   const { user } = useAuth0();
   const [status, setStatus] = useState(false);
   const [newUserModal, showNewUserModal] = useState(false);
+  const [rawVisitCount, setRawVisitCount] = useState(null);
   const {
     currentDate,
     dayName,
@@ -51,8 +52,8 @@ export default function VisitLogger(props) {
     setStoryIdForLandmark,
     doDatesMatch,
     setDoDatesMatch,
-    rawVisitCount,
-    setRawVisitCount,
+    // rawVisitCount,
+    // setRawVisitCount,
   } = useManagedStory();
   const { landmarkId, landmarkName } = props;
 
@@ -191,6 +192,7 @@ export default function VisitLogger(props) {
 
   const [publishUserChapter] = useMutation(PUBLISH_CHAPTER, {
     variables: { currentChptID: currentChapterId },
+    refetchQueries: [{ query: VISIT_LANDMARK_CHECK }, "CheckLandmarkForVisits"],
     onCompleted() {
       publishUserStory();
     },
@@ -206,7 +208,7 @@ export default function VisitLogger(props) {
 
   const [publishUserVisit] = useMutation(PUBLISH_VISIT, {
     variables: { visitDraft: currentVisitId },
-    refetchQueries: [{ query: VISIT_LANDMARK_CHECK }, "CheckLandmarkForVisits"],
+    // refetchQueries: [{ query: VISIT_LANDMARK_CHECK }, "CheckLandmarkForVisits"],
     onCompleted() {
       publishJournal();
     },
