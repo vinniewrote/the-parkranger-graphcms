@@ -8,10 +8,10 @@ import { useManagedStory } from "../contexts/StoryContext";
 import { FilterBar } from "../styledComponents/FilterButton_styled";
 
 const FILTER_MAP = {
-  Coasters: (property) => property.category.pluralName === "Coasters",
-  Shops: (property) => property.category.pluralName === "Shops",
-  Attractions: (property) => property.category.pluralName === "Attractions",
-  Restaurants: (property) => property.category.pluralName === "Restaurants",
+  Coasters: (property) => property.category?.pluralName === "Coasters",
+  Shops: (property) => property.category?.pluralName === "Shops",
+  Attractions: (property) => property.category?.pluralName === "Attractions",
+  Restaurants: (property) => property.category?.pluralName === "Restaurants",
 };
 
 const FILTER_ARRAY = ["Coasters", "Shops", "Attractions", "Restaurants"];
