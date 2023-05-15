@@ -65,18 +65,26 @@ export const GET_USER_VISIT_DATA = gql`
         title
         stories {
           id
+          landmark {
+            park {
+              id
+              name
+            }
+            category {
+              id
+              name
+              pluralName
+            }
+          }
           landmarkId
           landmarkName
+
           title
           visits {
             id
             landmark {
               id
               name
-              park {
-                id
-                name
-              }
             }
           }
         }

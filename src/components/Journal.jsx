@@ -8,7 +8,10 @@ import NewUserFlow from "./NewUserFlow";
 import Logout from "../components/LogoutButton";
 import {
   PropertyName,
+  PropertyLocation,
+  PropertyTitleWrapper,
   PropertyVisitCount,
+  PropertyCountValue,
   PropertyCountBlock,
   ChapterPropertyTitle,
   ChapterPropertySubTitle,
@@ -86,18 +89,20 @@ export default function Journal(props, match, location) {
         rawVisitData.map((visit, i) => (
           <>
             <ChapterDisplayBlock key={i}>
-              <ChapterPropertyTitle>
-                {visit?.stories[0]?.visits[0]?.landmark?.park?.name}
-              </ChapterPropertyTitle>
+              <ChapterPropertyTitle>{visit?.title}</ChapterPropertyTitle>
               <ChapterPropertySubTitle>{visit.date}</ChapterPropertySubTitle>
-              {/* {console.log(visit?.stories?.landmarkId)} */}
-              {/* {console.log(visit?.stories[0]?.visits[0]?.landmark?.park?.name)} */}
-              {/* {console.log(visit?.stories[0]?.visits)} */}
               {visit?.stories.map((story, landmarkId, index, visits) => (
                 <PropertyCountBlock>
-                  <PropertyName>{story.landmarkName}</PropertyName>
+                  <PropertyTitleWrapper>
+                    <PropertyName>{story.landmarkName}</PropertyName>
+                    <PropertyLocation>
+                      {`${story?.landmark?.category?.pluralName} - ${story?.landmark?.park?.name}`}
+                    </PropertyLocation>
+                  </PropertyTitleWrapper>
                   <PropertyVisitCount>
-                    x<span>{story?.visits.length}</span>{" "}
+                    <PropertyCountValue>
+                      {`x ${story?.visits.length}`}
+                    </PropertyCountValue>
                   </PropertyVisitCount>
                 </PropertyCountBlock>
               ))}
