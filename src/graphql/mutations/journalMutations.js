@@ -88,6 +88,7 @@ export const CREATE_NEW_CHAPTER = gql`
           create: {
             landmarkId: $authLandmark
             landmarkName: $landmarkTitle
+            landmark: { connect: { id: $authLandmark } }
             visits: {
               create: { landmark: { connect: { id: $landmarkIdentifier } } }
             }
@@ -175,6 +176,7 @@ export const CREATE_NEW_STORY = gql`
         chapter: { connect: { id: $currentChptID } }
         landmarkId: $authLandmark
         landmarkName: $landmarkTitle
+        landmark: { connect: { id: $landmarkIdentifier } }
         title: $landmarkTitle
         visits: {
           create: { landmark: { connect: { id: $landmarkIdentifier } } }

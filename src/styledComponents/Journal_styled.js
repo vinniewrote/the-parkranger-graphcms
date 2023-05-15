@@ -34,6 +34,12 @@ export const PropertyCountBlock = styled.div`
   padding: 0 14px;
   margin: 0 auto 14px auto;
 `;
+
+export const PropertyTitleWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+`;
 export const PropertyName = styled.h4`
   font-family: "Rubik";
   font-style: normal;
@@ -42,18 +48,33 @@ export const PropertyName = styled.h4`
   line-height: 22px;
   color: #1a2821;
   margin: 0;
-  width: 90%;
+  /* width: 90%; */
+  text-align: left;
+`;
+
+export const PropertyLocation = styled.h5`
+  font-family: "Rubik";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1em;
+  line-height: 18px;
+  color: rgba(0, 0, 0, 0.4);
+  margin: 0;
+  /* width: 90%; */
   text-align: left;
 `;
 
 export const PropertyVisitCount = styled.div`
   border: 1px solid #dcdcdc;
   border-radius: 6px;
-  padding: 0px 5px;
+  padding: 10px;
   width: 10%;
   font-family: "Rubik";
   font-style: normal;
-  font-weight: 400;
+`;
+
+export const PropertyCountValue = styled.span`
   font-size: 15px;
   line-height: 20px;
+  font-weight: 400;
 `;
