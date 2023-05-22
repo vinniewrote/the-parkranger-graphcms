@@ -229,3 +229,7 @@
 .empty {
   display: none;
 }
+
+.hiddenAreaTitle {
+  display: none;
+}

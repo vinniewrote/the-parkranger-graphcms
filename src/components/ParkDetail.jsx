@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Children, Fragment, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import FilterButton from "./FilterButton";
@@ -10,27 +10,24 @@ import {
   ParkLandmarkCard,
   LandmarkCardTop,
   LandmarkCardMiddle,
+  LandmarkCardBottom,
+  AreaContainer,
+  AreaTitle,
 } from "../styledComponents/ParkDetail_styled";
 
 const FILTER_MAP = {
   Coasters: (property) => property.category?.pluralName === "Coasters",
   Shops: (property) => property.category?.pluralName === "Shops",
   Attractions: (property) => property.category?.pluralName === "Attractions",
-  // Restaurants: (property) => property.category?.pluralName === "Restaurants",
   Dining: (property) => property.category?.pluralName === "Dining",
 };
 
-const FILTER_ARRAY = [
-  "Coasters",
-  "Shops",
-  "Attractions",
-  // "Restaurants",
-  "Dining",
-];
+const FILTER_ARRAY = ["Coasters", "Shops", "Attractions", "Dining"];
 
 const FILTER_NAMES = Object.keys(FILTER_MAP);
 
 export default function ParkDetail(props, match, location) {
+  const [rawAreaData, setRawAreaData] = useState(null);
   const {
     params: { parkId },
   } = props.match;
@@ -45,29 +42,23 @@ export default function ParkDetail(props, match, location) {
   const { loading, error, data } = useQuery(LANDMARK_LISTING, {
     variables: { propertyId: parkId },
     pollInterval: 10000,
+    onCompleted() {
+      setRawAreaData(data.parks[0].areas);
+    },
   });
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
-  const rawLandmarks = data.parks[0].landmarks;
-  // console.log(FILTER_ARRAY);
-  const dataBoop = FILTER_ARRAY.map((filterPoint) => {
-    const filterCheck = rawLandmarks.filter(FILTER_MAP[filterPoint]);
-    // console.log(filterCheck);
-    filterCheck.length === 0 && setEmptyFilters(filterPoint);
-  });
-  //  console.log(data.parks.includes("Coasters"));
-  // console.log(`Shops - ${data.includes("Shops")}`);
-  // console.log(`Attractions - ${data.includes("Attractions")}`);
-  // console.log(`Restaurants - ${data.includes("Restaurants")}`);
-  // console.log(`Dining - ${data.includes("Dining")}`);
-  const dataPreFilters = data.parks[0].landmarks.filter(FILTER_MAP[filter]);
-  console.log(dataPreFilters);
-  // console.log(FILTER_MAP[filter]);
-  // console.log(
-  //   data.parks[0].landmarks.filter(FILTER_MAP[filter]).length === 0 &&
-  //     setEmptyFilters(filter)
-  // );
+
+  console.log(data.parks[0].areas);
+
+  // const dataBoop = FILTER_ARRAY.map((filterPoint) => {
+  //   const filterCheck = rawLandmarks.filter(FILTER_MAP[filterPoint]);
+  //   // console.log(filterCheck);
+  //   filterCheck.length === 0 && setEmptyFilters(filterPoint);
+  // });
+  let propertyCheck = document.getElementsByClassName("areaTitle");
+  console.log(propertyCheck.length);
 
   return (
     <Fragment>
@@ -78,25 +69,39 @@ export default function ParkDetail(props, match, location) {
       </div>
       <FilterBar>{filterList}</FilterBar>
       <Fragment>
-        {dataPreFilters.length > 0
-          ? dataPreFilters.map((property) => (
-              <Link
-                key={property.id}
-                category={property.category.pluralName}
-                to={`/parks/${parkId}/${property.id}`}
-                style={{ textDecoration: "none" }}
-              >
-                <ParkLandmarkCard>
-                  <LandmarkCardTop>
-                    <span>{property.category.pluralName}</span>
-                  </LandmarkCardTop>
-                  <LandmarkCardMiddle>
-                    <h4>{property.name}</h4>
-                  </LandmarkCardMiddle>
-                </ParkLandmarkCard>
-              </Link>
-            ))
-          : setEmptyFilters(filter)}
+        {rawAreaData?.length > 0 &&
+          rawAreaData.map((propertyArea) => (
+            <AreaContainer key={propertyArea.id}>
+              <AreaTitle>{propertyArea.name}</AreaTitle>
+
+              {propertyArea.landmarks.length > 0
+                ? propertyArea.landmarks
+                    .filter(FILTER_MAP[filter])
+                    .map((propertyLandmarks) => (
+                      <ParkLandmarkCard>
+                        <Link
+                          key={propertyLandmarks.id}
+                          category={propertyLandmarks.category.pluralName}
+                          to={`/parks/${parkId}/${propertyLandmarks.id}`}
+                          style={{ textDecoration: "none" }}
+                        >
+                          <LandmarkCardTop>
+                            <span>{propertyLandmarks.category.pluralName}</span>
+                          </LandmarkCardTop>
+                          <LandmarkCardMiddle>
+                            <h4>{propertyLandmarks.name}</h4>
+                          </LandmarkCardMiddle>
+                        </Link>
+                        <LandmarkCardBottom>
+                          <span>{`${propertyLandmarks.visits.length} visits`}</span>
+                          {/* add slim visitlogger here */}
+                          <div>+</div>
+                        </LandmarkCardBottom>
+                      </ParkLandmarkCard>
+                    ))
+                : setEmptyFilters(filter)}
+            </AreaContainer>
+          ))}
       </Fragment>
     </Fragment>
   );

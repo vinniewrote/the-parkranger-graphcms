@@ -123,15 +123,21 @@ export const LANDMARK_LISTING = gql`
     parks(where: { parkId: $propertyId }) {
       id
       name
-
-      landmarks {
+      areas {
         id
         name
-        operationalStatus
-        category {
+        landmarks {
           id
           name
-          pluralName
+          operationalStatus
+          category {
+            id
+            name
+            pluralName
+          }
+          visits {
+            id
+          }
         }
       }
     }
