@@ -42,23 +42,25 @@ export default function ParkDetail(props, match, location) {
   const { loading, error, data } = useQuery(LANDMARK_LISTING, {
     variables: { propertyId: parkId },
     pollInterval: 10000,
+    context: { clientName: "readOnlyLink" },
     onCompleted() {
-      setRawAreaData(data.parks[0].areas);
+      setRawAreaData(data.property.childProp);
     },
   });
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
-  console.log(data.parks[0].areas);
+  const areaData = data?.property?.childProp;
+  console.log(areaData);
 
   // const dataBoop = FILTER_ARRAY.map((filterPoint) => {
   //   const filterCheck = rawLandmarks.filter(FILTER_MAP[filterPoint]);
   //   // console.log(filterCheck);
   //   filterCheck.length === 0 && setEmptyFilters(filterPoint);
   // });
-  let propertyCheck = document.getElementsByClassName("areaTitle");
-  console.log(propertyCheck.length);
+  // let propertyCheck = document.getElementsByClassName("areaTitle");
+  // console.log(propertyCheck.length);
 
   return (
     <Fragment>
@@ -74,9 +76,9 @@ export default function ParkDetail(props, match, location) {
             <AreaContainer key={propertyArea.id}>
               <AreaTitle>{propertyArea.name}</AreaTitle>
 
-              {propertyArea.landmarks.length > 0
-                ? propertyArea.landmarks
-                    .filter(FILTER_MAP[filter])
+              {propertyArea?.childProp?.length > 0
+                ? propertyArea.childProp
+                    //.filter(FILTER_MAP[filter])
                     .map((propertyLandmarks) => (
                       <ParkLandmarkCard>
                         <Link
@@ -93,7 +95,7 @@ export default function ParkDetail(props, match, location) {
                           </LandmarkCardMiddle>
                         </Link>
                         <LandmarkCardBottom>
-                          <span>{`${propertyLandmarks.visits.length} visits`}</span>
+                          <span>{`${propertyLandmarks?.visit} visits`}</span>
                           {/* add slim visitlogger here */}
                           <div>+</div>
                         </LandmarkCardBottom>

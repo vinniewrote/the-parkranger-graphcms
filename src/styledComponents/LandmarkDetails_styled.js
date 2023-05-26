@@ -9,11 +9,23 @@ export const InfoBlockWrapper = styled.div`
   margin: 0 auto;
 `;
 
-export const SpecsBlockWrapper = styled.li`
+export const SpecsContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: 10px;
+  row-gap: 10px;
+  width: 90%;
+  margin: 0 auto;
+`;
+
+export const SpecsBlockWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
   background: #fff;
-  border: 1px solid #fff;
-  width: 200px;
-  list-style-type: none;
+  border: 1px solid gray;
+  width: 195px;
+  padding: 5px 10px;
 `;
 
 export const LoggingCountContainer = styled.div`

@@ -28,8 +28,8 @@ export const GET_CHAPTER_DATE = gql`
       title
       stories {
         id
-        landmarkId
-        landmarkName
+        propertyId
+        propertyName
       }
     }
   }
@@ -51,7 +51,7 @@ export const CHECK_FOR_LANDMARKS = gql`
       }
     ) {
       id
-      landmarkId
+      propertyId
     }
   }
 `;
@@ -65,24 +65,24 @@ export const GET_USER_VISIT_DATA = gql`
         title
         stories {
           id
-          landmark {
-            park {
-              id
-              name
-            }
-            category {
-              id
-              name
-              pluralName
-            }
-          }
-          landmarkId
-          landmarkName
+          # landmark {
+          #   park {
+          #     id
+          #     name
+          #   }
+          #   category {
+          #     id
+          #     name
+          #     pluralName
+          #   }
+          # }
+          propertyId
+          propertyName
 
           title
           visits {
             id
-            landmark {
+            property {
               id
               name
             }
@@ -95,22 +95,24 @@ export const GET_USER_VISIT_DATA = gql`
 
 export const PARK_LISTING = gql`
   query GetParkListing {
-    parks {
+    properties {
       id
-      parkId
       name
-      openingDay
-      openingMonth
-      openingYear
+      summary
+      category {
+        id
+        name
+        pluralName
+      }
     }
   }
 `;
 
 export const VISIT_LANDMARK_CHECK = gql`
   query CheckLandmarkForVisits($currentPropertyId: ID) {
-    visits(where: { landmark: { id: $currentPropertyId } }) {
+    visits(where: { property: { id: $currentPropertyId } }) {
       id
-      landmark {
+      property {
         id
         name
       }
@@ -119,24 +121,24 @@ export const VISIT_LANDMARK_CHECK = gql`
 `;
 
 export const LANDMARK_LISTING = gql`
-  query GetLandmarkListing($propertyId: String) {
-    parks(where: { parkId: $propertyId }) {
+  query GetLandmarkListing($propertyId: ID) {
+    property(where: { id: $propertyId }) {
       id
       name
-      areas {
+      childProp(where: { category: { pluralName: "Areas" } }) {
         id
         name
-        landmarks {
+        childProp {
           id
           name
-          operationalStatus
+          summary
+          visit {
+            id
+          }
           category {
             id
             name
             pluralName
-          }
-          visits {
-            id
           }
         }
       }
@@ -146,50 +148,61 @@ export const LANDMARK_LISTING = gql`
 
 export const LANDMARK_DETAILS = gql`
   query GetLandmarkDetails($propertyId: ID) {
-    landmarks(where: { id: $propertyId }) {
+    property(where: { id: $propertyId }) {
       id
       name
-      height
-      inversions
-      length
-      heightRestriction
-      gForce
-      externalLink
-      duration
-      drop
-      createdAt
-      openingMonth
-      openingDay
-      openingYear
-      closingDay
-      closingMonth
-      closingYear
-      operationalStatus
-      speed
-      designer {
-        name
-        id
-      }
-      location {
-        latitude
-        longitude
-      }
-
       summary
-      colorPalette {
-        hex
+      ticketed
+      liveDataID {
+        id
+        wikiID
+        wikiLive {
+          id
+          name
+          liveData {
+            forecast
+            lastUpdated
+            operatingHours
+            queue
+            showtimes
+            status
+          }
+          schedule
+          timezone
+        }
+      }
+      category {
+        id
+        name
+        pluralName
+      }
+      timeline {
+        day
+        id
+        month
+        note
+        type
+        year
+      }
+      stats {
+        ... on Measurement {
+          id
+          measurementType
+          numericValue
+          stage
+          unitOfMeasure
+        }
+        ... on Time {
+          id
+          measurementTime
+          minutes
+          seconds
+          stage
+        }
       }
       visits {
         id
         title
-        date
-      }
-      park {
-        name
-      }
-      area {
-        id
-        name
       }
     }
   }

@@ -113,6 +113,7 @@ export default function VisitLogger(props) {
   } = useQuery(CHECK_FOR_STORYID, {
     variables: { currentChapterId: currentChapterId },
     pollInterval: 10000,
+    context: { clientName: "readOnlyLink" },
   });
 
   const {
@@ -125,6 +126,7 @@ export default function VisitLogger(props) {
       currentDate: currentDate,
     },
     pollInterval: 10000,
+    context: { clientName: "readOnlyLink" },
   });
 
   /************************************************ MUTATIONS *****************************************************/
@@ -145,6 +147,7 @@ export default function VisitLogger(props) {
       currentDate: currentDate,
       dayOfWeek: dayName,
     },
+    context: { clientName: "authorLink" },
     onCompleted() {
       // console.log(newChapterData);
       setCurentChapterId(newChapterData.createChapter.id);
@@ -164,6 +167,7 @@ export default function VisitLogger(props) {
       landmarkTitle: landmarkName,
       currentChptID: todaysChapterId,
     },
+    context: { clientName: "authorLink" },
     refetchQueries: [
       { query: GET_CHAPTER_DATE }, // DocumentNode object parsed
       "GetChapterDate", // Query name
@@ -183,6 +187,7 @@ export default function VisitLogger(props) {
       landmarkTracker: landmarkId,
       storyIDLandmark: storyIdForLandmark,
     },
+    context: { clientName: "authorLink" },
     onCompleted() {
       // console.log(newVisitData);
       setCurrentVisitId(newVisitData.createVisit.id);
@@ -192,6 +197,7 @@ export default function VisitLogger(props) {
 
   const [publishUserChapter] = useMutation(PUBLISH_CHAPTER, {
     variables: { currentChptID: currentChapterId },
+    context: { clientName: "authorLink" },
     refetchQueries: [{ query: VISIT_LANDMARK_CHECK }, "CheckLandmarkForVisits"],
     onCompleted() {
       publishUserStory();
@@ -200,7 +206,7 @@ export default function VisitLogger(props) {
 
   const [publishUserStory] = useMutation(PUBLISH_STORY, {
     variables: { storyDraft: currentStoryId },
-
+    context: { clientName: "authorLink" },
     onCompleted() {
       publishUserVisit();
     },
@@ -208,6 +214,7 @@ export default function VisitLogger(props) {
 
   const [publishUserVisit] = useMutation(PUBLISH_VISIT, {
     variables: { visitDraft: currentVisitId },
+    context: { clientName: "authorLink" },
     // refetchQueries: [{ query: VISIT_LANDMARK_CHECK }, "CheckLandmarkForVisits"],
     onCompleted() {
       publishJournal();
@@ -218,6 +225,7 @@ export default function VisitLogger(props) {
     variables: {
       authJournalId: userJournalId || localStorage.getItem("newJournalId"),
     },
+    context: { clientName: "authorLink" },
   });
 
   /************************************************ HELPER FUNCTIONS *****************************************************/

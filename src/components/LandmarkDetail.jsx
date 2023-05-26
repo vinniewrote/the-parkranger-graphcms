@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import VisitLogger from "./VisitLogger";
 import { useQuery } from "@apollo/client";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -12,6 +12,7 @@ import {
   InfoBlockWrapper,
   LoggingCountContainer,
   SpecsBlockWrapper,
+  SpecsContainer,
   YourVisitsBlock,
 } from "../styledComponents/LandmarkDetails_styled";
 import NewUserFlow from "./NewUserFlow";
@@ -23,6 +24,7 @@ export default function LandmarkDetail(props, match) {
   } = props.match;
   const { user } = useAuth0();
   const { setUserJournalId, newUserStatus } = useManagedStory();
+  const [localPropertyData, setLocalPropertyData] = useState(null);
 
   const {
     loading: journalQueryLoading,
@@ -49,20 +51,25 @@ export default function LandmarkDetail(props, match) {
 
   const { loading, error, data } = useQuery(LANDMARK_DETAILS, {
     variables: { propertyId: `${id}` },
+    context: { clientName: "readOnlyLink" },
+    onCompleted() {
+      setLocalPropertyData(data.property);
+    },
   });
 
-  console.log(authorQueryData?.author);
-  console.log(journalQueryData);
+  // console.log(authorQueryData?.author);
+  // console.log(journalQueryData);
 
-  const deactivateAuthorStep = authorQueryData?.author?.auth0id !== null;
-  console.log(`deactivated author step: ${deactivateAuthorStep}`);
+  // const deactivateAuthorStep = authorQueryData?.author?.auth0id !== null;
+  // console.log(`deactivated author step: ${deactivateAuthorStep}`);
 
   const newUserCriteria =
     authorQueryData?.author === null || journalQueryData?.journals.length === 0;
 
-  console.log(newUserCriteria);
+  // console.log(newUserCriteria);
 
-  // console.log(data);
+  console.log(localPropertyData?.liveDataID?.wikiLive?.liveData[0].status);
+  console.log(localPropertyData?.stats);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
@@ -72,108 +79,72 @@ export default function LandmarkDetail(props, match) {
         <NewUserFlow style={{ position: "absolute" }} />
       )}
 
-      <Fragment>
-        {data.landmarks.map(
-          ({
-            id,
-            name,
-            inversions,
-            duration,
-            openingMonth,
-            openingDay,
-            openingYear,
-            summary,
-            gForce,
-            speed,
-            colorPalette,
-            designer,
-            park,
-            area,
-          }) => (
-            <div key={`Landmark Detail -  ${id}`}>
-              <div className="topBlock">
-                <Logout />
-                <h2 key={`${name} - ${id}`}>{name}</h2>
-                <p key={`${openingYear} - ${id}`}>
-                  {openingYear !== null ? `@ ${openingYear}` : ""}
-                </p>
-              </div>
+      <div>
+        <div className="topBlock">
+          <Logout />
+          <h2 key={`${localPropertyData?.name} - ${localPropertyData?.id}`}>
+            {localPropertyData?.name}
+          </h2>
 
-              <h3>Your Visits</h3>
-              <InfoBlockWrapper>
-                <VisitLogger
-                  key={`${name} - ${id}`}
-                  landmarkId={id}
-                  landmarkName={name}
-                />
-              </InfoBlockWrapper>
-              <h3>Location</h3>
-              <InfoBlockWrapper>
-                <p key={`${park?.name} - ${id}`}>{park?.name}</p>
-                <p key={`${area?.name} - ${id}`}>{area?.name}</p>
-              </InfoBlockWrapper>
+          <p key={`${localPropertyData?.timeline[0]?.year} - ${id}`}>
+            {localPropertyData?.timeline[0]?.year !== null
+              ? `@ ${localPropertyData?.timeline[0]?.year}`
+              : ""}
+          </p>
 
-              <h3>Summary</h3>
-              <InfoBlockWrapper>
-                <p key={`${summary} - ${id}`}>{summary}</p>
-              </InfoBlockWrapper>
+          <h3>Your Visits</h3>
+          <div className="isPropertyOpen">
+            <p>
+              {`The Property is now ${localPropertyData?.liveDataID?.wikiLive?.liveData[0].status}`}
+            </p>
+          </div>
+          <InfoBlockWrapper>
+            <VisitLogger
+              key={`${localPropertyData?.name} - ${localPropertyData?.id}`}
+              landmarkId={localPropertyData?.id}
+              landmarkName={localPropertyData?.name}
+            />
+          </InfoBlockWrapper>
+          <h3>Location</h3>
+          <InfoBlockWrapper>
+            <p key={`${localPropertyData?.name} - ${localPropertyData?.id}`}>
+              {localPropertyData?.name}
+            </p>
+            {/* <p key={`${area?.name} - ${id}`}>{area?.name}</p> */}
+          </InfoBlockWrapper>
 
-              <h3>Specs</h3>
-              <>
-                {gForce !== null ? (
-                  <SpecsBlockWrapper>
-                    <h5>GForce</h5>
-                    <span key={`${gForce} - ${id}`}>{gForce}</span>
-                  </SpecsBlockWrapper>
-                ) : (
-                  ""
-                )}
-                {speed !== null ? (
-                  <SpecsBlockWrapper>
-                    <h5>Speed (in mph)</h5>
-                    <span key={`${speed} - ${id}`}>{speed}mph</span>
-                  </SpecsBlockWrapper>
-                ) : (
-                  ""
-                )}
-              </>
+          <h3>Summary</h3>
+          <InfoBlockWrapper>
+            <p key={`${localPropertyData?.summary} - ${localPropertyData?.id}`}>
+              {localPropertyData?.summary}
+            </p>
+          </InfoBlockWrapper>
 
-              <h3>Theme</h3>
-              <InfoBlockWrapper>
-                <div
-                  key={`${colorPalette} - ${id} - Block1`}
-                  style={{
-                    height: "40px",
-                    width: "40px",
-                    background: `${colorPalette[0]?.hex}`,
-                  }}
-                />
-                <div
-                  key={`${colorPalette} - ${id} - Block2`}
-                  style={{
-                    height: "40px",
-                    width: "40px",
-                    background: `${colorPalette[1]?.hex}`,
-                  }}
-                />
-                <div
-                  key={`${colorPalette} - ${id} - Block3`}
-                  style={{
-                    height: "40px",
-                    width: "40px",
-                    background: `${colorPalette[2]?.hex}`,
-                  }}
-                />
-              </InfoBlockWrapper>
-
-              <h3>Creative</h3>
-              <InfoBlockWrapper>
-                <p key={`designer - ${id}`}>{designer[0]?.name}</p>
-              </InfoBlockWrapper>
-            </div>
-          )
-        )}
-      </Fragment>
+          <h3>Specs</h3>
+          <SpecsContainer>
+            {localPropertyData?.stats.length > 0 &&
+              localPropertyData.stats.map((stat) => (
+                <SpecsBlockWrapper>
+                  {stat.measurementTime ? (
+                    <>
+                      <h4>{stat.measurementTime}</h4>{" "}
+                      <p>{`${stat.minutes}:${stat.seconds}`}</p>
+                    </>
+                  ) : (
+                    <>
+                      <h4> {stat.measurementType}</h4>
+                      {stat.unitOfMeasure !== null ? (
+                        <p>{`${stat.numericValue}  ${stat.unitOfMeasure}`} </p>
+                      ) : (
+                        <p>{`${stat.numericValue}`} </p>
+                      )}
+                    </>
+                  )}
+                </SpecsBlockWrapper>
+              ))}
+          </SpecsContainer>
+        </div>
+      </div>
     </Fragment>
   );
 }

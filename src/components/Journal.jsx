@@ -51,6 +51,7 @@ export default function Journal(props, match, location) {
   } = useQuery(AUTHOR_CHECK, {
     pollInterval: 10000,
     variables: { authZeroEmail: user.email },
+    context: { clientName: "readOnlyLink" },
   });
 
   const {
@@ -59,6 +60,7 @@ export default function Journal(props, match, location) {
     data: visitQueryData,
   } = useQuery(GET_USER_VISIT_DATA, {
     variables: { authZeroId: user.sub },
+    context: { clientName: "readOnlyLink" },
     onCompleted() {
       console.log(visitQueryData);
       setRawVisitData(visitQueryData?.journals?.[0].chapters);

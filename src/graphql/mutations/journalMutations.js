@@ -86,11 +86,11 @@ export const CREATE_NEW_CHAPTER = gql`
         title: $dayOfWeek
         stories: {
           create: {
-            landmarkId: $authLandmark
-            landmarkName: $landmarkTitle
-            landmark: { connect: { id: $authLandmark } }
+            propertyId: $authLandmark
+            propertyName: $landmarkTitle
+            # landmark: { connect: { id: $authLandmark } }
             visits: {
-              create: { landmark: { connect: { id: $landmarkIdentifier } } }
+              create: { property: { connect: { id: $landmarkIdentifier } } }
             }
           }
         }
@@ -174,12 +174,12 @@ export const CREATE_NEW_STORY = gql`
     createStory(
       data: {
         chapter: { connect: { id: $currentChptID } }
-        landmarkId: $authLandmark
-        landmarkName: $landmarkTitle
-        landmark: { connect: { id: $landmarkIdentifier } }
+        propertyId: $authLandmark
+        propertyName: $landmarkTitle
+        # landmark: { connect: { id: $landmarkIdentifier } }
         title: $landmarkTitle
         visits: {
-          create: { landmark: { connect: { id: $landmarkIdentifier } } }
+          create: { property: { connect: { id: $landmarkIdentifier } } }
         }
       }
     ) {
@@ -196,7 +196,7 @@ export const CREATE_NEW_VISIT = gql`
     createVisit(
       data: {
         story: { connect: { id: $storyIDLandmark } }
-        landmark: { connect: { id: $landmarkTracker } }
+        property: { connect: { id: $landmarkTracker } }
       }
     ) {
       id
