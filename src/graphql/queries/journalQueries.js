@@ -132,8 +132,9 @@ export const LANDMARK_LISTING = gql`
           id
           name
           summary
-          visit {
+          visits {
             id
+            title
           }
           category {
             id
