@@ -152,8 +152,16 @@ export const LANDMARK_DETAILS = gql`
     property(where: { id: $propertyId }) {
       id
       name
-      summary
+      state #shows if the property exists or not
       ticketed
+      #location shows the path to property based on parents
+      location: parentProp(where: { state_not: Defunct }) {
+        id
+        name
+        category {
+          name
+        }
+      }
       liveDataID {
         id
         wikiID
@@ -168,7 +176,6 @@ export const LANDMARK_DETAILS = gql`
             showtimes
             status
           }
-          schedule
           timezone
         }
       }
@@ -177,13 +184,22 @@ export const LANDMARK_DETAILS = gql`
         name
         pluralName
       }
-      timeline {
-        day
+      #show all child properties that aren't characeters
+      childProp(where: { category: { name_not: "Character" } }) {
+        name
         id
-        month
-        note
-        type
-        year
+      }
+      #show all classifications except themes
+      classification(where: { attribute_not: Theme }) {
+        id
+        name
+        attribute
+      }
+      #show themes only
+      themes: classification(where: { attribute_in: Theme }) {
+        id
+        name
+        attribute
       }
       stats {
         ... on Measurement {
@@ -201,6 +217,61 @@ export const LANDMARK_DETAILS = gql`
           stage
         }
       }
+      #presentation is another aspect of themeing
+      presentation {
+        ... on Detail {
+          id
+          detailName
+          detailNotes
+          detailType
+        }
+        ... on Bio {
+          id
+          alias
+          height
+          profession
+          weight
+        }
+      }
+      #cast are the character properties that are attached to current prop
+      cast: childProp(where: { category: { name_contains: "Character" } }) {
+        name
+        id
+      }
+      #creative team built/manage the prop
+      creativeTeam {
+        professionalRole
+        professionalName
+        id
+      }
+      timeline {
+        id
+        type
+        year
+        month
+        day
+        note
+      }
+      #the properties that came before current property which no longer exist
+      predecessor: parentProp(where: { state_in: Defunct }) {
+        id
+        name
+        category {
+          name
+        }
+        timeline(where: { type: EndDate }) {
+          year
+          month
+          day
+          type
+        }
+      }
+      #properties that came after the current property, excluding characers
+      successor: childProp(where: { category: { name_not_in: "Character" } }) {
+        name
+        id
+      }
+      summary
       visits {
         id
         title
