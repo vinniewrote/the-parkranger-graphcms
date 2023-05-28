@@ -92,12 +92,13 @@ export default function LandmarkDetail(props, match) {
               : ""}
           </p>
 
-          <h3>Your Visits</h3>
           <div className="isPropertyOpen">
             <p>
               {`The Property is now ${localPropertyData?.liveDataID?.wikiLive?.liveData[0].status}`}
             </p>
           </div>
+        </div>
+        <div>
           <InfoBlockWrapper>
             <VisitLogger
               key={`${localPropertyData?.name} - ${localPropertyData?.id}`}
@@ -106,19 +107,48 @@ export default function LandmarkDetail(props, match) {
             />
           </InfoBlockWrapper>
           <h3>Location</h3>
-          <InfoBlockWrapper>
-            <p key={`${localPropertyData?.name} - ${localPropertyData?.id}`}>
-              {localPropertyData?.name}
-            </p>
-            {/* <p key={`${area?.name} - ${id}`}>{area?.name}</p> */}
-          </InfoBlockWrapper>
+          {localPropertyData?.location.length > 0 &&
+            localPropertyData.location.map((locale) => (
+              <InfoBlockWrapper>
+                <p>{locale.category.name}</p>
+                <p>{locale.name}</p>
+              </InfoBlockWrapper>
+            ))}
 
           <h3>Summary</h3>
           <InfoBlockWrapper>
             <p key={`${localPropertyData?.summary} - ${localPropertyData?.id}`}>
               {localPropertyData?.summary}
             </p>
+            {}
           </InfoBlockWrapper>
+
+          <h3>Creative Team</h3>
+          {localPropertyData?.creativeTeam.length > 0 &&
+            localPropertyData.creativeTeam.map((member) => (
+              <InfoBlockWrapper>
+                <p>{member.professionalRole}</p>
+                <p>{member.professionalName}</p>
+              </InfoBlockWrapper>
+            ))}
+
+          <h3>Classification</h3>
+          {localPropertyData?.classification.length > 0 &&
+            localPropertyData.classification.map((classy) => (
+              <InfoBlockWrapper>
+                <p>{classy.attribute}</p>
+                <p>{classy.name}</p>
+              </InfoBlockWrapper>
+            ))}
+
+          <h3>Timeline</h3>
+          {localPropertyData?.timeline.length > 0 &&
+            localPropertyData.timeline.map((timepoint) => (
+              <InfoBlockWrapper>
+                <p>{timepoint.type}</p>
+                <p>{timepoint.year}</p>
+              </InfoBlockWrapper>
+            ))}
 
           <h3>Specs</h3>
           <SpecsContainer>
