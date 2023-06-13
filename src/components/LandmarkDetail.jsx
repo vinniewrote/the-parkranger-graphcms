@@ -1,6 +1,6 @@
 import React, { Fragment, useState } from "react";
 import VisitLogger from "./VisitLogger";
-import { useQuery } from "@apollo/client";
+import { empty, useQuery } from "@apollo/client";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useManagedStory } from "../contexts/StoryContext";
 import {
@@ -17,14 +17,16 @@ import {
 } from "../styledComponents/LandmarkDetails_styled";
 import NewUserFlow from "./NewUserFlow";
 import Logout from "../components/LogoutButton";
+import { element } from "prop-types";
 
 export default function LandmarkDetail(props, match) {
   const {
     params: { id },
   } = props.match;
   const { user } = useAuth0();
-  const { setUserJournalId, newUserStatus } = useManagedStory();
+  const { setUserJournalId, newUserStatus, setAuthorId } = useManagedStory();
   const [localPropertyData, setLocalPropertyData] = useState(null);
+  const [propertyDestinationId, setPropertyDestinationId] = useState(null);
 
   const {
     loading: journalQueryLoading,
@@ -33,8 +35,9 @@ export default function LandmarkDetail(props, match) {
   } = useQuery(JOURNAL_CHECK, {
     pollInterval: 10000,
     variables: { authZeroId: user.sub },
+    context: { clientName: "authorLink" },
     onCompleted: () => {
-      journalQueryData.journals.map(({ id }) => {
+      journalQueryData?.journal.map(({ id }) => {
         setUserJournalId(id);
       });
     },
@@ -45,13 +48,17 @@ export default function LandmarkDetail(props, match) {
     error: authorQueryError,
     data: authorQueryData,
   } = useQuery(AUTHOR_CHECK, {
-    pollInterval: 10000,
-    variables: { authZeroEmail: user.email },
+    pollInterval: 40000,
+    variables: { authZeroId: user.sub },
+    context: { clientName: "authorLink" },
+    onCompleted() {
+      setAuthorId(authorQueryData?.authors[0]?.id);
+    },
   });
 
   const { loading, error, data } = useQuery(LANDMARK_DETAILS, {
     variables: { propertyId: `${id}` },
-    context: { clientName: "readOnlyLink" },
+    context: { clientName: "authorLink" },
     onCompleted() {
       setLocalPropertyData(data.property);
     },
@@ -64,10 +71,48 @@ export default function LandmarkDetail(props, match) {
   // console.log(`deactivated author step: ${deactivateAuthorStep}`);
 
   const newUserCriteria =
-    authorQueryData?.author === null || journalQueryData?.journals.length === 0;
+    authorQueryData?.author === null || journalQueryData?.journal?.length === 0;
+  let emptyDestinationArray = [];
+  const propertyParent =
+    localPropertyData?.location?.length > 0 &&
+    localPropertyData?.location.map((parent) => {
+      emptyDestinationArray.push({
+        categoryName: parent.category.name,
+        categoryId: parent.id,
+        cluster: parent.category.cluster,
+      });
+    });
+  console.log(emptyDestinationArray);
+  const foundHotel =
+    emptyDestinationArray.length > 0 &&
+    emptyDestinationArray.find(
+      (element) => element.categoryName === "Hotel" && element.cluster === true
+    );
 
+  const foundShip =
+    emptyDestinationArray.length > 0 &&
+    emptyDestinationArray.find(
+      (element) =>
+        element.categoryName === "Cruise ship" && element.cluster === true
+    );
+  const foundPark =
+    emptyDestinationArray.length > 0 &&
+    emptyDestinationArray.find(
+      (element) => element.categoryName === "Park" && element.cluster === true
+    );
+
+  const foundDestination =
+    emptyDestinationArray.length > 0 &&
+    emptyDestinationArray.find(
+      (element) =>
+        element.categoryName === "Destination" && element.cluster === true
+    );
+  // setPropertyDestinationId(foundDestination.categoryId);
+  // const setFoundDestInContext =
+  //   foundDestination !== null && setPropertyDestinationId(foundDestination);
   // console.log(newUserCriteria);
 
+  console.log(localPropertyData?.location);
   console.log(localPropertyData?.liveDataID?.wikiLive?.liveData[0].status);
   console.log(localPropertyData?.stats);
   if (loading) return <p>Loading...</p>;
@@ -86,11 +131,11 @@ export default function LandmarkDetail(props, match) {
             {localPropertyData?.name}
           </h2>
 
-          <p key={`${localPropertyData?.timeline[0]?.year} - ${id}`}>
+          {/* <p key={`${localPropertyData?.timeline[0]?.year} - ${id}`}>
             {localPropertyData?.timeline[0]?.year !== null
               ? `@ ${localPropertyData?.timeline[0]?.year}`
               : ""}
-          </p>
+          </p> */}
 
           <div className="isPropertyOpen">
             <p>
@@ -104,6 +149,10 @@ export default function LandmarkDetail(props, match) {
               key={`${localPropertyData?.name} - ${localPropertyData?.id}`}
               landmarkId={localPropertyData?.id}
               landmarkName={localPropertyData?.name}
+              destinationId={foundDestination?.categoryId}
+              parkId={foundPark?.categoryId}
+              hotelId={foundHotel?.categoryId}
+              shipId={foundShip?.categoryId}
             />
           </InfoBlockWrapper>
           <h3>Location</h3>

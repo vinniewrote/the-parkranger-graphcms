@@ -1,20 +1,23 @@
 import { gql } from "@apollo/client";
 
 export const AUTHOR_CHECK = gql`
-  query getAuthorStatus($authZeroEmail: String!) {
-    author(where: { email: $authZeroEmail }) {
-      bio
-      email
+  query getAuthorStatus($authZeroId: String) {
+    authors(where: { auth0id: $authZeroId }) {
+      id
       name
-      auth0id
+      journal {
+        id
+        name
+      }
     }
   }
 `;
 
 export const JOURNAL_CHECK = gql`
-  query getJournalStatus($authZeroId: String!) {
+  query getJournalStatus($authZeroId: String) {
     journals(where: { author: { auth0id: $authZeroId } }) {
       id
+      name
     }
   }
 `;
@@ -28,8 +31,23 @@ export const GET_CHAPTER_DATE = gql`
       title
       stories {
         id
-        propertyId
-        propertyName
+      }
+    }
+  }
+`;
+
+export const GET_CHAPTER_ID = gql`
+  query getChapterId($journalTracker: ID!) {
+    journal(where: { id: $journalTracker }, stage: DRAFT) {
+      id
+      name
+      chapters {
+        id
+        date
+        title
+        articles {
+          id
+        }
       }
     }
   }
@@ -51,40 +69,34 @@ export const CHECK_FOR_LANDMARKS = gql`
       }
     ) {
       id
-      propertyId
     }
   }
 `;
 
 export const GET_USER_VISIT_DATA = gql`
-  query getUserVisitData($authZeroId: String!) {
-    journals(where: { author: { auth0id: $authZeroId } }) {
+  query getUserVisitData($journalTracker: ID) {
+    journal(stage: DRAFT, where: { id: $journalTracker }) {
+      id
+      name
       chapters {
-        date
         id
         title
-        stories {
+        articles {
           id
-          # landmark {
-          #   park {
-          #     id
-          #     name
-          #   }
-          #   category {
-          #     id
-          #     name
-          #     pluralName
-          #   }
-          # }
-          propertyId
-          propertyName
-
-          title
-          visits {
+          stories {
             id
             property {
               id
               name
+              category {
+                id
+                name
+                pluralName
+              }
+              visits {
+                id
+                title
+              }
             }
           }
         }
@@ -159,7 +171,9 @@ export const LANDMARK_DETAILS = gql`
         id
         name
         category {
+          id
           name
+          cluster
         }
       }
       liveDataID {

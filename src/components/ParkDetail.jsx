@@ -42,7 +42,7 @@ export default function ParkDetail(props, match, location) {
   const { loading, error, data } = useQuery(LANDMARK_LISTING, {
     variables: { propertyId: parkId },
     pollInterval: 10000,
-    context: { clientName: "readOnlyLink" },
+    context: { clientName: "authorLink" },
     onCompleted() {
       setRawAreaData(data.property.childProp);
     },

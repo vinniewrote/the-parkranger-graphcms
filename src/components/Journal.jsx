@@ -26,8 +26,13 @@ import {
 export default function Journal(props, match, location) {
   const { user } = useAuth0();
 
-  const { rawVisitData, setRawVisitData, setUserJournalId, newUserStatus } =
-    useManagedStory();
+  const {
+    rawVisitData,
+    setRawVisitData,
+    userJournalId,
+    setUserJournalId,
+    newUserStatus,
+  } = useManagedStory();
 
   /************************************************ QUERIES *****************************************************/
 
@@ -37,10 +42,12 @@ export default function Journal(props, match, location) {
     data: journalQueryData,
   } = useQuery(JOURNAL_CHECK, {
     variables: { authZeroId: user.sub },
+    context: { clientName: "authorLink" },
     onCompleted: () => {
-      journalQueryData.journals.map(({ id }) => {
+      journalQueryData?.journals.map(({ id }) => {
         setUserJournalId(id);
       });
+      console.log(journalQueryData);
     },
   });
 
@@ -51,7 +58,7 @@ export default function Journal(props, match, location) {
   } = useQuery(AUTHOR_CHECK, {
     pollInterval: 10000,
     variables: { authZeroEmail: user.email },
-    context: { clientName: "readOnlyLink" },
+    context: { clientName: "authorLink" },
   });
 
   const {
@@ -59,11 +66,11 @@ export default function Journal(props, match, location) {
     error: visitDataQueryError,
     data: visitQueryData,
   } = useQuery(GET_USER_VISIT_DATA, {
-    variables: { authZeroId: user.sub },
-    context: { clientName: "readOnlyLink" },
+    variables: { journalTracker: userJournalId },
+    context: { clientName: "authorLink" },
     onCompleted() {
-      console.log(visitQueryData);
-      setRawVisitData(visitQueryData?.journals?.[0].chapters);
+      console.log(visitQueryData?.journal?.chapters);
+      setRawVisitData(visitQueryData?.journal?.chapters);
     },
   });
 
@@ -73,7 +80,7 @@ export default function Journal(props, match, location) {
   if (authorQueryError || journalQueryError) return <p>Error :(</p>;
 
   const newUserCriteria =
-    authorQueryData?.author === null || journalQueryData?.journals.length === 0;
+    authorQueryData?.author === null || journalQueryData?.journal?.length === 0;
 
   return (
     <Fragment>
@@ -87,27 +94,27 @@ export default function Journal(props, match, location) {
         <NewUserFlow style={{ position: "absolute" }} />
       )}
 
-      {rawVisitData &&
-        rawVisitData.map((visit, i) => (
+      {rawVisitData?.length > 0 &&
+        rawVisitData?.map((visit, i) => (
           <>
             <ChapterDisplayBlock key={i}>
               <ChapterPropertyTitle>{visit?.title}</ChapterPropertyTitle>
               <ChapterPropertySubTitle>{visit.date}</ChapterPropertySubTitle>
-              {visit?.stories.map((story, landmarkId, index, visits) => (
+              {/* {visit?.stories.map((story, index, id) => (
                 <PropertyCountBlock>
                   <PropertyTitleWrapper>
-                    <PropertyName>{story.landmarkName}</PropertyName>
+                    <PropertyName>{story?.property?.name}</PropertyName>
                     <PropertyLocation>
-                      {`${story?.landmark?.category?.pluralName} - ${story?.landmark?.park?.name}`}
+                      {`${story?.property?.category?.pluralName} - ${story?.property?.park?.name}`}
                     </PropertyLocation>
                   </PropertyTitleWrapper>
                   <PropertyVisitCount>
                     <PropertyCountValue>
-                      {`x ${story?.visits.length}`}
+                      {`x ${story?.property?.visits?.length}`}
                     </PropertyCountValue>
                   </PropertyVisitCount>
                 </PropertyCountBlock>
-              ))}
+              ))} */}
             </ChapterDisplayBlock>
           </>
         ))}

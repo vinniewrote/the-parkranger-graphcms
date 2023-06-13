@@ -9,7 +9,7 @@ export const NEW_AUTHOR_STEP_ONE = gql`
     createAuthor(
       data: { email: $authZeroEmail, name: $authZeroName, auth0id: $authZeroId }
     ) {
-      auth0id
+      id
       email
       name
       stage
@@ -18,22 +18,18 @@ export const NEW_AUTHOR_STEP_ONE = gql`
 `;
 
 export const NEW_AUTHOR_STEP_TWO = gql`
-  mutation AuthorStepTwo($authZeroEmail: String!) {
-    publishAuthor(where: { email: $authZeroEmail }, to: PUBLISHED) {
+  mutation AuthorStepTwo($authIdentifier: ID) {
+    publishAuthor(where: { id: $authIdentifier }, to: PUBLISHED) {
       id
     }
   }
 `;
 
 export const NEW_AUTHOR_STEP_THREE = gql`
-  mutation AuthorStepThree(
-    $authZeroEmail: String!
-    $authZeroName: String!
-    $authZeroId: String!
-  ) {
+  mutation AuthorStepThree($authZeroName: String!, $authIdentifier: ID) {
     createJournal(
       data: {
-        author: { connect: { auth0id: $authZeroId, email: $authZeroEmail } }
+        author: { connect: { id: $authIdentifier } }
         name: $authZeroName
       }
     ) {
@@ -73,35 +69,126 @@ export const NEW_AUTHOR_STEP_FOUR = gql`
 
 export const CREATE_NEW_CHAPTER = gql`
   mutation CreateNewChapter(
-    $authLandmark: String
     $landmarkIdentifier: ID
-    $landmarkTitle: String!
+    $landmarkTitle: String
     $authJournalID: ID!
     $currentDate: Date
-    $dayOfWeek: String
+    $desinationIdentifier: ID
+    $parkIdentifier: ID
   ) {
     createChapter(
       data: {
         date: $currentDate
-        title: $dayOfWeek
-        stories: {
+        journal: { connect: { id: $authJournalID } }
+        articles: {
           create: {
-            propertyId: $authLandmark
-            propertyName: $landmarkTitle
-            # landmark: { connect: { id: $authLandmark } }
-            visits: {
-              create: { property: { connect: { id: $landmarkIdentifier } } }
+            reference: {
+              create: {
+                Story: {
+                  property: { connect: { id: $landmarkIdentifier } }
+                  visits: {
+                    create: {
+                      date: $currentDate
+                      title: $landmarkTitle
+                      property: { connect: { id: $landmarkIdentifier } }
+                    }
+                  }
+                }
+              }
+              connect: [
+                { Property: { id: $desinationIdentifier } }
+                { Property: { id: $parkIdentifier } }
+              ]
             }
           }
         }
-        journal: { connect: { id: $authJournalID } }
       }
     ) {
+      date
       id
-      stories {
+      title
+      articles {
         id
-        visits {
+        reference {
+          ... on Chapter {
+            id
+            title
+          }
+          ... on Property {
+            id
+            name
+            category {
+              id
+              name
+              pluralName
+            }
+          }
+          ... on Story {
+            id
+            visits {
+              id
+              title
+              date
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const TEST_CREATE_NEW_CHAPTER = gql`
+  mutation TestCreateNewChapter(
+    $landmarkIdentifier: ID
+    $landmarkTitle: String
+    $authJournalID: ID!
+    $currentDate: Date
+    $destinationIdent: ID
+    $parkIdentifier: ID
+  ) {
+    createChapter(
+      data: {
+        date: $currentDate
+        journal: { connect: { id: $authJournalID } }
+        articles: {
+          create: {
+            stories: {
+              create: {
+                property: { connect: { id: $landmarkIdentifier } }
+                visits: {
+                  create: {
+                    date: $currentDate
+                    title: $landmarkTitle
+                    property: { connect: { id: $landmarkIdentifier } }
+                  }
+                }
+              }
+            }
+            properties: {
+              connect: [{ id: $destinationIdent }, { id: $parkIdentifier }]
+            }
+          }
+        }
+      }
+    ) {
+      date
+      id
+      articles {
+        stories {
           id
+          title
+          visits {
+            id
+            date
+            title
+          }
+        }
+        properties {
+          id
+          name
+          category {
+            name
+          }
         }
       }
     }
@@ -166,7 +253,6 @@ export const PUBLISH_JOURNAL = gql`
 
 export const CREATE_NEW_STORY = gql`
   mutation CreateNewStory(
-    $authLandmark: String
     $landmarkIdentifier: ID
     $landmarkTitle: String!
     $currentChptID: ID
@@ -174,9 +260,7 @@ export const CREATE_NEW_STORY = gql`
     createStory(
       data: {
         chapter: { connect: { id: $currentChptID } }
-        propertyId: $authLandmark
-        propertyName: $landmarkTitle
-        # landmark: { connect: { id: $landmarkIdentifier } }
+        property: { connect: { id: $landmarkIdentifier } }
         title: $landmarkTitle
         visits: {
           create: { property: { connect: { id: $landmarkIdentifier } } }
@@ -184,8 +268,18 @@ export const CREATE_NEW_STORY = gql`
       }
     ) {
       id
-      visits {
+      property {
         id
+        name
+        category {
+          id
+          name
+          pluralName
+        }
+        visits {
+          id
+          date
+        }
       }
     }
   }

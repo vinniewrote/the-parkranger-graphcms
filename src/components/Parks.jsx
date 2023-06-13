@@ -7,7 +7,7 @@ import { PropertyBlock, PropertyTitle } from "../styledComponents/Parks_styled";
 
 export default function Parks() {
   const { loading, error, data } = useQuery(PARK_LISTING, {
-    context: { clientName: "readOnlyLink" },
+    context: { clientName: "authorLink" },
   });
 
   if (loading) return <p>Loading...</p>;
@@ -23,9 +23,9 @@ export default function Parks() {
 
       <Fragment>
         {data.properties.map(({ id, name }) => (
-          <PropertyBlock>
-            <Link key={id} to={`/parks/${id}`}>
-              <PropertyTitle>{name}</PropertyTitle>
+          <PropertyBlock key={id}>
+            <Link key={`${name}-${id}`} to={`/parks/${id}`}>
+              <PropertyTitle key={`${id}-${name}`}>{name}</PropertyTitle>
             </Link>
           </PropertyBlock>
         ))}

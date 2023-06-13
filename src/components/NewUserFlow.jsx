@@ -13,8 +13,14 @@ import { useManagedStory } from "../contexts/StoryContext";
 import "react-toastify/dist/ReactToastify.min.css";
 
 export default function NewUserFlow() {
-  const { userJournalId, setUserJournalId, newUserStatus, setNewUserStatus } =
-    useManagedStory();
+  const {
+    userJournalId,
+    setUserJournalId,
+    newUserStatus,
+    setNewUserStatus,
+    setAuthorId,
+    authorId,
+  } = useManagedStory();
   const { user } = useAuth0();
 
   const {
@@ -22,8 +28,9 @@ export default function NewUserFlow() {
     error: authorQueryError,
     data: authorQueryData,
   } = useQuery(AUTHOR_CHECK, {
-    pollInterval: 10000,
+    pollInterval: 40000,
     variables: { authZeroEmail: user.email },
+    context: { clientName: "authorLink" },
   });
 
   const {
@@ -31,48 +38,86 @@ export default function NewUserFlow() {
     error: journalQueryError,
     data: journalQueryData,
   } = useQuery(JOURNAL_CHECK, {
-    pollInterval: 10000,
+    pollInterval: 40000,
     variables: { authZeroId: user.sub },
+    context: { clientName: "authorLink" },
     onCompleted: () => {
-      journalQueryData.journals.map(({ id }) => {
-        setUserJournalId(id);
-      });
+      // journalQueryData?.journal.map(({ id }) => {
+      //   setUserJournalId(id);
+      // });
+      console.log(journalQueryData);
     },
   });
-
-  const [newAuthorStepThree] = useMutation(NEW_AUTHOR_STEP_THREE, {
-    variables: {
-      authZeroId: user.sub,
-      authZeroEmail: user.email,
-      authZeroName: user.name,
+  //create journal
+  const [
+    newAuthorStepThree,
+    {
+      data: stepThreeAuthorData,
+      loading: stepThreeAuthorLoading,
+      error: stepThreeAuthorError,
     },
-
+  ] = useMutation(NEW_AUTHOR_STEP_THREE, {
+    variables: {
+      authIdentifier: authorId,
+      authZeroName: user.nickname,
+    },
+    context: { clientName: "authorLink" },
+    // refetchQueries: [
+    //   { query: JOURNAL_CHECK }, // DocumentNode object parsed
+    //   "getJournalStatus", // Query name
+    // ],
     onCompleted() {
       console.log("step 3 done");
+      console.log(stepThreeAuthorData?.createJournal);
+      setUserJournalId(stepThreeAuthorData?.createJournal?.id);
     },
   });
-
-  const [newAuthorStepTwo] = useMutation(NEW_AUTHOR_STEP_TWO, {
+  //publish author
+  const [
+    newAuthorStepTwo,
+    {
+      data: stepTwoAuthorData,
+      loading: stepTwoAuthorLoading,
+      error: stepTwoAuthorError,
+    },
+  ] = useMutation(NEW_AUTHOR_STEP_TWO, {
     variables: {
-      authZeroEmail: user.email,
+      authIdentifier: authorId,
     },
-    onCompleted: () => console.log("completed step 2"),
+    context: { clientName: "authorLink" },
+    onCompleted() {
+      console.log(stepTwoAuthorData);
+    },
   });
-
-  const [newAuthorStepOne] = useMutation(NEW_AUTHOR_STEP_ONE, {
+  //create author
+  const [
+    newAuthorStepOne,
+    {
+      data: stepOneAuthorData,
+      loading: stepOneAuthorLoading,
+      error: stepOneAuthorError,
+    },
+  ] = useMutation(NEW_AUTHOR_STEP_ONE, {
     variables: {
       authZeroId: user.sub,
       authZeroEmail: user.email,
-      authZeroName: user.name,
+      authZeroName: `${user.nickname} Author`,
     },
-    onCompleted: () => newAuthorStepTwo(),
+    context: { clientName: "authorLink" },
+    onCompleted() {
+      setAuthorId(stepOneAuthorData.createAuthor.id);
+      newAuthorStepTwo();
+    },
   });
 
   const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
     variables: {
       authJournalId: userJournalId || localStorage.getItem("newJournalId"),
     },
+    context: { clientName: "authorLink" },
   });
+
+  console.log(authorQueryData?.authors.length);
 
   return (
     <div>
@@ -83,7 +128,7 @@ export default function NewUserFlow() {
           padding: "1em 1.25em",
         }}
         className={
-          authorQueryData?.author?.auth0id === null
+          authorQueryData?.authors?.auth0id === null
             ? "openTask task"
             : "closedTask task"
         }
@@ -93,7 +138,7 @@ export default function NewUserFlow() {
           <h5>Looks like you are new here :) </h5>
 
           <button
-            disabled={authorQueryData?.author !== null}
+            disabled={authorQueryData?.authors.length !== 0}
             onClick={(event) => {
               event.preventDefault();
               setNewUserStatus(true);
@@ -116,7 +161,7 @@ export default function NewUserFlow() {
           padding: "1em 1.25em",
         }}
         className={
-          journalQueryData?.journals.length === 0
+          journalQueryData?.journals?.length === 0
             ? "openTask task"
             : "closedTask task"
         }
@@ -126,7 +171,7 @@ export default function NewUserFlow() {
           <p>Activate your Ranger Journal</p>
           <button
             style={{}}
-            disabled={journalQueryData?.journals.length === 1}
+            disabled={journalQueryData?.journals?.length === 1}
             onClick={(event) => {
               event.preventDefault();
               newAuthorStepThree();
