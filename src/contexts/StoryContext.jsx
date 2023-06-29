@@ -14,15 +14,17 @@ export function ManageStory({ children }) {
   const [todaysChapterId, setTodaysChapterId] = useState([]);
   const [userJournalId, setUserJournalId] = useState(null);
   const [currentChapterId, setCurentChapterId] = useState(null);
+  const [currentUserArticles, setCurrentUserArticles] = useState(null);
   const [currentStoryId, setCurrentStoryId] = useState(null);
   const [currentVisitId, setCurrentVisitId] = useState(null);
-  const [rawVisitData, setRawVisitData] = useState([]);
+  const [rawVisitData, setRawVisitData] = useState(null);
   const [landmarkFlagBoolean, setLandmarkFlagBoolean] = useState(null);
   const [newUserStatus, setNewUserStatus] = useState(null);
   const [storyIdForLandmark, setStoryIdForLandmark] = useState(null);
   const [doDatesMatch, setDoDatesMatch] = useState(null);
   const [filter, setFilter] = useState("Coasters");
   const [emptyFilters, setEmptyFilters] = useState(null);
+  const [cleanedArticles, setCleanedArticles] = useState(null);
   const newDate = new Date();
   const currentDate = newDate.toISOString();
   const currentDay = newDate.getDate().toString().padStart(2, "0");
@@ -91,6 +93,10 @@ export function ManageStory({ children }) {
     currentVisitId,
     setCurrentStoryId,
     setCurrentVisitId,
+    currentUserArticles,
+    setCurrentUserArticles,
+    cleanedArticles,
+    setCleanedArticles,
     filter,
     setFilter,
     emptyFilters,

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import { useQuery, useMutation } from "@apollo/client";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -13,6 +13,8 @@ import { useManagedStory } from "../contexts/StoryContext";
 import "react-toastify/dist/ReactToastify.min.css";
 
 export default function NewUserFlow() {
+  const [stepOneBtn, setStepOneBtn] = useState(true);
+  const [stepTwoBtn, setStepTwoBtn] = useState(true);
   const {
     userJournalId,
     setUserJournalId,
@@ -59,7 +61,6 @@ export default function NewUserFlow() {
   ] = useMutation(NEW_AUTHOR_STEP_THREE, {
     variables: {
       authIdentifier: authorId,
-      authZeroName: user.nickname,
     },
     context: { clientName: "authorLink" },
     // refetchQueries: [
@@ -67,29 +68,13 @@ export default function NewUserFlow() {
     //   "getJournalStatus", // Query name
     // ],
     onCompleted() {
-      console.log("step 3 done");
+      // console.log("step 3 done");
       console.log(stepThreeAuthorData?.createJournal);
       setUserJournalId(stepThreeAuthorData?.createJournal?.id);
+      setStepTwoBtn(false);
     },
   });
-  //publish author
-  const [
-    newAuthorStepTwo,
-    {
-      data: stepTwoAuthorData,
-      loading: stepTwoAuthorLoading,
-      error: stepTwoAuthorError,
-    },
-  ] = useMutation(NEW_AUTHOR_STEP_TWO, {
-    variables: {
-      authIdentifier: authorId,
-    },
-    context: { clientName: "authorLink" },
-    onCompleted() {
-      console.log(stepTwoAuthorData);
-    },
-  });
-  //create author
+
   const [
     newAuthorStepOne,
     {
@@ -106,15 +91,8 @@ export default function NewUserFlow() {
     context: { clientName: "authorLink" },
     onCompleted() {
       setAuthorId(stepOneAuthorData.createAuthor.id);
-      newAuthorStepTwo();
+      setStepOneBtn(false);
     },
-  });
-
-  const [publishJournal] = useMutation(PUBLISH_JOURNAL, {
-    variables: {
-      authJournalId: userJournalId || localStorage.getItem("newJournalId"),
-    },
-    context: { clientName: "authorLink" },
   });
 
   console.log(authorQueryData?.authors.length);
@@ -138,7 +116,9 @@ export default function NewUserFlow() {
           <h5>Looks like you are new here :) </h5>
 
           <button
-            disabled={authorQueryData?.authors.length !== 0}
+            disabled={
+              stepOneBtn === false || authorQueryData?.authors.length === 1
+            }
             onClick={(event) => {
               event.preventDefault();
               setNewUserStatus(true);
@@ -171,7 +151,7 @@ export default function NewUserFlow() {
           <p>Activate your Ranger Journal</p>
           <button
             style={{}}
-            disabled={journalQueryData?.journals?.length === 1}
+            disabled={stepTwoBtn === false}
             onClick={(event) => {
               event.preventDefault();
               newAuthorStepThree();
@@ -198,7 +178,6 @@ export default function NewUserFlow() {
             style={{}}
             onClick={(event) => {
               event.preventDefault();
-              publishJournal();
               setNewUserStatus(false);
               toast("taking you to your journal");
             }}

@@ -52,7 +52,7 @@ export default function ParkDetail(props, match, location) {
   if (error) return <p>Error :(</p>;
 
   const areaData = data?.property?.childProp;
-  console.log(areaData);
+  // console.log(areaData);
 
   // const dataBoop = FILTER_ARRAY.map((filterPoint) => {
   //   const filterCheck = rawLandmarks.filter(FILTER_MAP[filterPoint]);
@@ -80,9 +80,8 @@ export default function ParkDetail(props, match, location) {
                 ? propertyArea.childProp
                     //.filter(FILTER_MAP[filter])
                     .map((propertyLandmarks) => (
-                      <ParkLandmarkCard>
+                      <ParkLandmarkCard key={propertyLandmarks.id}>
                         <Link
-                          key={propertyLandmarks.id}
                           category={propertyLandmarks.category.pluralName}
                           to={`/parks/${parkId}/${propertyLandmarks.id}`}
                           style={{ textDecoration: "none" }}
@@ -95,7 +94,7 @@ export default function ParkDetail(props, match, location) {
                           </LandmarkCardMiddle>
                         </Link>
                         <LandmarkCardBottom>
-                          <span>{`${propertyLandmarks?.visit} visits`}</span>
+                          <span>{`${propertyLandmarks?.visits?.length} visits`}</span>
                           {/* add slim visitlogger here */}
                           <div>+</div>
                         </LandmarkCardBottom>

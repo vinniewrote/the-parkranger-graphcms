@@ -7,7 +7,6 @@ export const AUTHOR_CHECK = gql`
       name
       journal {
         id
-        name
       }
     }
   }
@@ -17,7 +16,6 @@ export const JOURNAL_CHECK = gql`
   query getJournalStatus($authZeroId: String) {
     journals(where: { author: { auth0id: $authZeroId } }) {
       id
-      name
     }
   }
 `;
@@ -40,7 +38,6 @@ export const GET_CHAPTER_ID = gql`
   query getChapterId($journalTracker: ID!) {
     journal(where: { id: $journalTracker }, stage: DRAFT) {
       id
-      name
       chapters {
         id
         date
@@ -73,11 +70,21 @@ export const CHECK_FOR_LANDMARKS = gql`
   }
 `;
 
+export const HAS_PROPERTY_BEEN_LOGGED = gql`
+  query checkPropertyForPriorLog($landmarkTracker: ID!, $currentDate: Date) {
+    visits(
+      where: { date: $currentDate, property: { id: $landmarkTracker } }
+      stage: DRAFT
+    ) {
+      id
+    }
+  }
+`;
+
 export const GET_USER_VISIT_DATA = gql`
   query getUserVisitData($journalTracker: ID) {
     journal(stage: DRAFT, where: { id: $journalTracker }) {
       id
-      name
       chapters {
         id
         title
@@ -98,6 +105,9 @@ export const GET_USER_VISIT_DATA = gql`
                 title
               }
             }
+          }
+          properties {
+            id
           }
         }
       }
@@ -146,7 +156,6 @@ export const LANDMARK_LISTING = gql`
           summary
           visits {
             id
-            title
           }
           category {
             id
@@ -160,103 +169,152 @@ export const LANDMARK_LISTING = gql`
 `;
 
 export const LANDMARK_DETAILS = gql`
-  query GetLandmarkDetails($propertyId: ID) {
-    property(where: { id: $propertyId }) {
+  query GetPropertyDetails($propertyId: ID, $authZeroId: String!) {
+    property(where: { id: $propertyId }, stage: DRAFT) {
       id
       name
-      state #shows if the property exists or not
+      state
       ticketed
-      #location shows the path to property based on parents
-      location: parentProp(where: { state_not: Defunct }) {
-        id
+      category {
         name
-        category {
-          id
-          name
-          cluster
-        }
+        trackable
+        cluster
       }
       liveDataID {
-        id
-        wikiID
+        #Might be noisy for park type properties since it retrieves all children from the API
         wikiLive {
-          id
-          name
           liveData {
-            forecast
-            lastUpdated
-            operatingHours
             queue
-            showtimes
             status
+            forecast
+            operatingHours
           }
+        }
+        #Only relevant for park type properties
+        wikiSchedule {
+          schedule
           timezone
         }
       }
-      category {
+      location: parentProp {
         id
         name
-        pluralName
+        category {
+          name
+          cluster
+        }
+        state
       }
-      #show all child properties that aren't characeters
-      childProp(where: { category: { name_not: "Character" } }) {
-        name
+      childProp {
         id
+        name
+        category {
+          name
+        }
       }
-      #show all classifications except themes
+      map {
+        latitude
+        longitude
+      }
+      #List all classifcations but themes, we list those separately
       classification(where: { attribute_not: Theme }) {
         id
         name
-        attribute
-      }
-      #show themes only
-      themes: classification(where: { attribute_in: Theme }) {
-        id
-        name
-        attribute
       }
       stats {
+        ... on Vehicle {
+          __typename
+          id
+          restraintSystem
+          onboardFeatures
+          arrangement {
+            arrangementType
+            numericValue
+            unitOfMeasure
+          }
+        }
         ... on Measurement {
+          __typename
           id
           measurementType
           numericValue
-          stage
           unitOfMeasure
         }
         ... on Time {
+          __typename
           id
           measurementTime
           minutes
           seconds
-          stage
+        }
+        ... on Expense {
+          __typename
+          id
+          expenseType
+          amount
+          currency
         }
       }
-      #presentation is another aspect of themeing
       presentation {
         ... on Detail {
+          __typename
           id
+          detailType
           detailName
           detailNotes
-          detailType
         }
         ... on Bio {
+          __typename
           id
-          alias
-          height
           profession
+          height
           weight
+          alias
+        }
+        ... on Palette {
+          __typename
+          id
+          colorApplication
+          hues {
+            colorName
+            value {
+              rgba {
+                r
+                g
+                b
+                a
+              }
+            }
+          }
         }
       }
-      #cast are the character properties that are attached to current prop
-      cast: childProp(where: { category: { name_contains: "Character" } }) {
+      theme: classification(where: { attribute_in: Theme }) {
+        id
         name
-        id
       }
-      #creative team built/manage the prop
+      #We just want to list the cast of characters that can be found in this property
+      cast: childProp(
+        where: { category: { id: "clg33z21w30h50bk8tbanm0yt" } }
+      ) {
+        name
+        presentation {
+          ... on Bio {
+            profession
+          }
+        }
+      }
       creativeTeam {
-        professionalRole
-        professionalName
         id
+        professionalName
+        professionalRole
+      }
+      summary
+      predecessor {
+        id
+        name
+        category {
+          name
+        }
       }
       timeline {
         id
@@ -266,30 +324,38 @@ export const LANDMARK_DETAILS = gql`
         day
         note
       }
-      #the properties that came before current property which no longer exist
-      predecessor: parentProp(where: { state_in: Defunct }) {
+      successor {
         id
         name
         category {
           name
         }
-        timeline(where: { type: EndDate }) {
-          year
-          month
-          day
-          type
+      }
+      # List all child properties
+      lineup: childProp {
+        name
+        category {
+          name
         }
       }
-      #properties that came after the current property, excluding characers
-      successor: childProp(where: { category: { name_not_in: "Character" } }) {
-        name
-        id
+    }
+    # Get total visit count to this property for specific user
+    visitsConnection(
+      where: { property: { id: $propertyId }, author: { auth0id: $authZeroId } }
+    ) {
+      aggregate {
+        count
       }
-      summary
-      visits {
-        id
-        title
+    }
+    # Get all related chapters that contain stories from this property
+    chapters(
+      where: {
+        articles_some: { stories_some: { property: { id: $propertyId } } }
+        author: { auth0id: $authZeroId }
       }
+    ) {
+      id
+      title
     }
   }
 `;

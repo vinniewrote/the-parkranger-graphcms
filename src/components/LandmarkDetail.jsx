@@ -21,7 +21,7 @@ import { element } from "prop-types";
 
 export default function LandmarkDetail(props, match) {
   const {
-    params: { id },
+    params: { id, parkId },
   } = props.match;
   const { user } = useAuth0();
   const { setUserJournalId, newUserStatus, setAuthorId } = useManagedStory();
@@ -37,7 +37,7 @@ export default function LandmarkDetail(props, match) {
     variables: { authZeroId: user.sub },
     context: { clientName: "authorLink" },
     onCompleted: () => {
-      journalQueryData?.journal.map(({ id }) => {
+      journalQueryData?.journal?.map(({ id }) => {
         setUserJournalId(id);
       });
     },
@@ -57,9 +57,10 @@ export default function LandmarkDetail(props, match) {
   });
 
   const { loading, error, data } = useQuery(LANDMARK_DETAILS, {
-    variables: { propertyId: `${id}` },
+    variables: { propertyId: id, authZeroId: user.sub },
     context: { clientName: "authorLink" },
     onCompleted() {
+      console.log(data.property);
       setLocalPropertyData(data.property);
     },
   });
@@ -88,7 +89,7 @@ export default function LandmarkDetail(props, match) {
     emptyDestinationArray.find(
       (element) => element.categoryName === "Hotel" && element.cluster === true
     );
-
+  console.log(foundHotel);
   const foundShip =
     emptyDestinationArray.length > 0 &&
     emptyDestinationArray.find(
@@ -100,7 +101,7 @@ export default function LandmarkDetail(props, match) {
     emptyDestinationArray.find(
       (element) => element.categoryName === "Park" && element.cluster === true
     );
-
+  console.log(foundPark);
   const foundDestination =
     emptyDestinationArray.length > 0 &&
     emptyDestinationArray.find(
@@ -111,7 +112,7 @@ export default function LandmarkDetail(props, match) {
   // const setFoundDestInContext =
   //   foundDestination !== null && setPropertyDestinationId(foundDestination);
   // console.log(newUserCriteria);
-
+  console.log(localPropertyData);
   console.log(localPropertyData?.location);
   console.log(localPropertyData?.liveDataID?.wikiLive?.liveData[0].status);
   console.log(localPropertyData?.stats);

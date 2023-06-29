@@ -26,15 +26,9 @@ export const NEW_AUTHOR_STEP_TWO = gql`
 `;
 
 export const NEW_AUTHOR_STEP_THREE = gql`
-  mutation AuthorStepThree($authZeroName: String!, $authIdentifier: ID) {
-    createJournal(
-      data: {
-        author: { connect: { id: $authIdentifier } }
-        name: $authZeroName
-      }
-    ) {
+  mutation AuthorStepThree($authIdentifier: ID) {
+    createJournal(data: { author: { connect: { id: $authIdentifier } } }) {
       id
-      name
     }
   }
 `;
@@ -174,6 +168,7 @@ export const TEST_CREATE_NEW_CHAPTER = gql`
       date
       id
       articles {
+        id
         stories {
           id
           title
@@ -190,6 +185,93 @@ export const TEST_CREATE_NEW_CHAPTER = gql`
             name
           }
         }
+      }
+    }
+  }
+`;
+
+export const TEST_CREATE_NEW_ARTICLE = gql`
+  mutation TestCreateNewArticle(
+    $chapterIdentifier: ID
+    $landmarkIdentifier: ID
+    $destinationIdent: ID
+    $parkIdentifier: ID
+    $currentDate: Date
+    $visitTitle: String
+  ) {
+    createArticle(
+      data: {
+        chapter: { connect: { id: $chapterIdentifier } }
+        properties: {
+          connect: [{ id: $destinationIdent }, { id: $parkIdentifier }]
+        }
+        stories: {
+          create: {
+            property: { connect: { id: $landmarkIdentifier } }
+            visits: { create: { date: $currentDate, title: $visitTitle } }
+          }
+        }
+      }
+    ) {
+      id
+      properties {
+        id
+        name
+        category {
+          name
+        }
+        articles {
+          id
+          stories {
+            id
+            visits {
+              id
+              date
+            }
+            property {
+              id
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const TEST_ADD_NEW_STORY_TO_ARTICLE = gql`
+  mutation AddNewStoryToArticle(
+    $chapterIdentifier: ID
+    $articleIdentifier: ID
+    $landmarkIdentifier: ID
+    $currentDate: Date
+    $visitTitle: String
+    $storyTitle: String
+  ) {
+    createStory(
+      data: {
+        article: { connect: { id: $articleIdentifier } }
+        chapter: { connect: { id: $chapterIdentifier } }
+        title: $storyTitle
+        visits: {
+          create: {
+            title: $visitTitle
+            date: $currentDate
+            property: { connect: { id: $landmarkIdentifier } }
+          }
+        }
+      }
+    ) {
+      id
+      title
+      visits {
+        date
+        id
+        property {
+          id
+        }
+      }
+      chapter {
+        id
       }
     }
   }
@@ -246,7 +328,6 @@ export const PUBLISH_JOURNAL = gql`
   mutation PublishJournal($authJournalId: ID!) {
     publishJournal(where: { id: $authJournalId }) {
       id
-      name
     }
   }
 `;
