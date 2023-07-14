@@ -15,6 +15,7 @@ import {
   GET_USER_VISIT_DATA,
   IS_PROPERTY_LOGGED_TO_STORY,
   GET_TODAYS_CHAPTER_DATA,
+  PROPERTY_VISIT_COUNTER,
 } from "../graphql/queries/journalQueries.js";
 import {
   CREATE_NEW_CHAPTER,
@@ -44,6 +45,7 @@ export default function VisitLogger(props) {
   const [userArticles, setUserArticles] = useState(null);
   const [testcleanedArray, setTestCleanedArray] = useState(null);
   const [storyBlock, setStoryBlock] = useState(null);
+  const [propertyVisitCount, setPropertyVisitCount] = useState(null);
   const {
     currentDate,
     dayName,
@@ -86,6 +88,18 @@ export default function VisitLogger(props) {
   let todaysChapterBundle = [];
 
   /************************************************ QUERIES *****************************************************/
+
+  const {
+    loading: propertyVisitLoading,
+    error: propertyVisitError,
+    data: propertyVisitData,
+  } = useQuery(PROPERTY_VISIT_COUNTER, {
+    variables: { landmarkTracker: landmarkId, authorIdentifier: authorId },
+    context: { clientName: "authorLink" },
+    onCompleted: () => {
+      setPropertyVisitCount(propertyVisitData.visitsConnection.aggregate.count);
+    },
+  });
 
   const {
     loading: todaysChpDataLoading,
@@ -596,10 +610,10 @@ export default function VisitLogger(props) {
         <YourVisitsBlock>
           <h4>Your Visits</h4>
           <p>
-            {rawVisitCount?.visits.length === undefined ? (
+            {propertyVisitCount === undefined ? (
               <span>0</span>
             ) : (
-              <span>{rawVisitCount?.visits.length}</span>
+              <span>{propertyVisitCount}</span>
             )}
           </p>
         </YourVisitsBlock>

@@ -1,5 +1,20 @@
 import { gql } from "@apollo/client";
 
+export const PROPERTY_VISIT_COUNTER = gql`
+  query BetatVisitCount($authorIdentifier: ID, $landmarkTracker: ID!) {
+    visitsConnection(
+      where: {
+        property: { id: $landmarkTracker }
+        AND: { author: { id: $authorIdentifier } }
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+  }
+`;
+
 export const AUTHOR_CHECK = gql`
   query getAuthorStatus($authZeroId: String) {
     authors(where: { auth0id: $authZeroId }) {
