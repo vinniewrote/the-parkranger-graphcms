@@ -11,7 +11,7 @@ export function ManageStory({ children }) {
   const [savedJournalId, setSavedJournalId] = useState(false);
   const [savedChapterId, setSavedChapterId] = useState(false);
   const [savedLandmarkId, setSavedLandmarkId] = useState([]);
-  const [todaysChapterId, setTodaysChapterId] = useState([]);
+  // const [todaysChapterId, setTodaysChapterId] = useState([]);
   const [userJournalId, setUserJournalId] = useState(null);
   const [currentChapterId, setCurentChapterId] = useState(null);
   const [currentUserArticles, setCurrentUserArticles] = useState(null);
@@ -79,8 +79,8 @@ export function ManageStory({ children }) {
     rawVisitData,
     setRawVisitData,
     STATUS,
-    todaysChapterId,
-    setTodaysChapterId,
+    // todaysChapterId,
+    // setTodaysChapterId,
     landmarkFlagBoolean,
     setLandmarkFlagBoolean,
     newUserStatus,

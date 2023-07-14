@@ -6,6 +6,7 @@ import Logout from "../components/LogoutButton";
 import { LANDMARK_LISTING } from "../graphql/queries/journalQueries";
 import { useManagedStory } from "../contexts/StoryContext";
 import { FilterBar } from "../styledComponents/FilterButton_styled";
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   ParkLandmarkCard,
   LandmarkCardTop,
@@ -27,6 +28,7 @@ const FILTER_ARRAY = ["Coasters", "Shops", "Attractions", "Dining"];
 const FILTER_NAMES = Object.keys(FILTER_MAP);
 
 export default function ParkDetail(props, match, location) {
+  const { user } = useAuth0();
   const [rawAreaData, setRawAreaData] = useState(null);
   const {
     params: { parkId },
@@ -40,7 +42,7 @@ export default function ParkDetail(props, match, location) {
   ));
 
   const { loading, error, data } = useQuery(LANDMARK_LISTING, {
-    variables: { propertyId: parkId },
+    variables: { propertyId: parkId, authZeroId: user.sub },
     pollInterval: 10000,
     context: { clientName: "authorLink" },
     onCompleted() {

@@ -133,6 +133,7 @@ export const CREATE_NEW_CHAPTER = gql`
 
 export const TEST_CREATE_NEW_CHAPTER = gql`
   mutation TestCreateNewChapter(
+    $authorIdentifier: ID
     $landmarkIdentifier: ID
     $landmarkTitle: String
     $authJournalID: ID!
@@ -148,11 +149,14 @@ export const TEST_CREATE_NEW_CHAPTER = gql`
           create: {
             stories: {
               create: {
+                storyDate: $currentDate
+                author: { connect: { id: $authorIdentifier } }
                 property: { connect: { id: $landmarkIdentifier } }
                 visits: {
                   create: {
                     date: $currentDate
                     title: $landmarkTitle
+                    author: { connect: { id: $authorIdentifier } }
                     property: { connect: { id: $landmarkIdentifier } }
                   }
                 }
@@ -192,6 +196,7 @@ export const TEST_CREATE_NEW_CHAPTER = gql`
 
 export const TEST_CREATE_NEW_ARTICLE = gql`
   mutation TestCreateNewArticle(
+    $authorIdentifier: ID
     $chapterIdentifier: ID
     $landmarkIdentifier: ID
     $destinationIdent: ID
@@ -207,8 +212,15 @@ export const TEST_CREATE_NEW_ARTICLE = gql`
         }
         stories: {
           create: {
+            storyDate: $currentDate
             property: { connect: { id: $landmarkIdentifier } }
-            visits: { create: { date: $currentDate, title: $visitTitle } }
+            visits: {
+              create: {
+                date: $currentDate
+                title: $visitTitle
+                author: { connect: { id: $authorIdentifier } }
+              }
+            }
           }
         }
       }
@@ -237,12 +249,39 @@ export const TEST_CREATE_NEW_ARTICLE = gql`
     }
   }
 `;
+export const ALPHA_CREATE_NEW_VISIT = gql`
+  mutation MyAlphaMutation(
+    $storyIdentifier: ID
+    $landmarkIdentifier: ID
+    $authorIdentifier: ID
+    $currentDate: Date
+    $visitTitle: String
+  ) {
+    createVisit(
+      data: {
+        story: { connect: { id: $storyIdentifier } }
+        title: $visitTitle
+        date: $currentDate
+        property: { connect: { id: $landmarkIdentifier } }
+        author: { connect: { id: $authorIdentifier } }
+      }
+    ) {
+      id
+      date
+      title
+      property {
+        id
+      }
+    }
+  }
+`;
 
-export const TEST_ADD_NEW_STORY_TO_ARTICLE = gql`
-  mutation AddNewStoryToArticle(
+export const ALPHA_ADD_NEW_STORY_TO_ARTICLE = gql`
+  mutation AlphaAddNewStoryToArticle(
     $chapterIdentifier: ID
     $articleIdentifier: ID
     $landmarkIdentifier: ID
+    $authorIdentifier: ID
     $currentDate: Date
     $visitTitle: String
     $storyTitle: String
@@ -252,8 +291,10 @@ export const TEST_ADD_NEW_STORY_TO_ARTICLE = gql`
         article: { connect: { id: $articleIdentifier } }
         chapter: { connect: { id: $chapterIdentifier } }
         title: $storyTitle
+        storyDate: $currentDate
         visits: {
           create: {
+            author: { connect: { id: $authorIdentifier } }
             title: $visitTitle
             date: $currentDate
             property: { connect: { id: $landmarkIdentifier } }
@@ -324,14 +365,6 @@ export const CREATE_NEW_JOURNAL = gql`
   }
 `;
 
-export const PUBLISH_JOURNAL = gql`
-  mutation PublishJournal($authJournalId: ID!) {
-    publishJournal(where: { id: $authJournalId }) {
-      id
-    }
-  }
-`;
-
 export const CREATE_NEW_STORY = gql`
   mutation CreateNewStory(
     $landmarkIdentifier: ID
@@ -374,30 +407,6 @@ export const CREATE_NEW_VISIT = gql`
         property: { connect: { id: $landmarkTracker } }
       }
     ) {
-      id
-    }
-  }
-`;
-
-export const PUBLISH_CHAPTER = gql`
-  mutation PublishChapter($currentChptID: ID) {
-    publishChapter(where: { id: $currentChptID }) {
-      publishedAt
-    }
-  }
-`;
-
-export const PUBLISH_STORY = gql`
-  mutation PublishStory($storyDraft: ID) {
-    publishStory(where: { id: $storyDraft }) {
-      id
-    }
-  }
-`;
-
-export const PUBLISH_VISIT = gql`
-  mutation PublishVisit($visitDraft: ID) {
-    publishVisit(where: { id: $visitDraft }) {
       id
     }
   }

@@ -72,11 +72,57 @@ export const CHECK_FOR_LANDMARKS = gql`
 
 export const HAS_PROPERTY_BEEN_LOGGED = gql`
   query checkPropertyForPriorLog($landmarkTracker: ID!, $currentDate: Date) {
-    visits(
-      where: { date: $currentDate, property: { id: $landmarkTracker } }
-      stage: DRAFT
+    visits(where: { date: $currentDate, property: { id: $landmarkTracker } }) {
+      id
+    }
+  }
+`;
+
+export const IS_PROPERTY_LOGGED_TO_STORY = gql`
+  query CheckPropertyIsLoggedToStory(
+    $authorIdentifier: ID
+    $landmarkTracker: ID!
+  ) {
+    stories(
+      where: {
+        property: { id: $landmarkTracker }
+        author: { id: $authorIdentifier }
+      }
     ) {
       id
+      storyDate
+      visits {
+        date
+        id
+      }
+    }
+  }
+`;
+
+export const GET_TODAYS_CHAPTER_DATA = gql`
+  query PullChapterDataForUser($currentChapterId: ID!) {
+    chapter(where: { id: $currentChapterId }) {
+      date
+      id
+      articles {
+        id
+        stories {
+          id
+          title
+          visits {
+            id
+            date
+            title
+          }
+        }
+        properties {
+          id
+          name
+          category {
+            name
+          }
+        }
+      }
     }
   }
 `;
@@ -100,10 +146,10 @@ export const GET_USER_VISIT_DATA = gql`
                 name
                 pluralName
               }
-              visits {
-                id
-                title
-              }
+              # visits {
+              #   id
+              #   title
+              # }
             }
           }
           properties {
@@ -131,8 +177,13 @@ export const PARK_LISTING = gql`
 `;
 
 export const VISIT_LANDMARK_CHECK = gql`
-  query CheckLandmarkForVisits($currentPropertyId: ID) {
-    visits(where: { property: { id: $currentPropertyId } }) {
+  query CheckLandmarkForVisits($currentPropertyId: ID, $authZeroId: String) {
+    visits(
+      where: {
+        property: { id: $authZeroId }
+        property: { id: $currentPropertyId }
+      }
+    ) {
       id
       property {
         id
@@ -154,9 +205,9 @@ export const LANDMARK_LISTING = gql`
           id
           name
           summary
-          visits {
-            id
-          }
+          # visits(where: { author: { auth0id: $authZeroId } }) {
+          #   id
+          # }
           category {
             id
             name

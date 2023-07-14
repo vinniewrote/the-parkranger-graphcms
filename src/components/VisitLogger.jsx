@@ -13,6 +13,8 @@ import {
   VISIT_LANDMARK_CHECK,
   HAS_PROPERTY_BEEN_LOGGED,
   GET_USER_VISIT_DATA,
+  IS_PROPERTY_LOGGED_TO_STORY,
+  GET_TODAYS_CHAPTER_DATA,
 } from "../graphql/queries/journalQueries.js";
 import {
   CREATE_NEW_CHAPTER,
@@ -24,7 +26,8 @@ import {
   PUBLISH_VISIT,
   TEST_CREATE_NEW_CHAPTER,
   TEST_CREATE_NEW_ARTICLE,
-  TEST_ADD_NEW_STORY_TO_ARTICLE,
+  ALPHA_ADD_NEW_STORY_TO_ARTICLE,
+  ALPHA_CREATE_NEW_VISIT,
 } from "../graphql/mutations/journalMutations";
 import { LoggingButton } from "../styledComponents/VisitLogger_styled";
 import {
@@ -40,6 +43,7 @@ export default function VisitLogger(props) {
   const [landmarkVisitedPrior, setLandmarkVisitedPrior] = useState(null);
   const [userArticles, setUserArticles] = useState(null);
   const [testcleanedArray, setTestCleanedArray] = useState(null);
+  const [storyBlock, setStoryBlock] = useState(null);
   const {
     currentDate,
     dayName,
@@ -67,6 +71,7 @@ export default function VisitLogger(props) {
     setCurrentUserArticles,
     cleanedArticles,
     setCleanedArticles,
+    authorId,
   } = useManagedStory();
   const { landmarkId, landmarkName, destinationId, parkId, hotelId, shipId } =
     props;
@@ -77,10 +82,68 @@ export default function VisitLogger(props) {
   let landmarkArray = [];
   let cleanedLandMarkArray = [];
   let articleBundle = [];
+  let propStoryBundle = [];
+  let todaysChapterBundle = [];
 
   /************************************************ QUERIES *****************************************************/
+
+  const {
+    loading: todaysChpDataLoading,
+    error: todaysChpDataError,
+    data: todaysChpDataOutput,
+  } = useQuery(GET_TODAYS_CHAPTER_DATA, {
+    variables: { currentChapterId: currentChapterId },
+    context: { clientName: "authorLink" },
+    pollInterval: 100000,
+    onCompleted: () => {
+      console.log(todaysChpDataOutput.chapter.articles);
+      todaysChpDataOutput.chapter.articles.map((farty, index) => {
+        todaysChapterBundle.push({
+          articleID: farty.id,
+          destinationID: farty.properties[0].id,
+          parkID: farty.properties[1].id,
+          stories: farty.stories.map((story) => ({ storyId: story.id })),
+        });
+        return todaysChapterBundle;
+      });
+      console.log(todaysChapterBundle);
+      setCurrentUserArticles(todaysChpDataOutput.chapter.articles);
+      setCleanedArticles(todaysChapterBundle);
+    },
+  });
+
+  const {
+    loading: isPropertyStoryLoading,
+    error: isPropertyStoryError,
+    data: isPropertyStoryData,
+  } = useQuery(IS_PROPERTY_LOGGED_TO_STORY, {
+    variables: { landmarkTracker: landmarkId, authorIdentifier: authorId },
+    context: { clientName: "authorLink" },
+    pollInterval: 40000,
+    onCompleted: () => {
+      console.log(isPropertyStoryData);
+      isPropertyStoryData.stories.map((story, index) => {
+        let propStoryId = story.id;
+        let newStoryDate = story.storyDate;
+
+        propStoryBundle.push({
+          propStoryID: propStoryId,
+          propStoryDate: newStoryDate,
+        });
+        console.log(propStoryBundle);
+      });
+      setStoryBlock(propStoryBundle);
+    },
+  });
+  console.log(
+    storyBlock?.some((storee) => {
+      storee.propStoryDate === todaysDate &&
+        setStoryIdForLandmark(storee.propStoryID);
+    })
+  );
+
   const { loading, error, data } = useQuery(VISIT_LANDMARK_CHECK, {
-    variables: { currentPropertyId: landmarkId },
+    variables: { currentPropertyId: landmarkId, authZeroId: user.sub },
     context: { clientName: "authorLink" },
     onCompleted: () => {
       // console.log(data);
@@ -96,7 +159,7 @@ export default function VisitLogger(props) {
     variables: { landmarkTracker: landmarkId, currentDate: currentDate },
     context: { clientName: "authorLink" },
     onCompleted: () => {
-      // console.log(priorLogData?.visits.length);
+      console.log(priorLogData);
       priorLogData?.visits.length > 0
         ? setLandmarkVisitedPrior(true)
         : setLandmarkVisitedPrior(false);
@@ -214,6 +277,7 @@ export default function VisitLogger(props) {
     },
   ] = useMutation(TEST_CREATE_NEW_CHAPTER, {
     variables: {
+      authorIdentifier: authorId,
       authLandmark: landmarkId,
       landmarkIdentifier: landmarkId,
       parkIdentifier: parkId === undefined ? hotelId || shipId : parkId,
@@ -250,6 +314,7 @@ export default function VisitLogger(props) {
     },
   ] = useMutation(TEST_CREATE_NEW_ARTICLE, {
     variables: {
+      authorIdentifier: authorId,
       authLandmark: landmarkId,
       landmarkIdentifier: landmarkId,
       parkIdentifier: parkId === undefined ? hotelId || shipId : parkId,
@@ -270,13 +335,17 @@ export default function VisitLogger(props) {
       loading: newStoryArticleLoading,
       error: newStoryArticleError,
     },
-  ] = useMutation(TEST_ADD_NEW_STORY_TO_ARTICLE, {
+  ] = useMutation(ALPHA_ADD_NEW_STORY_TO_ARTICLE, {
     variables: {
       chapterIdentifier: currentChapterId,
-      articleIdentifier: cleanedArticles[0].articleID, //need to find the appropriate index when there are multiples
+      articleIdentifier:
+        cleanedArticles !== null ? cleanedArticles[0]?.articleID : "", //need to find the appropriate index when there are multiples
       landmarkIdentifier: landmarkId,
-      destinationIdent: cleanedArticles[0].destinationID,
-      parkIdentifier: cleanedArticles[0].parkID,
+      destinationIdent:
+        cleanedArticles !== null ? cleanedArticles[0]?.destinationID : "",
+      parkIdentifier:
+        cleanedArticles !== null ? cleanedArticles[0]?.parkID : "",
+      authorIdentifier: authorId,
       currentDate: currentDate,
       visitTitle: "Title String",
       storyTitle: "Title String",
@@ -284,6 +353,27 @@ export default function VisitLogger(props) {
     context: { clientName: "authorLink" },
     onCompleted() {
       console.log(newStoryArticleData);
+    },
+  });
+
+  const [
+    createVisitForExistingStory,
+    {
+      data: newUserVisitData,
+      loading: newUserVisitLoading,
+      error: newUserVisitError,
+    },
+  ] = useMutation(ALPHA_CREATE_NEW_VISIT, {
+    variables: {
+      storyIdentifier: storyIdForLandmark,
+      landmarkIdentifier: landmarkId,
+      authorIdentifier: authorId,
+      currentDate: currentDate,
+      visitTitle: "Title String",
+    },
+    context: { clientName: "authorLink" },
+    onCompleted() {
+      console.log(newUserVisitData);
     },
   });
 
@@ -330,7 +420,7 @@ export default function VisitLogger(props) {
         console.log("over here");
       }
     });
-  console.log(nArr);
+  // console.log(nArr);
   if (nArr.length > 0) {
     const dateComp = nArr.includes(todaysDate);
     setDoDatesMatch(dateComp);
@@ -349,7 +439,7 @@ export default function VisitLogger(props) {
   //     landmarkArray.push({ chapterId: id, stories });
   //   });
 
-  console.log(landmarkArray);
+  // console.log(landmarkArray);
 
   // const cleanLandmark = landmarkArray.map(
   //   (landmark, id, chapterId, stories) => {
@@ -368,26 +458,26 @@ export default function VisitLogger(props) {
       (c) => c.date === todaysDate
     );
     let isTodaysChapterId = findTodaysChapterId?.id;
-    console.log(cleanedLandMarkArray);
-    console.log(isTodaysChapterId);
+    // console.log(cleanedLandMarkArray);
+    // console.log(isTodaysChapterId);
     const findTodays = cleanedLandMarkArray?.filter(
       (d) => d.chpId === todaysChapterId
     );
 
-    console.log(`findTodays - ${findTodays}`);
+    // console.log(`findTodays - ${findTodays}`);
 
     const onlyLandmarks = findTodays.map((marks) => marks.propertyId);
 
-    console.log(`findTodays - ${onlyLandmarks}`);
+    // console.log(`findTodays - ${onlyLandmarks}`);
 
     const landmarkFlag = onlyLandmarks.includes(`${landmarkId}`);
 
-    console.log(`findTodays - ${landmarkFlag}`);
+    // console.log(`findTodays - ${landmarkFlag}`);
 
     setLandmarkFlagBoolean(landmarkFlag);
     setTodaysChapterId(isTodaysChapterId);
   }
-  console.log(bundleArray);
+  // console.log(bundleArray);
   if (bundleArray.length > 0) {
     const findStoryIdForLandmark = bundleArray.find(
       (b) => b.propertyId === landmarkId
@@ -399,6 +489,7 @@ export default function VisitLogger(props) {
   const loggedUserDestinations =
     userArticles?.length > 0 &&
     userArticles.map((destination, index) => destination.destinationID);
+  console.log(loggedUserDestinations);
 
   const isDestinationLogged =
     loggedUserDestinations !== false &&
@@ -453,7 +544,9 @@ export default function VisitLogger(props) {
   // articleStoryBundle.length > 0 && setTestCleanedArray(userArticleIds);
 
   /************************************************ JOURNAL LOGIC **************************************************/
-
+  console.log(landmarkVisitedPrior);
+  console.log(isDestinationLogged);
+  console.log(isParkLogged);
   const journalLogic = () => {
     setStatus(true);
     if (journalQueryData?.journals?.length === 0) {
@@ -466,6 +559,7 @@ export default function VisitLogger(props) {
       toast("creating today's data", { onClose: () => setStatus(false) });
       // create new article if there is a currentchapterID and parks/destination IDs DO NOT match
     } else if (
+      landmarkVisitedPrior === false &&
       currentChapterId !== null &&
       isDestinationLogged === false &&
       isParkLogged === false
@@ -489,18 +583,25 @@ export default function VisitLogger(props) {
     ) {
       // createNewChapter();
       // createNewVisit();
-      toast("adding visit to existing story....well nah", {
+      createVisitForExistingStory();
+      toast("adding visit to existing story....new shit!", {
         onClose: () => setStatus(false),
       });
     }
   };
-
+  console.log(rawVisitCount?.visits.length);
   return (
     <Fragment>
       <LoggingCountContainer>
         <YourVisitsBlock>
           <h4>Your Visits</h4>
-          <p>{rawVisitCount?.visits.length}</p>
+          <p>
+            {rawVisitCount?.visits.length === undefined ? (
+              <span>0</span>
+            ) : (
+              <span>{rawVisitCount?.visits.length}</span>
+            )}
+          </p>
         </YourVisitsBlock>
         <LoggingButton
           disabled={journalQueryData?.journals?.length === 0}
