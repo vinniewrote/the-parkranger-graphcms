@@ -301,6 +301,10 @@ export default function VisitLogger(props) {
       landmarkTitle: "Title String",
     },
     context: { clientName: "authorLink" },
+    refetchQueries: [
+      { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
+      "BetatVisitCount", // Query name
+    ],
     onCompleted() {
       setCurentChapterId(newChapterData.createChapter.id);
       newChapterData.createChapter.articles.map((arty, index) => {
@@ -338,6 +342,10 @@ export default function VisitLogger(props) {
       chapterIdentifier: currentChapterId,
     },
     context: { clientName: "authorLink" },
+    refetchQueries: [
+      { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
+      "BetatVisitCount", // Query name
+    ],
     onCompleted() {
       console.log(newArticleData);
     },
@@ -365,6 +373,10 @@ export default function VisitLogger(props) {
       storyTitle: "Title String",
     },
     context: { clientName: "authorLink" },
+    refetchQueries: [
+      { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
+      "BetatVisitCount", // Query name
+    ],
     onCompleted() {
       console.log(newStoryArticleData);
     },
@@ -386,6 +398,10 @@ export default function VisitLogger(props) {
       visitTitle: "Title String",
     },
     context: { clientName: "authorLink" },
+    refetchQueries: [
+      { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
+      "BetatVisitCount", // Query name
+    ],
     onCompleted() {
       console.log(newUserVisitData);
     },
