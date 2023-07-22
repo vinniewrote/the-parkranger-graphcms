@@ -15,6 +15,7 @@ import {
   GET_USER_VISIT_DATA,
   IS_PROPERTY_LOGGED_TO_STORY,
   GET_TODAYS_CHAPTER_DATA,
+  ALPHA_GET_USER_VISITS,
   PROPERTY_VISIT_COUNTER,
 } from "../graphql/queries/journalQueries.js";
 import {
@@ -173,6 +174,7 @@ export default function VisitLogger(props) {
     variables: { landmarkTracker: landmarkId, currentDate: currentDate },
     context: { clientName: "authorLink" },
     onCompleted: () => {
+      //check this for incorrect toggling of the landmark flag
       console.log(priorLogData);
       priorLogData?.visits.length > 0
         ? setLandmarkVisitedPrior(true)
@@ -597,7 +599,7 @@ export default function VisitLogger(props) {
       createNewArticle();
       toast("creating your new article", { onClose: () => setStatus(false) });
     } else if (
-      // add story to article when the currentchapterID is present and park/dest ID DO match and landmarkID does not
+      //make sure landmarkvisited prior IS ALWAYS updated
       landmarkVisitedPrior === false &&
       currentChapterId !== null &&
       isDestinationLogged === true &&

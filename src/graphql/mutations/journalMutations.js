@@ -143,6 +143,7 @@ export const TEST_CREATE_NEW_CHAPTER = gql`
   ) {
     createChapter(
       data: {
+        author: { connect: { id: $authorIdentifier } }
         date: $currentDate
         journal: { connect: { id: $authJournalID } }
         articles: {

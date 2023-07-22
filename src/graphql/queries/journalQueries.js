@@ -142,6 +142,45 @@ export const GET_TODAYS_CHAPTER_DATA = gql`
   }
 `;
 
+export const ALPHA_GET_USER_VISITS = gql`
+  query PullUserVisitsForJournal($authorIdentifier: ID) {
+    author(where: { id: $authorIdentifier }) {
+      id
+      name
+      chapters {
+        id
+        date
+        articles {
+          id
+          properties {
+            id
+            name
+          }
+          stories {
+            id
+            title
+            storyDate
+            visits {
+              id
+              title
+            }
+            property {
+              id
+              name
+              category {
+                id
+                name
+                pluralName
+                trackable
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const GET_USER_VISIT_DATA = gql`
   query getUserVisitData($journalTracker: ID) {
     journal(stage: DRAFT, where: { id: $journalTracker }) {
