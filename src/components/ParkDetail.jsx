@@ -78,31 +78,30 @@ export default function ParkDetail(props, match, location) {
             <AreaContainer key={propertyArea.id}>
               <AreaTitle>{propertyArea.name}</AreaTitle>
 
-              {propertyArea?.childProp?.length > 0
-                ? propertyArea.childProp
-                    //.filter(FILTER_MAP[filter])
-                    .map((propertyLandmarks) => (
-                      <ParkLandmarkCard key={propertyLandmarks.id}>
-                        <Link
-                          category={propertyLandmarks.category.pluralName}
-                          to={`/parks/${parkId}/${propertyLandmarks.id}`}
-                          style={{ textDecoration: "none" }}
-                        >
-                          <LandmarkCardTop>
-                            <span>{propertyLandmarks.category.pluralName}</span>
-                          </LandmarkCardTop>
-                          <LandmarkCardMiddle>
-                            <h4>{propertyLandmarks.name}</h4>
-                          </LandmarkCardMiddle>
-                        </Link>
-                        <LandmarkCardBottom>
-                          <span>{`${propertyLandmarks?.visits?.length} visits`}</span>
-                          {/* add slim visitlogger here */}
-                          <div>+</div>
-                        </LandmarkCardBottom>
-                      </ParkLandmarkCard>
-                    ))
-                : setEmptyFilters(filter)}
+              {propertyArea?.childProp?.length > 0 &&
+                propertyArea.childProp
+                  //.filter(FILTER_MAP[filter])
+                  .map((propertyLandmarks) => (
+                    <ParkLandmarkCard key={propertyLandmarks.id}>
+                      <Link
+                        category={propertyLandmarks.category.pluralName}
+                        to={`/parks/${parkId}/${propertyLandmarks.id}`}
+                        style={{ textDecoration: "none" }}
+                      >
+                        <LandmarkCardTop>
+                          <span>{propertyLandmarks.category.pluralName}</span>
+                        </LandmarkCardTop>
+                        <LandmarkCardMiddle>
+                          <h4>{propertyLandmarks.name}</h4>
+                        </LandmarkCardMiddle>
+                      </Link>
+                      <LandmarkCardBottom>
+                        <span>{`${propertyLandmarks?.visits?.length} visits`}</span>
+                        {/* add slim visitlogger here */}
+                        <div>+</div>
+                      </LandmarkCardBottom>
+                    </ParkLandmarkCard>
+                  ))}
             </AreaContainer>
           ))}
       </Fragment>

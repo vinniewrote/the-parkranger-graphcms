@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const PROPERTY_VISIT_COUNTER = gql`
-  query BetatVisitCount($authorIdentifier: ID, $landmarkTracker: ID!) {
+  query BetaVisitCount($authorIdentifier: ID, $landmarkTracker: ID!) {
     visitsConnection(
       where: {
         property: { id: $landmarkTracker }
@@ -86,9 +86,22 @@ export const CHECK_FOR_LANDMARKS = gql`
 `;
 
 export const HAS_PROPERTY_BEEN_LOGGED = gql`
-  query checkPropertyForPriorLog($landmarkTracker: ID!, $currentDate: Date) {
-    visits(where: { date: $currentDate, property: { id: $landmarkTracker } }) {
+  query checkPropertyForPriorLog(
+    $landmarkTracker: ID!
+    $currentDate: Date
+    $authorIdentifier: ID
+  ) {
+    visits(
+      where: {
+        author: { id: $authorIdentifier }
+        date: $currentDate
+        property: { id: $landmarkTracker }
+      }
+    ) {
       id
+      story {
+        id
+      }
     }
   }
 `;

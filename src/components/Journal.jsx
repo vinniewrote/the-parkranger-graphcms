@@ -155,6 +155,7 @@ export default function Journal(props, match, location) {
 
                       {usrarticle.stories.map((tinystory, q) => (
                         <div
+                          key={q}
                           className="singlevisitcard"
                           style={{
                             backgroundColor: "white",

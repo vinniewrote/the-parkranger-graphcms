@@ -26,7 +26,7 @@ export function ManageStory({ children }) {
   const [emptyFilters, setEmptyFilters] = useState(null);
   const [cleanedArticles, setCleanedArticles] = useState(null);
   const newDate = new Date();
-  const currentDate = newDate.toISOString();
+
   const currentDay = newDate.getDate().toString().padStart(2, "0");
   const currentNumberDay = newDate.getDay();
   const currentMonth = (newDate.getMonth() + 1).toString().padStart(2, "0");
@@ -53,6 +53,30 @@ export function ManageStory({ children }) {
     ERROR: "error",
   };
 
+  const toISOStringWithTimezone = (date) => {
+    const tzOffset = -date.getTimezoneOffset();
+    const diff = tzOffset >= 0 ? "+" : "-";
+    const pad = (n) => `${Math.floor(Math.abs(n))}`.padStart(2, "0");
+    return (
+      date.getFullYear() +
+      "-" +
+      pad(date.getMonth() + 1) +
+      "-" +
+      pad(date.getDate()) +
+      "T" +
+      pad(date.getHours()) +
+      ":" +
+      pad(date.getMinutes()) +
+      ":" +
+      pad(date.getSeconds()) +
+      diff +
+      pad(tzOffset / 60) +
+      ":" +
+      pad(tzOffset % 60)
+    );
+  };
+  const currentDate = toISOStringWithTimezone(newDate);
+  const currentISODate = currentDate.toISOString;
   const value = {
     authorId,
     setAuthorId,
@@ -69,6 +93,7 @@ export function ManageStory({ children }) {
     savedLandmarkId,
     setSavedLandmarkId,
     currentDate,
+    currentISODate,
     currentDay,
     dayName,
     todaysDate,
@@ -101,6 +126,7 @@ export function ManageStory({ children }) {
     setFilter,
     emptyFilters,
     setEmptyFilters,
+    toISOStringWithTimezone,
   };
 
   return (

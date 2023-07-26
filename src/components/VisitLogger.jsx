@@ -47,6 +47,7 @@ export default function VisitLogger(props) {
   const [testcleanedArray, setTestCleanedArray] = useState(null);
   const [storyBlock, setStoryBlock] = useState(null);
   const [propertyVisitCount, setPropertyVisitCount] = useState(null);
+  const [storyLandmarkBundle, setStoryLandmarkBundle] = useState(null);
   const {
     currentDate,
     dayName,
@@ -75,6 +76,9 @@ export default function VisitLogger(props) {
     cleanedArticles,
     setCleanedArticles,
     authorId,
+    newDate,
+    toISOStringWithTimezone,
+    currentISODate,
   } = useManagedStory();
   const { landmarkId, landmarkName, destinationId, parkId, hotelId, shipId } =
     props;
@@ -96,6 +100,7 @@ export default function VisitLogger(props) {
     data: propertyVisitData,
   } = useQuery(PROPERTY_VISIT_COUNTER, {
     variables: { landmarkTracker: landmarkId, authorIdentifier: authorId },
+    pollInterval: 50000,
     context: { clientName: "authorLink" },
     onCompleted: () => {
       setPropertyVisitCount(propertyVisitData.visitsConnection.aggregate.count);
@@ -171,11 +176,19 @@ export default function VisitLogger(props) {
     error: priorLogError,
     data: priorLogData,
   } = useQuery(HAS_PROPERTY_BEEN_LOGGED, {
-    variables: { landmarkTracker: landmarkId, currentDate: currentDate },
+    variables: {
+      landmarkTracker: landmarkId,
+      currentDate: currentDate,
+      authorIdentifier: authorId,
+    },
     context: { clientName: "authorLink" },
     onCompleted: () => {
       //check this for incorrect toggling of the landmark flag
       console.log(priorLogData);
+      setStoryLandmarkBundle({
+        ldmkID: landmarkId,
+        ldmkStoryID: priorLogData.visits[0].story.id,
+      });
       priorLogData?.visits.length > 0
         ? setLandmarkVisitedPrior(true)
         : setLandmarkVisitedPrior(false);
@@ -228,14 +241,14 @@ export default function VisitLogger(props) {
     onCompleted() {
       // console.log(visitQueryData?.journal?.chapters[0]);
 
-      const articArray = visitQueryData?.journal?.chapters[0].articles.map(
+      const articArray = visitQueryData?.journal?.chapters[0]?.articles.map(
         (item, index) => ({
           articleID: item.id,
           destinationID: item.properties[0]?.id,
           parkID: item.properties[1]?.id,
           rawStories: item?.stories?.map((story, index) => ({
-            storyID: story.id,
-            storyLandmarkID: story.property.id,
+            storyID: story?.id,
+            storyLandmarkID: story?.property?.id,
           })),
         })
       );
@@ -305,9 +318,10 @@ export default function VisitLogger(props) {
     context: { clientName: "authorLink" },
     refetchQueries: [
       { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
-      "BetatVisitCount", // Query name
+      "BetaVisitCount", // Query name
     ],
     onCompleted() {
+      console.log(newChapterData);
       setCurentChapterId(newChapterData.createChapter.id);
       newChapterData.createChapter.articles.map((arty, index) => {
         articleStoryBundle.push({
@@ -319,6 +333,7 @@ export default function VisitLogger(props) {
         return articleStoryBundle;
       });
       setCurrentUserArticles(newChapterData.createChapter.articles);
+      console.log(`created articles: ${newChapterData.createChapter.articles}`);
       setCleanedArticles(articleStoryBundle);
       // setCurrentStoryId(newChapterData.createChapter.stories[0].id);
       // setCurrentVisitId(newChapterData.createChapter.stories[0].visits[0].id);
@@ -393,7 +408,7 @@ export default function VisitLogger(props) {
     },
   ] = useMutation(ALPHA_CREATE_NEW_VISIT, {
     variables: {
-      storyIdentifier: storyIdForLandmark,
+      storyIdentifier: storyLandmarkBundle?.ldmkStoryID,
       landmarkIdentifier: landmarkId,
       authorIdentifier: authorId,
       currentDate: currentDate,
@@ -402,7 +417,7 @@ export default function VisitLogger(props) {
     context: { clientName: "authorLink" },
     refetchQueries: [
       { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
-      "BetatVisitCount", // Query name
+      "BetaVisitCount", // Query name
     ],
     onCompleted() {
       console.log(newUserVisitData);
@@ -576,6 +591,12 @@ export default function VisitLogger(props) {
   // articleStoryBundle.length > 0 && setTestCleanedArray(userArticleIds);
 
   /************************************************ JOURNAL LOGIC **************************************************/
+
+  // const dateTester = newDate.getTime() - newDate.getTimezoneOffset() * 60000;
+
+  // console.log(dateTester);
+
+  console.log(currentDate);
   console.log(landmarkVisitedPrior);
   console.log(isDestinationLogged);
   console.log(isParkLogged);
