@@ -93,6 +93,10 @@ export default function VisitLogger(props) {
   let propStoryBundle = [];
   let todaysChapterBundle = [];
 
+  function isDestMatch(dest) {
+    return dest.destinationID === destinationId;
+  }
+
   /************************************************ QUERIES *****************************************************/
 
   const {
@@ -373,6 +377,10 @@ export default function VisitLogger(props) {
       console.log(newArticleData);
     },
   });
+
+  const thatDestMatch =
+    cleanedArticles?.length > 0 && cleanedArticles?.find(isDestMatch);
+
   const [
     createStoryForExistingArticle,
     {
@@ -383,13 +391,11 @@ export default function VisitLogger(props) {
   ] = useMutation(ALPHA_ADD_NEW_STORY_TO_ARTICLE, {
     variables: {
       chapterIdentifier: currentChapterId,
-      articleIdentifier:
-        cleanedArticles !== null ? cleanedArticles[0]?.articleID : "", //need to find the appropriate index when there are multiples
+      articleIdentifier: thatDestMatch?.articleID,
+
       landmarkIdentifier: landmarkId,
-      destinationIdent:
-        cleanedArticles !== null ? cleanedArticles[0]?.destinationID : "",
-      parkIdentifier:
-        cleanedArticles !== null ? cleanedArticles[0]?.parkID : "",
+      destinationIdent: thatDestMatch?.destinationID,
+      parkIdentifier: thatDestMatch?.parkID,
       authorIdentifier: authorId,
       currentDate: currentDate,
       visitTitle: "Title String",
@@ -565,7 +571,7 @@ export default function VisitLogger(props) {
 
   useEffect(
     (userArticles) => {
-      console.log("haha bitches");
+      // console.log("haha bitches");
       console.log(userArticles);
     },
     [userArticles?.rawStories, userArticles?.rawStories?.length]
