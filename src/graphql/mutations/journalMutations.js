@@ -232,19 +232,15 @@ export const TEST_CREATE_NEW_ARTICLE = gql`
         name
         category {
           name
+          pluralName
         }
-        articles {
+      }
+      stories {
+        id
+        title
+        visits {
           id
-          stories {
-            id
-            visits {
-              id
-              date
-            }
-            property {
-              id
-            }
-          }
+          date
         }
       }
     }
