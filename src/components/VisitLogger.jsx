@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { useQuery, useMutation } from "@apollo/client";
 import { useManagedStory } from "../contexts/StoryContext";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -48,6 +48,7 @@ export default function VisitLogger(props) {
   const [storyBlock, setStoryBlock] = useState(null);
   const [propertyVisitCount, setPropertyVisitCount] = useState(null);
   const [storyLandmarkBundle, setStoryLandmarkBundle] = useState(null);
+  const [userDestinationLog, setUserDestinationLog] = useState(null);
   const {
     currentDate,
     dayName,
@@ -181,17 +182,16 @@ export default function VisitLogger(props) {
       currentDate: currentDate,
       authorIdentifier: authorId,
     },
+    pollInterval: 40000,
     context: { clientName: "authorLink" },
     onCompleted: () => {
-      //check this for incorrect toggling of the landmark flag
-      console.log(priorLogData);
+      priorLogData?.visits.length > 0
+        ? setLandmarkVisitedPrior(true)
+        : setLandmarkVisitedPrior(false);
       setStoryLandmarkBundle({
         ldmkID: landmarkId,
         ldmkStoryID: priorLogData.visits[0].story.id,
       });
-      priorLogData?.visits.length > 0
-        ? setLandmarkVisitedPrior(true)
-        : setLandmarkVisitedPrior(false);
     },
   });
 
@@ -319,10 +319,16 @@ export default function VisitLogger(props) {
     refetchQueries: [
       { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
       "BetaVisitCount", // Query name
+      { query: GET_USER_VISIT_DATA },
+      "getUserVisitData",
     ],
+
     onCompleted() {
-      console.log(newChapterData);
+      // loggedUserDestinations(newChapterData.createChapter.articles);
+
+      setCurrentUserArticles(newChapterData.createChapter.articles);
       setCurentChapterId(newChapterData.createChapter.id);
+
       newChapterData.createChapter.articles.map((arty, index) => {
         articleStoryBundle.push({
           articleID: arty.id,
@@ -332,7 +338,7 @@ export default function VisitLogger(props) {
         });
         return articleStoryBundle;
       });
-      setCurrentUserArticles(newChapterData.createChapter.articles);
+
       console.log(`created articles: ${newChapterData.createChapter.articles}`);
       setCleanedArticles(articleStoryBundle);
       // setCurrentStoryId(newChapterData.createChapter.stories[0].id);
@@ -393,6 +399,10 @@ export default function VisitLogger(props) {
     refetchQueries: [
       { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
       "BetatVisitCount", // Query name
+      { query: GET_USER_VISIT_DATA },
+      "getUserVisitData",
+      { query: HAS_PROPERTY_BEEN_LOGGED },
+      "checkPropertyForPriorLog",
     ],
     onCompleted() {
       console.log(newStoryArticleData);
@@ -418,6 +428,10 @@ export default function VisitLogger(props) {
     refetchQueries: [
       { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
       "BetaVisitCount", // Query name
+      { query: GET_USER_VISIT_DATA },
+      "getUserVisitData",
+      { query: HAS_PROPERTY_BEEN_LOGGED },
+      "checkPropertyForPriorLog",
     ],
     onCompleted() {
       console.log(newUserVisitData);
@@ -467,7 +481,7 @@ export default function VisitLogger(props) {
         console.log("over here");
       }
     });
-  // console.log(nArr);
+
   if (nArr.length > 0) {
     const dateComp = nArr.includes(todaysDate);
     setDoDatesMatch(dateComp);
@@ -479,23 +493,6 @@ export default function VisitLogger(props) {
       storyArr.push(propertyId);
       bundleArray.push({ propertyId, storyId: id });
     });
-
-  // const landmarkMap =
-  //   chapterQueryData !== undefined &&
-  //   chapterQueryData.chapters.map(({ id, stories }) => {
-  //     landmarkArray.push({ chapterId: id, stories });
-  //   });
-
-  // console.log(landmarkArray);
-
-  // const cleanLandmark = landmarkArray.map(
-  //   (landmark, id, chapterId, stories) => {
-  //     landmark.stories.map(({ id, propertyId }) => {
-  //       let chpId = landmark.chapterId;
-  //       cleanedLandMarkArray.push({ chpId, propertyId, storyId: id });
-  //     });
-  //   }
-  // );
 
   if (
     cleanedLandMarkArray?.length > 0 &&
@@ -510,21 +507,14 @@ export default function VisitLogger(props) {
     const findTodays = cleanedLandMarkArray?.filter(
       (d) => d.chpId === todaysChapterId
     );
-
-    // console.log(`findTodays - ${findTodays}`);
-
     const onlyLandmarks = findTodays.map((marks) => marks.propertyId);
 
-    // console.log(`findTodays - ${onlyLandmarks}`);
-
     const landmarkFlag = onlyLandmarks.includes(`${landmarkId}`);
-
-    // console.log(`findTodays - ${landmarkFlag}`);
 
     setLandmarkFlagBoolean(landmarkFlag);
     setTodaysChapterId(isTodaysChapterId);
   }
-  // console.log(bundleArray);
+
   if (bundleArray.length > 0) {
     const findStoryIdForLandmark = bundleArray.find(
       (b) => b.propertyId === landmarkId
@@ -532,7 +522,7 @@ export default function VisitLogger(props) {
     const storyIdToLdmk = findStoryIdForLandmark?.storyId;
     setStoryIdForLandmark(storyIdToLdmk);
   }
-
+  console.log(userArticles);
   const loggedUserDestinations =
     userArticles?.length > 0 &&
     userArticles.map((destination, index) => destination.destinationID);
@@ -541,13 +531,13 @@ export default function VisitLogger(props) {
   const isDestinationLogged =
     loggedUserDestinations !== false &&
     loggedUserDestinations.includes(`${destinationId}`);
-  // console.log(isDestinationLogged);
+  console.log(isDestinationLogged);
 
   const loggedUserParks =
     userArticles?.length > 0 && userArticles.map((park, index) => park.parkID);
   const isParkLogged =
     loggedUserParks !== false && loggedUserParks?.includes(`${parkId}`);
-  // console.log(isParkLogged);
+  console.log(isParkLogged);
 
   const loggedUserStories =
     userArticles?.length > 0 &&
@@ -555,7 +545,7 @@ export default function VisitLogger(props) {
 
   const isLandmarkLogged =
     loggedUserStories !== false && loggedUserStories.includes(`${parkId}`);
-  // console.log(loggedUserStories);
+  console.log(loggedUserStories);
 
   const storyLandmarkValuePairs =
     loggedUserStories !== false &&
@@ -573,28 +563,15 @@ export default function VisitLogger(props) {
     });
   let articleStoryBundle = [];
 
-  // const userArticleIds =
-  //   currentUserArticles?.length > 0 &&
-  //   currentUserArticles.map((arty, index) => {
-  //     articleStoryBundle.push({
-  //       articleID: arty.id,
-  //       destinationID: arty.properties[0].id,
-  //       parkID: arty.properties[1].id,
-  //       stories: arty.stories,
-  //     });
-  //     return articleStoryBundle;
-  // arty.stories.map((story, index) => {
-  //   articleStoryBundle.push({ storyID: story.id });
-  // });
-  // });
-  // console.log(userArticleIds);
-  // articleStoryBundle.length > 0 && setTestCleanedArray(userArticleIds);
+  useEffect(
+    (userArticles) => {
+      console.log("haha bitches");
+      console.log(userArticles);
+    },
+    [userArticles?.rawStories, userArticles?.rawStories?.length]
+  );
 
   /************************************************ JOURNAL LOGIC **************************************************/
-
-  // const dateTester = newDate.getTime() - newDate.getTimezoneOffset() * 60000;
-
-  // console.log(dateTester);
 
   console.log(currentDate);
   console.log(landmarkVisitedPrior);
@@ -626,6 +603,7 @@ export default function VisitLogger(props) {
       isDestinationLogged === true &&
       isParkLogged === true
     ) {
+      console.log("triggering the  new story");
       createStoryForExistingArticle();
       toast("adding story to article", { onClose: () => setStatus(false) });
     } else if (
@@ -634,8 +612,6 @@ export default function VisitLogger(props) {
       isDestinationLogged === true &&
       isParkLogged === true
     ) {
-      // createNewChapter();
-      // createNewVisit();
       createVisitForExistingStory();
       toast("adding visit to existing story....new shit!", {
         onClose: () => setStatus(false),

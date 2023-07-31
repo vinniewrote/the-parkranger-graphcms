@@ -261,10 +261,10 @@ export const ALPHA_CREATE_NEW_VISIT = gql`
     createVisit(
       data: {
         story: { connect: { id: $storyIdentifier } }
-        title: $visitTitle
         date: $currentDate
-        property: { connect: { id: $landmarkIdentifier } }
+        title: $visitTitle
         author: { connect: { id: $authorIdentifier } }
+        property: { connect: { id: $landmarkIdentifier } }
       }
     ) {
       id
@@ -293,11 +293,12 @@ export const ALPHA_ADD_NEW_STORY_TO_ARTICLE = gql`
         chapter: { connect: { id: $chapterIdentifier } }
         title: $storyTitle
         storyDate: $currentDate
+        property: { connect: { id: $landmarkIdentifier } }
         visits: {
           create: {
-            author: { connect: { id: $authorIdentifier } }
-            title: $visitTitle
             date: $currentDate
+            title: $visitTitle
+            author: { connect: { id: $authorIdentifier } }
             property: { connect: { id: $landmarkIdentifier } }
           }
         }
