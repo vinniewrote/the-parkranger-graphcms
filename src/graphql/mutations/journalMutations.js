@@ -135,7 +135,6 @@ export const TEST_CREATE_NEW_CHAPTER = gql`
   mutation TestCreateNewChapter(
     $authorIdentifier: ID
     $landmarkIdentifier: ID
-    $landmarkTitle: String
     $authJournalID: ID!
     $currentDate: Date
     $destinationIdent: ID
@@ -156,7 +155,6 @@ export const TEST_CREATE_NEW_CHAPTER = gql`
                 visits: {
                   create: {
                     date: $currentDate
-                    title: $landmarkTitle
                     author: { connect: { id: $authorIdentifier } }
                     property: { connect: { id: $landmarkIdentifier } }
                   }
@@ -180,7 +178,6 @@ export const TEST_CREATE_NEW_CHAPTER = gql`
           visits {
             id
             date
-            title
           }
         }
         properties {
@@ -203,7 +200,6 @@ export const TEST_CREATE_NEW_ARTICLE = gql`
     $destinationIdent: ID
     $parkIdentifier: ID
     $currentDate: Date
-    $visitTitle: String
   ) {
     createArticle(
       data: {
@@ -218,7 +214,6 @@ export const TEST_CREATE_NEW_ARTICLE = gql`
             visits: {
               create: {
                 date: $currentDate
-                title: $visitTitle
                 author: { connect: { id: $authorIdentifier } }
               }
             }
@@ -252,20 +247,17 @@ export const ALPHA_CREATE_NEW_VISIT = gql`
     $landmarkIdentifier: ID
     $authorIdentifier: ID
     $currentDate: Date
-    $visitTitle: String
   ) {
     createVisit(
       data: {
         story: { connect: { id: $storyIdentifier } }
         date: $currentDate
-        title: $visitTitle
         author: { connect: { id: $authorIdentifier } }
         property: { connect: { id: $landmarkIdentifier } }
       }
     ) {
       id
       date
-      title
       property {
         id
       }
@@ -280,7 +272,6 @@ export const ALPHA_ADD_NEW_STORY_TO_ARTICLE = gql`
     $landmarkIdentifier: ID
     $authorIdentifier: ID
     $currentDate: Date
-    $visitTitle: String
     $storyTitle: String
   ) {
     createStory(
@@ -293,7 +284,6 @@ export const ALPHA_ADD_NEW_STORY_TO_ARTICLE = gql`
         visits: {
           create: {
             date: $currentDate
-            title: $visitTitle
             author: { connect: { id: $authorIdentifier } }
             property: { connect: { id: $landmarkIdentifier } }
           }
