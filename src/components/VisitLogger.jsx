@@ -372,6 +372,8 @@ export default function VisitLogger(props) {
     refetchQueries: [
       { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
       "BetatVisitCount", // Query name
+      { query: GET_USER_VISIT_DATA },
+      "getUserVisitData",
     ],
     onCompleted() {
       console.log(newArticleData);
