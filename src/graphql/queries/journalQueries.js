@@ -140,7 +140,6 @@ export const GET_TODAYS_CHAPTER_DATA = gql`
           visits {
             id
             date
-            title
           }
         }
         properties {
@@ -175,7 +174,6 @@ export const ALPHA_GET_USER_VISITS = gql`
             storyDate
             visits {
               id
-              title
             }
             property {
               id
@@ -213,10 +211,6 @@ export const GET_USER_VISIT_DATA = gql`
                 name
                 pluralName
               }
-              # visits {
-              #   id
-              #   title
-              # }
             }
           }
           properties {
@@ -272,9 +266,6 @@ export const LANDMARK_LISTING = gql`
           id
           name
           summary
-          # visits(where: { author: { auth0id: $authZeroId } }) {
-          #   id
-          # }
           category {
             id
             name
