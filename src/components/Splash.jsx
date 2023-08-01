@@ -17,10 +17,13 @@ export default function Splash() {
   } = useQuery(JOURNAL_CHECK, {
     pollInterval: 10000,
     variables: { authZeroId: user.sub },
+    context: { clientName: "authorLink" },
     onCompleted: () => {
-      journalQueryData.journals.map(({ id }) => {
+      journalQueryData?.journals?.map(({ id }) => {
+        console.log(`id posted ${id}`);
         setUserJournalId(id);
       });
+      console.log(journalQueryData);
     },
   });
 
@@ -31,6 +34,7 @@ export default function Splash() {
   } = useQuery(AUTHOR_CHECK, {
     pollInterval: 10000,
     variables: { authZeroEmail: user.email },
+    context: { clientName: "authorLink" },
   });
 
   console.log(authorQueryData?.author);
@@ -40,7 +44,8 @@ export default function Splash() {
   console.log(`deactivated author step: ${deactivateAuthorStep}`);
 
   const newUserCriteria =
-    authorQueryData?.author === null || journalQueryData?.journals.length === 0;
+    authorQueryData?.author === null ||
+    journalQueryData?.journals?.length === 0;
 
   console.log(newUserCriteria);
 

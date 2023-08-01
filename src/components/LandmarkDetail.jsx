@@ -1,6 +1,6 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import VisitLogger from "./VisitLogger";
-import { useQuery } from "@apollo/client";
+import { empty, useQuery } from "@apollo/client";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useManagedStory } from "../contexts/StoryContext";
 import {
@@ -12,17 +12,21 @@ import {
   InfoBlockWrapper,
   LoggingCountContainer,
   SpecsBlockWrapper,
+  SpecsContainer,
   YourVisitsBlock,
 } from "../styledComponents/LandmarkDetails_styled";
 import NewUserFlow from "./NewUserFlow";
 import Logout from "../components/LogoutButton";
+import { element } from "prop-types";
 
 export default function LandmarkDetail(props, match) {
   const {
-    params: { id },
+    params: { id, parkId },
   } = props.match;
   const { user } = useAuth0();
-  const { setUserJournalId, newUserStatus } = useManagedStory();
+  const { setUserJournalId, newUserStatus, setAuthorId } = useManagedStory();
+  const [localPropertyData, setLocalPropertyData] = useState(null);
+  const [propertyDestinationId, setPropertyDestinationId] = useState(null);
 
   const {
     loading: journalQueryLoading,
@@ -31,8 +35,9 @@ export default function LandmarkDetail(props, match) {
   } = useQuery(JOURNAL_CHECK, {
     pollInterval: 10000,
     variables: { authZeroId: user.sub },
+    context: { clientName: "authorLink" },
     onCompleted: () => {
-      journalQueryData.journals.map(({ id }) => {
+      journalQueryData?.journal?.map(({ id }) => {
         setUserJournalId(id);
       });
     },
@@ -43,26 +48,74 @@ export default function LandmarkDetail(props, match) {
     error: authorQueryError,
     data: authorQueryData,
   } = useQuery(AUTHOR_CHECK, {
-    pollInterval: 10000,
-    variables: { authZeroEmail: user.email },
+    pollInterval: 40000,
+    variables: { authZeroId: user.sub },
+    context: { clientName: "authorLink" },
+    onCompleted() {
+      setAuthorId(authorQueryData?.authors[0]?.id);
+    },
   });
 
   const { loading, error, data } = useQuery(LANDMARK_DETAILS, {
-    variables: { propertyId: `${id}` },
+    variables: { propertyId: id, authZeroId: user.sub },
+    context: { clientName: "authorLink" },
+    onCompleted() {
+      console.log(data.property);
+      setLocalPropertyData(data.property);
+    },
   });
 
-  console.log(authorQueryData?.author);
-  console.log(journalQueryData);
+  // console.log(authorQueryData?.author);
+  // console.log(journalQueryData);
 
-  const deactivateAuthorStep = authorQueryData?.author?.auth0id !== null;
-  console.log(`deactivated author step: ${deactivateAuthorStep}`);
+  // const deactivateAuthorStep = authorQueryData?.author?.auth0id !== null;
+  // console.log(`deactivated author step: ${deactivateAuthorStep}`);
 
   const newUserCriteria =
-    authorQueryData?.author === null || journalQueryData?.journals.length === 0;
-
-  console.log(newUserCriteria);
-
-  // console.log(data);
+    authorQueryData?.author === null || journalQueryData?.journal?.length === 0;
+  let emptyDestinationArray = [];
+  const propertyParent =
+    localPropertyData?.location?.length > 0 &&
+    localPropertyData?.location.map((parent) => {
+      emptyDestinationArray.push({
+        categoryName: parent.category.name,
+        categoryId: parent.id,
+        cluster: parent.category.cluster,
+      });
+    });
+  console.log(emptyDestinationArray);
+  const foundHotel =
+    emptyDestinationArray.length > 0 &&
+    emptyDestinationArray.find(
+      (element) => element.categoryName === "Hotel" && element.cluster === true
+    );
+  console.log(foundHotel);
+  const foundShip =
+    emptyDestinationArray.length > 0 &&
+    emptyDestinationArray.find(
+      (element) =>
+        element.categoryName === "Cruise ship" && element.cluster === true
+    );
+  const foundPark =
+    emptyDestinationArray.length > 0 &&
+    emptyDestinationArray.find(
+      (element) => element.categoryName === "Park" && element.cluster === true
+    );
+  console.log(foundPark);
+  const foundDestination =
+    emptyDestinationArray.length > 0 &&
+    emptyDestinationArray.find(
+      (element) =>
+        element.categoryName === "Destination" && element.cluster === true
+    );
+  // setPropertyDestinationId(foundDestination.categoryId);
+  // const setFoundDestInContext =
+  //   foundDestination !== null && setPropertyDestinationId(foundDestination);
+  // console.log(newUserCriteria);
+  console.log(localPropertyData);
+  console.log(localPropertyData?.location);
+  console.log(localPropertyData?.liveDataID?.wikiLive?.liveData[0].status);
+  console.log(localPropertyData?.stats);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
@@ -72,108 +125,106 @@ export default function LandmarkDetail(props, match) {
         <NewUserFlow style={{ position: "absolute" }} />
       )}
 
-      <Fragment>
-        {data.landmarks.map(
-          ({
-            id,
-            name,
-            inversions,
-            duration,
-            openingMonth,
-            openingDay,
-            openingYear,
-            summary,
-            gForce,
-            speed,
-            colorPalette,
-            designer,
-            park,
-            area,
-          }) => (
-            <div key={`Landmark Detail -  ${id}`}>
-              <div className="topBlock">
-                <Logout />
-                <h2 key={`${name} - ${id}`}>{name}</h2>
-                <p key={`${openingYear} - ${id}`}>
-                  {openingYear !== null ? `@ ${openingYear}` : ""}
-                </p>
-              </div>
+      <div>
+        <div className="topBlock">
+          <Logout />
+          <h2 key={`${localPropertyData?.name} - ${localPropertyData?.id}`}>
+            {localPropertyData?.name}
+          </h2>
 
-              <h3>Your Visits</h3>
-              <InfoBlockWrapper>
-                <VisitLogger
-                  key={`${name} - ${id}`}
-                  landmarkId={id}
-                  landmarkName={name}
-                />
-              </InfoBlockWrapper>
-              <h3>Location</h3>
-              <InfoBlockWrapper>
-                <p key={`${park?.name} - ${id}`}>{park?.name}</p>
-                <p key={`${area?.name} - ${id}`}>{area?.name}</p>
-              </InfoBlockWrapper>
+          {/* <p key={`${localPropertyData?.timeline[0]?.year} - ${id}`}>
+            {localPropertyData?.timeline[0]?.year !== null
+              ? `@ ${localPropertyData?.timeline[0]?.year}`
+              : ""}
+          </p> */}
 
-              <h3>Summary</h3>
+          <div className="isPropertyOpen">
+            <p>
+              {`The Property is now ${localPropertyData?.liveDataID?.wikiLive?.liveData[0].status}`}
+            </p>
+          </div>
+        </div>
+        <div>
+          <InfoBlockWrapper>
+            <VisitLogger
+              key={`${localPropertyData?.name} - ${localPropertyData?.id}`}
+              landmarkId={localPropertyData?.id}
+              landmarkName={localPropertyData?.name}
+              destinationId={foundDestination?.categoryId}
+              parkId={foundPark?.categoryId}
+              hotelId={foundHotel?.categoryId}
+              shipId={foundShip?.categoryId}
+            />
+          </InfoBlockWrapper>
+          <h3>Location</h3>
+          {localPropertyData?.location.length > 0 &&
+            localPropertyData.location.map((locale) => (
               <InfoBlockWrapper>
-                <p key={`${summary} - ${id}`}>{summary}</p>
+                <p>{locale.category.name}</p>
+                <p>{locale.name}</p>
               </InfoBlockWrapper>
+            ))}
 
-              <h3>Specs</h3>
-              <>
-                {gForce !== null ? (
-                  <SpecsBlockWrapper>
-                    <h5>GForce</h5>
-                    <span key={`${gForce} - ${id}`}>{gForce}</span>
-                  </SpecsBlockWrapper>
-                ) : (
-                  ""
-                )}
-                {speed !== null ? (
-                  <SpecsBlockWrapper>
-                    <h5>Speed (in mph)</h5>
-                    <span key={`${speed} - ${id}`}>{speed}mph</span>
-                  </SpecsBlockWrapper>
-                ) : (
-                  ""
-                )}
-              </>
+          <h3>Summary</h3>
+          <InfoBlockWrapper>
+            <p key={`${localPropertyData?.summary} - ${localPropertyData?.id}`}>
+              {localPropertyData?.summary}
+            </p>
+            {}
+          </InfoBlockWrapper>
 
-              <h3>Theme</h3>
+          <h3>Creative Team</h3>
+          {localPropertyData?.creativeTeam.length > 0 &&
+            localPropertyData.creativeTeam.map((member) => (
               <InfoBlockWrapper>
-                <div
-                  key={`${colorPalette} - ${id} - Block1`}
-                  style={{
-                    height: "40px",
-                    width: "40px",
-                    background: `${colorPalette[0]?.hex}`,
-                  }}
-                />
-                <div
-                  key={`${colorPalette} - ${id} - Block2`}
-                  style={{
-                    height: "40px",
-                    width: "40px",
-                    background: `${colorPalette[1]?.hex}`,
-                  }}
-                />
-                <div
-                  key={`${colorPalette} - ${id} - Block3`}
-                  style={{
-                    height: "40px",
-                    width: "40px",
-                    background: `${colorPalette[2]?.hex}`,
-                  }}
-                />
+                <p>{member.professionalRole}</p>
+                <p>{member.professionalName}</p>
               </InfoBlockWrapper>
+            ))}
 
-              <h3>Creative</h3>
+          <h3>Classification</h3>
+          {localPropertyData?.classification.length > 0 &&
+            localPropertyData.classification.map((classy) => (
               <InfoBlockWrapper>
-                <p key={`designer - ${id}`}>{designer[0]?.name}</p>
+                <p>{classy.attribute}</p>
+                <p>{classy.name}</p>
               </InfoBlockWrapper>
-            </div>
-          )
-        )}
-      </Fragment>
+            ))}
+
+          <h3>Timeline</h3>
+          {localPropertyData?.timeline.length > 0 &&
+            localPropertyData.timeline.map((timepoint) => (
+              <InfoBlockWrapper>
+                <p>{timepoint.type}</p>
+                <p>{timepoint.year}</p>
+              </InfoBlockWrapper>
+            ))}
+
+          <h3>Specs</h3>
+          <SpecsContainer>
+            {localPropertyData?.stats.length > 0 &&
+              localPropertyData.stats.map((stat) => (
+                <SpecsBlockWrapper>
+                  {stat.measurementTime ? (
+                    <>
+                      <h4>{stat.measurementTime}</h4>{" "}
+                      <p>{`${stat.minutes}:${stat.seconds}`}</p>
+                    </>
+                  ) : (
+                    <>
+                      <h4> {stat.measurementType}</h4>
+                      {stat.unitOfMeasure !== null ? (
+                        <p>{`${stat.numericValue}  ${stat.unitOfMeasure}`} </p>
+                      ) : (
+                        <p>{`${stat.numericValue}`} </p>
+                      )}
+                    </>
+                  )}
+                </SpecsBlockWrapper>
+              ))}
+          </SpecsContainer>
+        </div>
+      </div>
     </Fragment>
   );
 }

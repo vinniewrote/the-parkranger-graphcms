@@ -1,18 +1,34 @@
 import { gql } from "@apollo/client";
 
+export const PROPERTY_VISIT_COUNTER = gql`
+  query BetaVisitCount($authorIdentifier: ID, $landmarkTracker: ID!) {
+    visitsConnection(
+      where: {
+        property: { id: $landmarkTracker }
+        AND: { author: { id: $authorIdentifier } }
+      }
+    ) {
+      aggregate {
+        count
+      }
+    }
+  }
+`;
+
 export const AUTHOR_CHECK = gql`
-  query getAuthorStatus($authZeroEmail: String!) {
-    author(where: { email: $authZeroEmail }) {
-      bio
-      email
+  query getAuthorStatus($authZeroId: String) {
+    authors(where: { auth0id: $authZeroId }) {
+      id
       name
-      auth0id
+      journal {
+        id
+      }
     }
   }
 `;
 
 export const JOURNAL_CHECK = gql`
-  query getJournalStatus($authZeroId: String!) {
+  query getJournalStatus($authZeroId: String) {
     journals(where: { author: { auth0id: $authZeroId } }) {
       id
     }
@@ -28,8 +44,22 @@ export const GET_CHAPTER_DATE = gql`
       title
       stories {
         id
-        landmarkId
-        landmarkName
+      }
+    }
+  }
+`;
+
+export const GET_CHAPTER_ID = gql`
+  query getChapterId($journalTracker: ID!) {
+    journal(where: { id: $journalTracker }, stage: DRAFT) {
+      id
+      chapters {
+        id
+        date
+        title
+        articles {
+          id
+        }
       }
     }
   }
@@ -51,41 +81,146 @@ export const CHECK_FOR_LANDMARKS = gql`
       }
     ) {
       id
-      landmarkId
+    }
+  }
+`;
+
+export const HAS_PROPERTY_BEEN_LOGGED = gql`
+  query checkPropertyForPriorLog(
+    $landmarkTracker: ID!
+    $currentDate: Date
+    $authorIdentifier: ID
+  ) {
+    visits(
+      where: {
+        author: { id: $authorIdentifier }
+        date: $currentDate
+        property: { id: $landmarkTracker }
+      }
+    ) {
+      id
+      story {
+        id
+      }
+    }
+  }
+`;
+
+export const IS_PROPERTY_LOGGED_TO_STORY = gql`
+  query CheckPropertyIsLoggedToStory(
+    $authorIdentifier: ID
+    $landmarkTracker: ID!
+  ) {
+    stories(
+      where: {
+        property: { id: $landmarkTracker }
+        author: { id: $authorIdentifier }
+      }
+    ) {
+      id
+      storyDate
+      visits {
+        date
+        id
+      }
+    }
+  }
+`;
+
+export const GET_TODAYS_CHAPTER_DATA = gql`
+  query PullChapterDataForUser($currentChapterId: ID!) {
+    chapter(where: { id: $currentChapterId }) {
+      date
+      id
+      articles {
+        id
+        stories {
+          id
+          title
+          visits {
+            id
+            date
+            title
+          }
+        }
+        properties {
+          id
+          name
+          category {
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+
+export const ALPHA_GET_USER_VISITS = gql`
+  query PullUserVisitsForJournal($authorIdentifier: ID) {
+    author(where: { id: $authorIdentifier }) {
+      id
+      name
+      chapters {
+        id
+        date
+        articles {
+          id
+          properties {
+            id
+            name
+          }
+          stories {
+            id
+            title
+            storyDate
+            visits {
+              id
+              title
+            }
+            property {
+              id
+              name
+              category {
+                id
+                name
+                pluralName
+                trackable
+              }
+            }
+          }
+        }
+      }
     }
   }
 `;
 
 export const GET_USER_VISIT_DATA = gql`
-  query getUserVisitData($authZeroId: String!) {
-    journals(where: { author: { auth0id: $authZeroId } }) {
+  query getUserVisitData($journalTracker: ID) {
+    journal(stage: DRAFT, where: { id: $journalTracker }) {
+      id
       chapters {
-        date
         id
         title
-        stories {
+        articles {
           id
-          landmark {
-            park {
+          stories {
+            id
+            property {
               id
               name
-            }
-            category {
-              id
-              name
-              pluralName
+              category {
+                id
+                name
+                pluralName
+              }
+              # visits {
+              #   id
+              #   title
+              # }
             }
           }
-          landmarkId
-          landmarkName
-
-          title
-          visits {
+          properties {
             id
-            landmark {
-              id
-              name
-            }
           }
         }
       }
@@ -95,22 +230,29 @@ export const GET_USER_VISIT_DATA = gql`
 
 export const PARK_LISTING = gql`
   query GetParkListing {
-    parks {
+    properties {
       id
-      parkId
       name
-      openingDay
-      openingMonth
-      openingYear
+      summary
+      category {
+        id
+        name
+        pluralName
+      }
     }
   }
 `;
 
 export const VISIT_LANDMARK_CHECK = gql`
-  query CheckLandmarkForVisits($currentPropertyId: ID) {
-    visits(where: { landmark: { id: $currentPropertyId } }) {
+  query CheckLandmarkForVisits($currentPropertyId: ID, $authZeroId: String) {
+    visits(
+      where: {
+        property: { id: $authZeroId }
+        property: { id: $currentPropertyId }
+      }
+    ) {
       id
-      landmark {
+      property {
         id
         name
       }
@@ -119,24 +261,24 @@ export const VISIT_LANDMARK_CHECK = gql`
 `;
 
 export const LANDMARK_LISTING = gql`
-  query GetLandmarkListing($propertyId: String) {
-    parks(where: { parkId: $propertyId }) {
+  query GetLandmarkListing($propertyId: ID) {
+    property(where: { id: $propertyId }) {
       id
       name
-      areas {
+      childProp(where: { category: { pluralName: "Areas" } }) {
         id
         name
-        landmarks {
+        childProp {
           id
           name
-          operationalStatus
+          summary
+          # visits(where: { author: { auth0id: $authZeroId } }) {
+          #   id
+          # }
           category {
             id
             name
             pluralName
-          }
-          visits {
-            id
           }
         }
       }
@@ -145,52 +287,193 @@ export const LANDMARK_LISTING = gql`
 `;
 
 export const LANDMARK_DETAILS = gql`
-  query GetLandmarkDetails($propertyId: ID) {
-    landmarks(where: { id: $propertyId }) {
+  query GetPropertyDetails($propertyId: ID, $authZeroId: String!) {
+    property(where: { id: $propertyId }, stage: DRAFT) {
       id
       name
-      height
-      inversions
-      length
-      heightRestriction
-      gForce
-      externalLink
-      duration
-      drop
-      createdAt
-      openingMonth
-      openingDay
-      openingYear
-      closingDay
-      closingMonth
-      closingYear
-      operationalStatus
-      speed
-      designer {
+      state
+      ticketed
+      category {
         name
-        id
+        trackable
+        cluster
       }
-      location {
+      liveDataID {
+        #Might be noisy for park type properties since it retrieves all children from the API
+        wikiLive {
+          liveData {
+            queue
+            status
+            forecast
+            operatingHours
+          }
+        }
+        #Only relevant for park type properties
+        wikiSchedule {
+          schedule
+          timezone
+        }
+      }
+      location: parentProp {
+        id
+        name
+        category {
+          name
+          cluster
+        }
+        state
+      }
+      childProp {
+        id
+        name
+        category {
+          name
+        }
+      }
+      map {
         latitude
         longitude
       }
-
+      #List all classifcations but themes, we list those separately
+      classification(where: { attribute_not: Theme }) {
+        id
+        name
+      }
+      stats {
+        ... on Vehicle {
+          __typename
+          id
+          restraintSystem
+          onboardFeatures
+          arrangement {
+            arrangementType
+            numericValue
+            unitOfMeasure
+          }
+        }
+        ... on Measurement {
+          __typename
+          id
+          measurementType
+          numericValue
+          unitOfMeasure
+        }
+        ... on Time {
+          __typename
+          id
+          measurementTime
+          minutes
+          seconds
+        }
+        ... on Expense {
+          __typename
+          id
+          expenseType
+          amount
+          currency
+        }
+      }
+      presentation {
+        ... on Detail {
+          __typename
+          id
+          detailType
+          detailName
+          detailNotes
+        }
+        ... on Bio {
+          __typename
+          id
+          profession
+          height
+          weight
+          alias
+        }
+        ... on Palette {
+          __typename
+          id
+          colorApplication
+          hues {
+            colorName
+            value {
+              rgba {
+                r
+                g
+                b
+                a
+              }
+            }
+          }
+        }
+      }
+      theme: classification(where: { attribute_in: Theme }) {
+        id
+        name
+      }
+      #We just want to list the cast of characters that can be found in this property
+      cast: childProp(
+        where: { category: { id: "clg33z21w30h50bk8tbanm0yt" } }
+      ) {
+        name
+        presentation {
+          ... on Bio {
+            profession
+          }
+        }
+      }
+      creativeTeam {
+        id
+        professionalName
+        professionalRole
+      }
       summary
-      colorPalette {
-        hex
-      }
-      visits {
-        id
-        title
-        date
-      }
-      park {
-        name
-      }
-      area {
+      predecessor {
         id
         name
+        category {
+          name
+        }
       }
+      timeline {
+        id
+        type
+        year
+        month
+        day
+        note
+      }
+      successor {
+        id
+        name
+        category {
+          name
+        }
+      }
+      # List all child properties
+      lineup: childProp {
+        name
+        category {
+          name
+        }
+      }
+    }
+    # Get total visit count to this property for specific user
+    visitsConnection(
+      where: { property: { id: $propertyId }, author: { auth0id: $authZeroId } }
+    ) {
+      aggregate {
+        count
+      }
+    }
+    # Get all related chapters that contain stories from this property
+    chapters(
+      where: {
+        articles_some: { stories_some: { property: { id: $propertyId } } }
+        author: { auth0id: $authZeroId }
+      }
+    ) {
+      id
+      title
     }
   }
 `;
