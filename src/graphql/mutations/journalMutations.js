@@ -215,6 +215,7 @@ export const TEST_CREATE_NEW_ARTICLE = gql`
               create: {
                 date: $currentDate
                 author: { connect: { id: $authorIdentifier } }
+                property: { connect: { id: $landmarkIdentifier } }
               }
             }
           }

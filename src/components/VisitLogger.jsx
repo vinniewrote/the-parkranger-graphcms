@@ -475,6 +475,14 @@ export default function VisitLogger(props) {
       storyIDLandmark: storyIdForLandmark,
     },
     context: { clientName: "authorLink" },
+    refetchQueries: [
+      { query: PROPERTY_VISIT_COUNTER },
+      "BetaVisitCount",
+      { query: GET_USER_VISIT_DATA },
+      "getUserVisitData",
+      { query: HAS_PROPERTY_BEEN_LOGGED },
+      "checkPropertyForPriorLog",
+    ],
     onCompleted() {
       setCurrentVisitId(newVisitData.createVisit.id);
     },
