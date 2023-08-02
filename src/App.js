@@ -78,7 +78,11 @@ function App() {
         <BrowserRouter>
           <ManageStory>
             <div className="App">
+<<<<<<< Updated upstream
               <p style={{ margin: 0 }}>v0.106.4</p>
+=======
+              <p style={{ margin: 0 }}>v0.106.6</p>
+>>>>>>> Stashed changes
               <Switch>
                 <Route path="/auth" component={Unauthenticated} />
                 <PrivateRoute path="/" component={Authenticated} />
