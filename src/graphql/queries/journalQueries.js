@@ -224,7 +224,7 @@ export const GET_USER_VISIT_DATA = gql`
 
 export const PARK_LISTING = gql`
   query GetParkListing {
-    properties(stage: PUBLISHED) {
+    properties {
       id
       name
       summary
@@ -256,7 +256,7 @@ export const VISIT_LANDMARK_CHECK = gql`
 
 export const LANDMARK_LISTING = gql`
   query GetLandmarkListing($propertyId: ID) {
-    property(where: { id: $propertyId }, stage: PUBLISHED) {
+    property(where: { id: $propertyId }) {
       id
       name
       childProp(where: { category: { pluralName: "Areas" } }) {
@@ -279,7 +279,7 @@ export const LANDMARK_LISTING = gql`
 
 export const LANDMARK_DETAILS = gql`
   query GetPropertyDetails($propertyId: ID, $authZeroId: String!) {
-    property(where: { id: $propertyId }, stage: PUBLISHED) {
+    property(where: { id: $propertyId }, stage: DRAFT) {
       id
       name
       state
