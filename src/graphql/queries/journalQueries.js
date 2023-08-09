@@ -238,10 +238,10 @@ export const PARK_LISTING = gql`
 `;
 
 export const VISIT_LANDMARK_CHECK = gql`
-  query CheckLandmarkForVisits($currentPropertyId: ID, $authZeroId: String) {
+  query CheckLandmarkForVisits($currentPropertyId: ID, $authorIdentifier: ID) {
     visits(
       where: {
-        property: { id: $authZeroId }
+        author: { id: $authorIdentifier }
         property: { id: $currentPropertyId }
       }
     ) {

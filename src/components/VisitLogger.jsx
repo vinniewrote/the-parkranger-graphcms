@@ -92,6 +92,7 @@ export default function VisitLogger(props) {
   let articleBundle = [];
   let propStoryBundle = [];
   let todaysChapterBundle = [];
+  let newArticleAdditionBundle = [];
 
   function isDestMatch(dest) {
     return dest.destinationID === destinationId;
@@ -168,7 +169,7 @@ export default function VisitLogger(props) {
   );
 
   const { loading, error, data } = useQuery(VISIT_LANDMARK_CHECK, {
-    variables: { currentPropertyId: landmarkId, authZeroId: user.sub },
+    variables: { currentPropertyId: landmarkId, authorIdentifier: authorId },
     context: { clientName: "authorLink" },
     onCompleted: () => {
       // console.log(data);
@@ -333,18 +334,18 @@ export default function VisitLogger(props) {
       setCurrentUserArticles(newChapterData.createChapter.articles);
       setCurentChapterId(newChapterData.createChapter.id);
 
-      newChapterData.createChapter.articles.map((arty, index) => {
-        articleStoryBundle.push({
-          articleID: arty.id,
-          destinationID: arty.properties[0].id,
-          parkID: arty.properties[1].id,
-          stories: arty.stories.map((story) => ({ storyId: story.id })),
+      newChapterData.createChapter.articles.map((party, index) => {
+        newArticleAdditionBundle.push({
+          articleID: party.id,
+          destinationID: party.properties[0].id,
+          parkID: party.properties[1].id,
+          stories: party.stories.map((story) => ({ storyId: story.id })),
         });
-        return articleStoryBundle;
+        return newArticleAdditionBundle;
       });
 
       console.log(`created articles: ${newChapterData.createChapter.articles}`);
-      setCleanedArticles(articleStoryBundle);
+      setCleanedArticles(newArticleAdditionBundle);
       // setCurrentStoryId(newChapterData.createChapter.stories[0].id);
       // setCurrentVisitId(newChapterData.createChapter.stories[0].visits[0].id);
     },
@@ -374,9 +375,22 @@ export default function VisitLogger(props) {
       "BetatVisitCount", // Query name
       { query: GET_USER_VISIT_DATA },
       "getUserVisitData",
+      { query: HAS_PROPERTY_BEEN_LOGGED },
+      "checkPropertyForPriorLog",
     ],
     onCompleted() {
-      console.log(newArticleData);
+      newArticleData.createArticle.map((arty, index) => {
+        articleStoryBundle.push({
+          articleID: arty.id,
+          destinationID: arty.properties[0].id,
+          parkID: arty.properties[1].id,
+          stories: arty.stories.map((story) => ({ storyId: story.id })),
+        });
+        return articleStoryBundle;
+      });
+
+      console.log(`created new article: ${newArticleData}`);
+      setCleanedArticles(articleStoryBundle);
     },
   });
 
@@ -580,11 +594,11 @@ export default function VisitLogger(props) {
   let articleStoryBundle = [];
 
   useEffect(
-    (userArticles) => {
-      // console.log("haha bitches");
-      console.log(userArticles);
+    (currentUserArticles) => {
+      console.log("haha bitches");
+      // console.log(userArticles);
     },
-    [userArticles?.rawStories, userArticles?.rawStories?.length]
+    [currentUserArticles]
   );
 
   /************************************************ JOURNAL LOGIC **************************************************/
