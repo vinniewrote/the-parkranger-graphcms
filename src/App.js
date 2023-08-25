@@ -78,7 +78,7 @@ function App() {
         <BrowserRouter>
           <ManageStory>
             <div className="App">
-              <p style={{ margin: 0 }}>v0.106.7</p>
+              <p style={{ margin: 0 }}>v0.106.8</p>
               <Switch>
                 <Route path="/auth" component={Unauthenticated} />
                 <PrivateRoute path="/" component={Authenticated} />

@@ -128,21 +128,20 @@ export default function LandmarkDetail(props, match) {
       <div>
         <div className="topBlock">
           <Logout />
+          <div>{localPropertyData?.category?.name}</div>
+          <div className="isPropertyOpen">
+            <p>{localPropertyData?.liveDataID?.wikiLive?.liveData[0].status}</p>
+          </div>
+
           <h2 key={`${localPropertyData?.name} - ${localPropertyData?.id}`}>
             {localPropertyData?.name}
           </h2>
 
-          {/* <p key={`${localPropertyData?.timeline[0]?.year} - ${id}`}>
+          <p key={`${localPropertyData?.timeline[0]?.year} - ${id}`}>
             {localPropertyData?.timeline[0]?.year !== null
               ? `@ ${localPropertyData?.timeline[0]?.year}`
               : ""}
-          </p> */}
-
-          <div className="isPropertyOpen">
-            <p>
-              {`The Property is now ${localPropertyData?.liveDataID?.wikiLive?.liveData[0].status}`}
-            </p>
-          </div>
+          </p>
         </div>
         <div>
           <InfoBlockWrapper>

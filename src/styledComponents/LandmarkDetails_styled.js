@@ -33,8 +33,8 @@ export const LoggingCountContainer = styled.div`
   width: 75%;
   margin: 0 auto;
   border: 1px solid #000;
-  background: #0d4556;
-  border-radius: 8px;
+  background: #bde79d;
+  border-radius: 4px;
   padding: 24px;
   column-gap: 16px;
 `;
@@ -43,7 +43,7 @@ export const YourVisitsBlock = styled.div`
   display: flex;
   flex-direction: column;
   width: 68%;
-  color: white;
+  color: #013e42;
 
   & h4 {
     text-align: left;

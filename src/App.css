@@ -57,11 +57,18 @@
 }
 
 .topBlock {
-  background-color: #8bc34a;
-  height: 30vh;
+  background-color: #8daa88;
+  height: 40vh;
 }
 .topBlock p {
   margin: 0;
+}
+.topBlock h2 {
+  font-family: "Work Sans";
+  font-size: 2.25rem;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 2.5rem;
 }
 .profileTopBlock {
   background-color: #29333b;
