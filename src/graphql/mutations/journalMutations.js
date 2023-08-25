@@ -61,78 +61,8 @@ export const NEW_AUTHOR_STEP_FOUR = gql`
   }
 `;
 
-export const CREATE_NEW_CHAPTER = gql`
-  mutation CreateNewChapter(
-    $landmarkIdentifier: ID
-    $landmarkTitle: String
-    $authJournalID: ID!
-    $currentDate: Date
-    $desinationIdentifier: ID
-    $parkIdentifier: ID
-  ) {
-    createChapter(
-      data: {
-        date: $currentDate
-        journal: { connect: { id: $authJournalID } }
-        articles: {
-          create: {
-            reference: {
-              create: {
-                Story: {
-                  property: { connect: { id: $landmarkIdentifier } }
-                  visits: {
-                    create: {
-                      date: $currentDate
-                      title: $landmarkTitle
-                      property: { connect: { id: $landmarkIdentifier } }
-                    }
-                  }
-                }
-              }
-              connect: [
-                { Property: { id: $desinationIdentifier } }
-                { Property: { id: $parkIdentifier } }
-              ]
-            }
-          }
-        }
-      }
-    ) {
-      date
-      id
-      title
-      articles {
-        id
-        reference {
-          ... on Chapter {
-            id
-            title
-          }
-          ... on Property {
-            id
-            name
-            category {
-              id
-              name
-              pluralName
-            }
-          }
-          ... on Story {
-            id
-            visits {
-              id
-              title
-              date
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-export const TEST_CREATE_NEW_CHAPTER = gql`
-  mutation TestCreateNewChapter(
+export const CREATE_NEW_CHAPTER_FINAL = gql`
+  mutation CreateNewChapterFinal(
     $authorIdentifier: ID
     $landmarkIdentifier: ID
     $authJournalID: ID!
@@ -192,8 +122,8 @@ export const TEST_CREATE_NEW_CHAPTER = gql`
   }
 `;
 
-export const TEST_CREATE_NEW_ARTICLE = gql`
-  mutation TestCreateNewArticle(
+export const CREATE_NEW_ARTICLE_FINAL = gql`
+  mutation CreateNewArticleFinal(
     $authorIdentifier: ID
     $chapterIdentifier: ID
     $landmarkIdentifier: ID
@@ -242,8 +172,8 @@ export const TEST_CREATE_NEW_ARTICLE = gql`
     }
   }
 `;
-export const ALPHA_CREATE_NEW_VISIT = gql`
-  mutation MyAlphaMutation(
+export const CREATE_NEW_VISIT_FINAL = gql`
+  mutation CreateNewVisitFinal(
     $storyIdentifier: ID
     $landmarkIdentifier: ID
     $authorIdentifier: ID
@@ -266,8 +196,8 @@ export const ALPHA_CREATE_NEW_VISIT = gql`
   }
 `;
 
-export const ALPHA_ADD_NEW_STORY_TO_ARTICLE = gql`
-  mutation AlphaAddNewStoryToArticle(
+export const ADD_STORY_TO_ARTICLE_FINAL = gql`
+  mutation AddStoryToArticleFinal(
     $chapterIdentifier: ID
     $articleIdentifier: ID
     $landmarkIdentifier: ID
@@ -354,8 +284,8 @@ export const CREATE_NEW_JOURNAL = gql`
   }
 `;
 
-export const CREATE_NEW_STORY = gql`
-  mutation CreateNewStory(
+export const CREATE_NEW_STORY_FINAL = gql`
+  mutation CreateNewStoryFinal(
     $landmarkIdentifier: ID
     $landmarkTitle: String!
     $currentChptID: ID
@@ -388,15 +318,15 @@ export const CREATE_NEW_STORY = gql`
   }
 `;
 
-export const CREATE_NEW_VISIT = gql`
-  mutation CreateNewVisit($landmarkTracker: ID, $storyIDLandmark: ID) {
-    createVisit(
-      data: {
-        story: { connect: { id: $storyIDLandmark } }
-        property: { connect: { id: $landmarkTracker } }
-      }
-    ) {
-      id
-    }
-  }
-`;
+// export const CREATE_NEW_VISIT_FINAL = gql`
+//   mutation CreateNewVisitFinal($landmarkTracker: ID, $storyIDLandmark: ID) {
+//     createVisit(
+//       data: {
+//         story: { connect: { id: $storyIDLandmark } }
+//         property: { connect: { id: $landmarkTracker } }
+//       }
+//     ) {
+//       id
+//     }
+//   }
+// `;

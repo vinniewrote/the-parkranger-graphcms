@@ -199,6 +199,7 @@ export const GET_USER_VISIT_DATA = gql`
       chapters {
         id
         title
+        date
         articles {
           id
           stories {
