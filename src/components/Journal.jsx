@@ -220,7 +220,7 @@ export default function Journal(props, match, location) {
                                       border: "1px solid #f0f5f5",
                                       borderRadius: "624.9375rem",
                                     }}
-                                  >{`X ${tinystory.visits.length}`}</p>
+                                  >{`X ${tinystory?.visits?.length}`}</p>
                                 </div>
                               </div>
                             </div>
