@@ -84,12 +84,19 @@ export default function LandmarkDetail(props, match) {
       });
     });
   console.log(emptyDestinationArray);
+  const foundDistrict =
+    emptyDestinationArray.length > 0 &&
+    emptyDestinationArray.find(
+      (element) =>
+        element.categoryName === "District" && element.cluster === true
+    );
+  // console.log(foundDistrict);
   const foundHotel =
     emptyDestinationArray.length > 0 &&
     emptyDestinationArray.find(
       (element) => element.categoryName === "Hotel" && element.cluster === true
     );
-  console.log(foundHotel);
+  // console.log(foundHotel);
   const foundShip =
     emptyDestinationArray.length > 0 &&
     emptyDestinationArray.find(
@@ -101,7 +108,7 @@ export default function LandmarkDetail(props, match) {
     emptyDestinationArray.find(
       (element) => element.categoryName === "Park" && element.cluster === true
     );
-  console.log(foundPark);
+  // console.log(foundPark);
   const foundDestination =
     emptyDestinationArray.length > 0 &&
     emptyDestinationArray.find(
@@ -145,15 +152,19 @@ export default function LandmarkDetail(props, match) {
         </div>
         <div>
           <InfoBlockWrapper>
-            <VisitLogger
-              key={`${localPropertyData?.name} - ${localPropertyData?.id}`}
-              landmarkId={localPropertyData?.id}
-              landmarkName={localPropertyData?.name}
-              destinationId={foundDestination?.categoryId}
-              parkId={foundPark?.categoryId}
-              hotelId={foundHotel?.categoryId}
-              shipId={foundShip?.categoryId}
-            />
+            {localPropertyData?.category?.trackable === true ? (
+              <VisitLogger
+                key={`${localPropertyData?.name} - ${localPropertyData?.id}`}
+                landmarkId={localPropertyData?.id}
+                landmarkName={localPropertyData?.name}
+                destinationId={foundDestination?.categoryId}
+                parkId={foundPark?.categoryId}
+                hotelId={foundHotel?.categoryId}
+                shipId={foundShip?.categoryId}
+              />
+            ) : (
+              <h4>Apologies, this property cannot be logged</h4>
+            )}
           </InfoBlockWrapper>
           <h3>Location</h3>
           {localPropertyData?.location.length > 0 &&

@@ -310,7 +310,6 @@ export default function VisitLogger(props) {
       destinationIdent: destinationId,
       authJournalID: userJournalId,
       currentDate: currentDate,
-      // landmarkTitle: "Title String",
     },
     context: { clientName: "authorLink" },
     refetchQueries: [
