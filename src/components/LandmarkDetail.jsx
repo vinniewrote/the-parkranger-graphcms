@@ -163,6 +163,7 @@ export default function LandmarkDetail(props, match) {
                 parkId={foundPark?.categoryId}
                 hotelId={foundHotel?.categoryId}
                 shipId={foundShip?.categoryId}
+                districtId={foundDistrict?.categoryId}
               />
             ) : (
               <h4>Apologies, this property cannot be logged</h4>
