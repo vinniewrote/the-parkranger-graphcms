@@ -121,7 +121,7 @@ export default function LandmarkDetail(props, match) {
   // console.log(newUserCriteria);
   console.log(localPropertyData);
   console.log(localPropertyData?.location);
-  console.log(localPropertyData?.liveDataID?.wikiLive?.liveData[0].status);
+  console.log(localPropertyData?.liveDataID?.wikiLive?.liveData[0]?.status);
   console.log(localPropertyData?.stats);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
@@ -137,7 +137,9 @@ export default function LandmarkDetail(props, match) {
           <Logout />
           <div>{localPropertyData?.category?.name}</div>
           <div className="isPropertyOpen">
-            <p>{localPropertyData?.liveDataID?.wikiLive?.liveData[0].status}</p>
+            <p>
+              {localPropertyData?.liveDataID?.wikiLive?.liveData[0]?.status}
+            </p>
           </div>
 
           <h2 key={`${localPropertyData?.name} - ${localPropertyData?.id}`}>
