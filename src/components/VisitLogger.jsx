@@ -602,6 +602,7 @@ export default function VisitLogger(props) {
   console.log(isParkLogged);
   const journalLogic = () => {
     setStatus(true);
+
     if (journalQueryData?.journals?.length === 0) {
       showNewUserModal(true);
       toast("You need to register your journal before tracking your ride", {
@@ -610,7 +611,6 @@ export default function VisitLogger(props) {
     } else if (journalQueryData?.journals?.length > 0 && !doDatesMatch) {
       createNewChapter();
       toast("creating today's data", { onClose: () => setStatus(false) });
-      // create new article if there is a currentchapterID and parks/destination IDs DO NOT match
     } else if (
       landmarkVisitedPrior === false &&
       currentChapterId !== null &&
@@ -630,13 +630,12 @@ export default function VisitLogger(props) {
         onClose: () => setStatus(false),
       });
     } else if (
-      //make sure landmarkvisited prior IS ALWAYS updated
       landmarkVisitedPrior === false &&
       currentChapterId !== null &&
       isDestinationLogged === true &&
-      isParkLogged === false
+      isParkLogged === true
     ) {
-      console.log("triggering the  new story");
+      // console.log("creating a new story");
       createStoryForExistingArticle();
       toast("adding story to article", { onClose: () => setStatus(false) });
     } else if (
