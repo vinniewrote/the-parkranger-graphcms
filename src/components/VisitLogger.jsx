@@ -620,11 +620,21 @@ export default function VisitLogger(props) {
       createNewArticle();
       toast("creating your new article", { onClose: () => setStatus(false) });
     } else if (
+      landmarkVisitedPrior === false &&
+      currentChapterId !== null &&
+      isDestinationLogged === true &&
+      isParkLogged === false
+    ) {
+      createNewArticle();
+      toast("new article, new park, same destination", {
+        onClose: () => setStatus(false),
+      });
+    } else if (
       //make sure landmarkvisited prior IS ALWAYS updated
       landmarkVisitedPrior === false &&
       currentChapterId !== null &&
       isDestinationLogged === true &&
-      isParkLogged === true
+      isParkLogged === false
     ) {
       console.log("triggering the  new story");
       createStoryForExistingArticle();
