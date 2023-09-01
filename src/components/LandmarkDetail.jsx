@@ -115,10 +115,11 @@ export default function LandmarkDetail(props, match) {
       (element) =>
         element.categoryName === "Destination" && element.cluster === true
     );
-  // setPropertyDestinationId(foundDestination.categoryId);
-  // const setFoundDestInContext =
-  //   foundDestination !== null && setPropertyDestinationId(foundDestination);
-  // console.log(newUserCriteria);
+
+  const foundlingProperty =
+    emptyDestinationArray.length < 3 &&
+    emptyDestinationArray.find((element) => element.categoryName === "Area");
+
   console.log(localPropertyData);
   console.log(localPropertyData?.location);
   console.log(localPropertyData?.liveDataID?.wikiLive?.liveData[0]?.status);
@@ -164,6 +165,7 @@ export default function LandmarkDetail(props, match) {
                 hotelId={foundHotel?.categoryId}
                 shipId={foundShip?.categoryId}
                 districtId={foundDistrict?.categoryId}
+                foundlingId={foundlingProperty?.categoryId}
               />
             ) : (
               <h4>Apologies, this property cannot be logged</h4>
