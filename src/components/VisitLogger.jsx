@@ -574,9 +574,12 @@ export default function VisitLogger(props) {
     userArticles?.length > 0 && userArticles.map((park, index) => park.parkID);
 
   const isParkLogged =
-    foundlingId === undefined
-      ? loggedUserParks !== false && loggedUserParks?.includes(`${parkId}`)
-      : true;
+    foundlingId !== undefined
+      ? true
+      : districtId !== undefined
+      ? true
+      : loggedUserParks !== false && loggedUserParks?.includes(`${parkId}`);
+
   console.log(isParkLogged);
 
   const loggedUserStories =
