@@ -117,7 +117,7 @@ export default function LandmarkDetail(props, match) {
     );
 
   const foundlingProperty =
-    emptyDestinationArray.length < 3 &&
+    emptyDestinationArray.length === 2 &&
     emptyDestinationArray.find((element) => element.categoryName === "Area");
 
   console.log(localPropertyData);

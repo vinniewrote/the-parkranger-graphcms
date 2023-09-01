@@ -315,7 +315,9 @@ export default function VisitLogger(props) {
       authLandmark: landmarkId,
       landmarkIdentifier: landmarkId,
       parkIdentifier:
-        parkId === undefined ? hotelId || shipId || districtId : foundlingId,
+        parkId === undefined
+          ? hotelId || shipId || districtId || foundlingId
+          : parkId,
       destinationIdent: destinationId,
       authJournalID: userJournalId,
       currentDate: currentDate,
@@ -366,7 +368,9 @@ export default function VisitLogger(props) {
       authLandmark: landmarkId,
       landmarkIdentifier: landmarkId,
       parkIdentifier:
-        parkId === undefined ? hotelId || shipId || districtId : foundlingId,
+        parkId === undefined
+          ? hotelId || shipId || districtId || foundlingId
+          : parkId,
       destinationIdent: destinationId,
       currentDate: currentDate,
       // visitTitle: "Title String",
@@ -568,8 +572,11 @@ export default function VisitLogger(props) {
 
   const loggedUserParks =
     userArticles?.length > 0 && userArticles.map((park, index) => park.parkID);
+
   const isParkLogged =
-    loggedUserParks !== false && loggedUserParks?.includes(`${parkId}`);
+    foundlingId === undefined
+      ? loggedUserParks !== false && loggedUserParks?.includes(`${parkId}`)
+      : true;
   console.log(isParkLogged);
 
   const loggedUserStories =
@@ -660,7 +667,7 @@ export default function VisitLogger(props) {
       });
     }
   };
-  console.log(rawVisitCount?.visits.length);
+  // console.log(rawVisitCount?.visits.length);
   return (
     <Fragment>
       <LoggingCountContainer>
