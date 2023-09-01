@@ -32,8 +32,16 @@ import {
 } from "../styledComponents/LandmarkDetails_styled";
 
 export default function VisitLogger(props) {
-  const { landmarkId, landmarkName, destinationId, parkId, hotelId, shipId } =
-    props;
+  const {
+    landmarkId,
+    landmarkName,
+    destinationId,
+    parkId,
+    hotelId,
+    shipId,
+    districtId,
+    foundlingId,
+  } = props;
   const { user } = useAuth0();
   const [status, setStatus] = useState(false);
   const [newUserModal, showNewUserModal] = useState(false);
@@ -306,7 +314,8 @@ export default function VisitLogger(props) {
       authorIdentifier: authorId,
       authLandmark: landmarkId,
       landmarkIdentifier: landmarkId,
-      parkIdentifier: parkId === undefined ? hotelId || shipId : parkId,
+      parkIdentifier:
+        parkId === undefined ? hotelId || shipId || districtId : foundlingId,
       destinationIdent: destinationId,
       authJournalID: userJournalId,
       currentDate: currentDate,
@@ -356,7 +365,8 @@ export default function VisitLogger(props) {
       authorIdentifier: authorId,
       authLandmark: landmarkId,
       landmarkIdentifier: landmarkId,
-      parkIdentifier: parkId === undefined ? hotelId || shipId : parkId,
+      parkIdentifier:
+        parkId === undefined ? hotelId || shipId || districtId : foundlingId,
       destinationIdent: destinationId,
       currentDate: currentDate,
       // visitTitle: "Title String",
