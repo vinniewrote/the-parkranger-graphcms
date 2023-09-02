@@ -91,6 +91,9 @@ export default function VisitLogger(props) {
   function isDestMatch(dest) {
     return dest.destinationID === destinationId;
   }
+  function isParkMatch(dest) {
+    return dest.parkID === parkId;
+  }
 
   /************************************************ QUERIES *****************************************************/
 
@@ -274,8 +277,7 @@ export default function VisitLogger(props) {
       rawStories: item?.stories,
     }));
 
-  console.log(articleArray);
-  // articleArray?.length > 0 && setCleanedArticles([...articleArray]);
+  // console.log(articleArray);
 
   const {
     loading: storyQueryLoading,
@@ -324,8 +326,8 @@ export default function VisitLogger(props) {
     },
     context: { clientName: "authorLink" },
     refetchQueries: [
-      { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
-      "BetaVisitCount", // Query name
+      { query: PROPERTY_VISIT_COUNTER },
+      "BetaVisitCount",
       { query: GET_USER_VISIT_DATA },
       "getUserVisitData",
       { query: HAS_PROPERTY_BEEN_LOGGED },
@@ -333,8 +335,6 @@ export default function VisitLogger(props) {
     ],
 
     onCompleted() {
-      // loggedUserDestinations(newChapterData.createChapter.articles);
-      console.log(newChapterData);
       setCurrentUserArticles(newChapterData.createChapter.articles);
       setCurentChapterId(newChapterData.createChapter.id);
 
@@ -350,8 +350,6 @@ export default function VisitLogger(props) {
 
       console.log(`created articles: ${newChapterData.createChapter.articles}`);
       setCleanedArticles(newArticleAdditionBundle);
-      // setCurrentStoryId(newChapterData.createChapter.stories[0].id);
-      // setCurrentVisitId(newChapterData.createChapter.stories[0].visits[0].id);
     },
   });
 
@@ -373,13 +371,12 @@ export default function VisitLogger(props) {
           : parkId,
       destinationIdent: destinationId,
       currentDate: currentDate,
-      // visitTitle: "Title String",
       chapterIdentifier: currentChapterId,
     },
     context: { clientName: "authorLink" },
     refetchQueries: [
-      { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
-      "BetatVisitCount", // Query name
+      { query: PROPERTY_VISIT_COUNTER },
+      "BetatVisitCount",
       { query: GET_USER_VISIT_DATA },
       "getUserVisitData",
       { query: HAS_PROPERTY_BEEN_LOGGED },
@@ -396,14 +393,23 @@ export default function VisitLogger(props) {
         return articleStoryBundle;
       });
 
-      console.log(`created new article: ${newArticleData}`);
+      // console.log(`created new article: ${newArticleData}`);
       setCleanedArticles(articleStoryBundle);
     },
   });
 
-  const thatDestMatch =
-    cleanedArticles?.length > 0 && cleanedArticles?.find(isDestMatch);
+  // const thatDestMatch =
+  //   cleanedArticles?.length > 0 && cleanedArticles?.find(isDestMatch);
 
+  // console.log(thatDestMatch);
+
+  let destParkMatch = cleanedArticles?.filter(function (parkdest) {
+    return (
+      parkdest.destinationID === destinationId || parkdest.parkID === parkId
+    );
+  });
+
+  console.log(destParkMatch);
   const [
     createStoryForExistingArticle,
     {
@@ -414,20 +420,18 @@ export default function VisitLogger(props) {
   ] = useMutation(ADD_STORY_TO_ARTICLE_FINAL, {
     variables: {
       chapterIdentifier: currentChapterId,
-      articleIdentifier: thatDestMatch?.articleID,
-
+      articleIdentifier: destParkMatch?.articleID,
       landmarkIdentifier: landmarkId,
-      destinationIdent: thatDestMatch?.destinationID,
-      parkIdentifier: thatDestMatch?.parkID,
+      destinationIdent: destParkMatch?.destinationID,
+      parkIdentifier: destParkMatch?.parkID,
       authorIdentifier: authorId,
       currentDate: currentDate,
-      // visitTitle: "Title String",
       storyTitle: "Title String",
     },
     context: { clientName: "authorLink" },
     refetchQueries: [
-      { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
-      "BetatVisitCount", // Query name
+      { query: PROPERTY_VISIT_COUNTER },
+      "BetatVisitCount",
       { query: GET_USER_VISIT_DATA },
       "getUserVisitData",
       { query: HAS_PROPERTY_BEEN_LOGGED },
@@ -451,7 +455,6 @@ export default function VisitLogger(props) {
       landmarkIdentifier: landmarkId,
       authorIdentifier: authorId,
       currentDate: currentDate,
-      // visitTitle: "Title String",
     },
     context: { clientName: "authorLink" },
     refetchQueries: [
@@ -486,28 +489,6 @@ export default function VisitLogger(props) {
       setCurrentVisitId(newStoryData.createStory.visits[0].id);
     },
   });
-
-  // const [
-  //   createNewVisit,
-  //   { data: newVisitData, loading: newVisitLoading, error: newVisitError },
-  // ] = useMutation(CREATE_NEW_VISIT, {
-  //   variables: {
-  //     landmarkTracker: landmarkId,
-  //     storyIDLandmark: storyIdForLandmark,
-  //   },
-  //   context: { clientName: "authorLink" },
-  //   refetchQueries: [
-  //     { query: PROPERTY_VISIT_COUNTER },
-  //     "BetaVisitCount",
-  //     { query: GET_USER_VISIT_DATA },
-  //     "getUserVisitData",
-  //     { query: HAS_PROPERTY_BEEN_LOGGED },
-  //     "checkPropertyForPriorLog",
-  //   ],
-  //   onCompleted() {
-  //     setCurrentVisitId(newVisitData.createVisit.id);
-  //   },
-  // });
 
   /************************************************ HELPER FUNCTIONS *****************************************************/
   const chapterMap =
@@ -559,16 +540,16 @@ export default function VisitLogger(props) {
     const storyIdToLdmk = findStoryIdForLandmark?.storyId;
     setStoryIdForLandmark(storyIdToLdmk);
   }
-  console.log(userArticles);
+  // console.log(userArticles);
   const loggedUserDestinations =
     userArticles?.length > 0 &&
     userArticles.map((destination, index) => destination.destinationID);
-  console.log(loggedUserDestinations);
+  // console.log(loggedUserDestinations);
 
   const isDestinationLogged =
     loggedUserDestinations !== false &&
     loggedUserDestinations.includes(`${destinationId}`);
-  console.log(isDestinationLogged);
+  // console.log(isDestinationLogged);
 
   const loggedUserParks =
     userArticles?.length > 0 && userArticles.map((park, index) => park.parkID);
@@ -580,7 +561,7 @@ export default function VisitLogger(props) {
       ? true
       : loggedUserParks !== false && loggedUserParks?.includes(`${parkId}`);
 
-  console.log(isParkLogged);
+  // console.log(isParkLogged);
 
   const loggedUserStories =
     userArticles?.length > 0 &&
