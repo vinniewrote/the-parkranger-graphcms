@@ -426,10 +426,10 @@ export default function VisitLogger(props) {
   ] = useMutation(ADD_STORY_TO_ARTICLE_FINAL, {
     variables: {
       chapterIdentifier: currentChapterId,
-      articleIdentifier: destParkMatch[0]?.articleID,
+      articleIdentifier: destParkMatch?.[0]?.articleID,
       landmarkIdentifier: landmarkId,
-      destinationIdent: destParkMatch[0]?.destinationID,
-      parkIdentifier: destParkMatch[0]?.parkID,
+      destinationIdent: destParkMatch?.[0]?.destinationID,
+      parkIdentifier: destParkMatch?.[0]?.parkID,
       authorIdentifier: authorId,
       currentDate: currentDate,
       storyTitle: "Title String",
