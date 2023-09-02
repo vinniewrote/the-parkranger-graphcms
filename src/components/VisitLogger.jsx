@@ -403,13 +403,19 @@ export default function VisitLogger(props) {
 
   // console.log(thatDestMatch);
 
+  let propParkIdentity =
+    parkId === undefined
+      ? hotelId || shipId || districtId || foundlingId
+      : parkId;
+
   let destParkMatch = cleanedArticles?.filter(function (parkdest) {
     return (
-      parkdest.destinationID === destinationId || parkdest.parkID === parkId
+      parkdest.destinationID === destinationId ||
+      parkdest.parkID === propParkIdentity
     );
   });
 
-  console.log(destParkMatch);
+  // console.log(destParkMatch[0]?.articleID);
   const [
     createStoryForExistingArticle,
     {
@@ -420,10 +426,10 @@ export default function VisitLogger(props) {
   ] = useMutation(ADD_STORY_TO_ARTICLE_FINAL, {
     variables: {
       chapterIdentifier: currentChapterId,
-      articleIdentifier: destParkMatch?.articleID,
+      articleIdentifier: destParkMatch[0]?.articleID,
       landmarkIdentifier: landmarkId,
-      destinationIdent: destParkMatch?.destinationID,
-      parkIdentifier: destParkMatch?.parkID,
+      destinationIdent: destParkMatch[0]?.destinationID,
+      parkIdentifier: destParkMatch[0]?.parkID,
       authorIdentifier: authorId,
       currentDate: currentDate,
       storyTitle: "Title String",
