@@ -88,12 +88,19 @@ export default function VisitLogger(props) {
   let todaysChapterBundle = [];
   let newArticleAdditionBundle = [];
 
-  function isDestMatch(dest) {
-    return dest.destinationID === destinationId;
-  }
-  function isParkMatch(dest) {
-    return dest.parkID === parkId;
-  }
+  // function isDestMatch(dest) {
+  //   return dest.destinationID === destinationId;
+  // }
+  // function isParkMatch(dest) {
+  //   return dest.parkID === parkId;
+  // }
+
+  let propParkIdentity =
+    parkId === undefined
+      ? hotelId || shipId || districtId || foundlingId
+      : parkId;
+
+  console.log(propParkIdentity);
 
   /************************************************ QUERIES *****************************************************/
 
@@ -192,7 +199,7 @@ export default function VisitLogger(props) {
         : setLandmarkVisitedPrior(false);
       setStoryLandmarkBundle({
         ldmkID: landmarkId,
-        ldmkStoryID: priorLogData.visits[0].story.id,
+        ldmkStoryID: priorLogData.visits[0]?.story.id,
       });
     },
   });
@@ -266,7 +273,7 @@ export default function VisitLogger(props) {
     },
   });
 
-  // console.log(rawVisitData?.articles);
+  console.log(rawVisitData?.articles);
 
   const articleArray =
     rawVisitData?.articles?.length > 0 &&
@@ -277,7 +284,7 @@ export default function VisitLogger(props) {
       rawStories: item?.stories,
     }));
 
-  // console.log(articleArray);
+  console.log(articleArray);
 
   const {
     loading: storyQueryLoading,
@@ -316,10 +323,7 @@ export default function VisitLogger(props) {
       authorIdentifier: authorId,
       authLandmark: landmarkId,
       landmarkIdentifier: landmarkId,
-      parkIdentifier:
-        parkId === undefined
-          ? hotelId || shipId || districtId || foundlingId
-          : parkId,
+      parkIdentifier: propParkIdentity,
       destinationIdent: destinationId,
       authJournalID: userJournalId,
       currentDate: currentDate,
@@ -365,10 +369,7 @@ export default function VisitLogger(props) {
       authorIdentifier: authorId,
       authLandmark: landmarkId,
       landmarkIdentifier: landmarkId,
-      parkIdentifier:
-        parkId === undefined
-          ? hotelId || shipId || districtId || foundlingId
-          : parkId,
+      parkIdentifier: propParkIdentity,
       destinationIdent: destinationId,
       currentDate: currentDate,
       chapterIdentifier: currentChapterId,
@@ -398,24 +399,16 @@ export default function VisitLogger(props) {
     },
   });
 
-  // const thatDestMatch =
-  //   cleanedArticles?.length > 0 && cleanedArticles?.find(isDestMatch);
-
-  // console.log(thatDestMatch);
-
-  let propParkIdentity =
-    parkId === undefined
-      ? hotelId || shipId || districtId || foundlingId
-      : parkId;
-
-  let destParkMatch = cleanedArticles?.filter(function (parkdest) {
+  // add another layer
+  console.log(propParkIdentity);
+  const destParkMatch = cleanedArticles?.filter(function (parkdest) {
     return (
-      parkdest.destinationID === destinationId ||
+      parkdest.destinationID === destinationId &&
       parkdest.parkID === propParkIdentity
     );
   });
+  // console.log(destParkMatch?.[0].articleID);
 
-  // console.log(destParkMatch[0]?.articleID);
   const [
     createStoryForExistingArticle,
     {
@@ -429,7 +422,7 @@ export default function VisitLogger(props) {
       articleIdentifier: destParkMatch?.[0]?.articleID,
       landmarkIdentifier: landmarkId,
       destinationIdent: destParkMatch?.[0]?.destinationID,
-      parkIdentifier: destParkMatch?.[0]?.parkID,
+      parkIdentifier: propParkIdentity,
       authorIdentifier: authorId,
       currentDate: currentDate,
       storyTitle: "Title String",
@@ -464,8 +457,8 @@ export default function VisitLogger(props) {
     },
     context: { clientName: "authorLink" },
     refetchQueries: [
-      { query: PROPERTY_VISIT_COUNTER }, // DocumentNode object parsed
-      "BetaVisitCount", // Query name
+      { query: PROPERTY_VISIT_COUNTER },
+      "BetaVisitCount",
       { query: GET_USER_VISIT_DATA },
       "getUserVisitData",
       { query: HAS_PROPERTY_BEEN_LOGGED },
@@ -486,10 +479,7 @@ export default function VisitLogger(props) {
       currentChptID: todaysChapterId,
     },
     context: { clientName: "authorLink" },
-    refetchQueries: [
-      { query: GET_CHAPTER_DATE }, // DocumentNode object parsed
-      "GetChapterDate", // Query name
-    ],
+    refetchQueries: [{ query: GET_CHAPTER_DATE }, "GetChapterDate"],
     onCompleted() {
       setCurrentStoryId(newStoryData.createStory.id);
       setCurrentVisitId(newStoryData.createStory.visits[0].id);
@@ -555,7 +545,6 @@ export default function VisitLogger(props) {
   const isDestinationLogged =
     loggedUserDestinations !== false &&
     loggedUserDestinations.includes(`${destinationId}`);
-  // console.log(isDestinationLogged);
 
   const loggedUserParks =
     userArticles?.length > 0 && userArticles.map((park, index) => park.parkID);
@@ -566,8 +555,6 @@ export default function VisitLogger(props) {
       : districtId !== undefined
       ? true
       : loggedUserParks !== false && loggedUserParks?.includes(`${parkId}`);
-
-  // console.log(isParkLogged);
 
   const loggedUserStories =
     userArticles?.length > 0 &&
@@ -603,7 +590,6 @@ export default function VisitLogger(props) {
 
   /************************************************ JOURNAL LOGIC **************************************************/
 
-  console.log(currentDate);
   console.log(landmarkVisitedPrior);
   console.log(isDestinationLogged);
   console.log(isParkLogged);
