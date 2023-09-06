@@ -407,7 +407,7 @@ export default function VisitLogger(props) {
       parkdest.parkID === propParkIdentity
     );
   });
-  console.log(destParkMatch?.[0].articleID);
+  // console.log(destParkMatch?.[0].articleID);
 
   const [
     createStoryForExistingArticle,
