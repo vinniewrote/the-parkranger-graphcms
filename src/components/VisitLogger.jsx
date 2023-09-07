@@ -48,11 +48,9 @@ export default function VisitLogger(props) {
   const [rawVisitCount, setRawVisitCount] = useState(null);
   const [landmarkVisitedPrior, setLandmarkVisitedPrior] = useState(null);
   const [userArticles, setUserArticles] = useState(null);
-  const [testcleanedArray, setTestCleanedArray] = useState(null);
   const [storyBlock, setStoryBlock] = useState(null);
   const [propertyVisitCount, setPropertyVisitCount] = useState(null);
   const [storyLandmarkBundle, setStoryLandmarkBundle] = useState(null);
-  const [userDestinationLog, setUserDestinationLog] = useState(null);
   const {
     currentDate,
     todaysDate,
@@ -536,11 +534,11 @@ export default function VisitLogger(props) {
     const storyIdToLdmk = findStoryIdForLandmark?.storyId;
     setStoryIdForLandmark(storyIdToLdmk);
   }
-  // console.log(userArticles);
+  console.log(userArticles);
   const loggedUserDestinations =
     userArticles?.length > 0 &&
     userArticles.map((destination, index) => destination.destinationID);
-  // console.log(loggedUserDestinations);
+  console.log(loggedUserDestinations);
 
   const isDestinationLogged =
     loggedUserDestinations !== false &&
@@ -548,13 +546,10 @@ export default function VisitLogger(props) {
 
   const loggedUserParks =
     userArticles?.length > 0 && userArticles.map((park, index) => park.parkID);
-
+  console.log(loggedUserParks);
   const isParkLogged =
-    foundlingId !== undefined
-      ? true
-      : districtId !== undefined
-      ? true
-      : loggedUserParks !== false && loggedUserParks?.includes(`${parkId}`);
+    loggedUserParks !== false &&
+    loggedUserParks?.includes(`${propParkIdentity}`);
 
   const loggedUserStories =
     userArticles?.length > 0 &&
@@ -589,7 +584,7 @@ export default function VisitLogger(props) {
   );
 
   /************************************************ JOURNAL LOGIC **************************************************/
-
+  // console.log(foundlingState);
   console.log(landmarkVisitedPrior);
   console.log(isDestinationLogged);
   console.log(isParkLogged);
@@ -643,7 +638,7 @@ export default function VisitLogger(props) {
       });
     }
   };
-  // console.log(rawVisitCount?.visits.length);
+  console.log(rawVisitCount?.visits.length);
   return (
     <Fragment>
       <LoggingCountContainer>
