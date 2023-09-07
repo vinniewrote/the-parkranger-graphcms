@@ -53,6 +53,7 @@ export default function VisitLogger(props) {
   const [propertyVisitCount, setPropertyVisitCount] = useState(null);
   const [storyLandmarkBundle, setStoryLandmarkBundle] = useState(null);
   const [userDestinationLog, setUserDestinationLog] = useState(null);
+  const [foundlingState, setFoundlingState] = useState(null);
   const {
     currentDate,
     todaysDate,
@@ -487,6 +488,11 @@ export default function VisitLogger(props) {
   });
 
   /************************************************ HELPER FUNCTIONS *****************************************************/
+  const setFoundlingProperty =
+    foundlingId !== undefined
+      ? console.log("truly a foundling")
+      : console.log("not a foundling");
+  console.log(setFoundlingProperty);
   const chapterMap =
     chapterIDQueryData?.journal?.chapters.length > 0 &&
     chapterIDQueryData?.journal?.chapters.map(({ id, date }) => {
@@ -536,11 +542,11 @@ export default function VisitLogger(props) {
     const storyIdToLdmk = findStoryIdForLandmark?.storyId;
     setStoryIdForLandmark(storyIdToLdmk);
   }
-  // console.log(userArticles);
+  console.log(userArticles);
   const loggedUserDestinations =
     userArticles?.length > 0 &&
     userArticles.map((destination, index) => destination.destinationID);
-  // console.log(loggedUserDestinations);
+  console.log(loggedUserDestinations);
 
   const isDestinationLogged =
     loggedUserDestinations !== false &&
@@ -548,13 +554,10 @@ export default function VisitLogger(props) {
 
   const loggedUserParks =
     userArticles?.length > 0 && userArticles.map((park, index) => park.parkID);
-
+  console.log(loggedUserParks);
   const isParkLogged =
-    foundlingId !== undefined
-      ? true
-      : districtId !== undefined
-      ? true
-      : loggedUserParks !== false && loggedUserParks?.includes(`${parkId}`);
+    loggedUserParks !== false &&
+    loggedUserParks?.includes(`${propParkIdentity}`);
 
   const loggedUserStories =
     userArticles?.length > 0 &&
@@ -589,7 +592,7 @@ export default function VisitLogger(props) {
   );
 
   /************************************************ JOURNAL LOGIC **************************************************/
-
+  // console.log(foundlingState);
   console.log(landmarkVisitedPrior);
   console.log(isDestinationLogged);
   console.log(isParkLogged);
@@ -643,7 +646,7 @@ export default function VisitLogger(props) {
       });
     }
   };
-  // console.log(rawVisitCount?.visits.length);
+  console.log(rawVisitCount?.visits.length);
   return (
     <Fragment>
       <LoggingCountContainer>
