@@ -48,12 +48,9 @@ export default function VisitLogger(props) {
   const [rawVisitCount, setRawVisitCount] = useState(null);
   const [landmarkVisitedPrior, setLandmarkVisitedPrior] = useState(null);
   const [userArticles, setUserArticles] = useState(null);
-  const [testcleanedArray, setTestCleanedArray] = useState(null);
   const [storyBlock, setStoryBlock] = useState(null);
   const [propertyVisitCount, setPropertyVisitCount] = useState(null);
   const [storyLandmarkBundle, setStoryLandmarkBundle] = useState(null);
-  const [userDestinationLog, setUserDestinationLog] = useState(null);
-  const [foundlingState, setFoundlingState] = useState(null);
   const {
     currentDate,
     todaysDate,
@@ -488,11 +485,6 @@ export default function VisitLogger(props) {
   });
 
   /************************************************ HELPER FUNCTIONS *****************************************************/
-  const setFoundlingProperty =
-    foundlingId !== undefined
-      ? console.log("truly a foundling")
-      : console.log("not a foundling");
-  console.log(setFoundlingProperty);
   const chapterMap =
     chapterIDQueryData?.journal?.chapters.length > 0 &&
     chapterIDQueryData?.journal?.chapters.map(({ id, date }) => {
