@@ -85,7 +85,7 @@ export default function ParkDetail(props, match, location) {
                     <ParkLandmarkCard key={propertyLandmarks.id}>
                       <Link
                         category={propertyLandmarks.category.pluralName}
-                        to={`/parks/${parkId}/${propertyLandmarks.id}`}
+                        to={`/property/${parkId}/${propertyLandmarks.id}`}
                         style={{ textDecoration: "none" }}
                       >
                         <LandmarkCardTop>
