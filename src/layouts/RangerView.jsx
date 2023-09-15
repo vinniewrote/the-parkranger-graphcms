@@ -37,9 +37,9 @@ export default function RangerView({ children }) {
       </div> */}
       <div className="contentBlock">
         <Switch>
-          <Route path="/property/:parkId/:id" component={LandmarkDetail} />
-          <Route path="/property/:parkId" component={ParkDetail} />
-          <Route path="/property" component={Parks} />
+          <Route path="/properties/:parkId/:id" component={LandmarkDetail} />
+          <Route path="/properties/:parkId" component={ParkDetail} />
+          <Route path="/properties" component={Parks} />
           <Route path="/journal" component={Journal} />
           <Route exact path="/" component={Splash} />
         </Switch>

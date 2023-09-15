@@ -24,7 +24,7 @@ export default function Parks() {
       <Fragment>
         {data.properties.map(({ id, name }) => (
           <PropertyBlock key={id}>
-            <Link key={`${name}-${id}`} to={`/property/${id}`}>
+            <Link key={`${name}-${id}`} to={`/properties/${id}`}>
               <PropertyTitle key={`${id}-${name}`}>{name}</PropertyTitle>
             </Link>
           </PropertyBlock>
