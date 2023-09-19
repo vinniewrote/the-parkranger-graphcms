@@ -238,6 +238,50 @@ export const PARK_LISTING = gql`
   }
 `;
 
+export const SEARCH_QUERY = gql`
+  query SearchData {
+    properties {
+      name
+      state
+      ticketed
+      location: parentProp {
+        id
+        name
+        category {
+          name
+        }
+      }
+      childProp {
+        id
+        name
+        category {
+          name
+        }
+      }
+      map {
+        latitude
+        longitude
+      }
+      timeline {
+        day
+        month
+        year
+        type
+      }
+      liveDataID {
+        id
+        wikiID
+        wikiLive {
+          liveData {
+            queue
+            status
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const VISIT_LANDMARK_CHECK = gql`
   query CheckLandmarkForVisits($currentPropertyId: ID, $authorIdentifier: ID) {
     visits(
