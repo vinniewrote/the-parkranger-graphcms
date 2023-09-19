@@ -12,7 +12,7 @@ export default function Profile() {
         </div>
         <h3>Profile</h3>
         <p>
-          <a href="/app/parks">go to parks</a>
+          <a href="/app/properties">go to parks</a>
         </p>
         <p>
           <a href="/">go to home</a>

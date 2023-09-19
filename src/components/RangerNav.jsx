@@ -7,7 +7,7 @@ import { NavLink } from "react-router-dom";
 export default function RangerNav() {
   return (
     <div className="rangerNav">
-      <NavLink to="/property" activeClassName="selected">
+      <NavLink to="/properties" activeClassName="selected">
         <Parksbtn />
       </NavLink>
       <NavLink to="/journal" activeClassName="selected">
