@@ -79,6 +79,7 @@ function App() {
           <ManageStory>
             <div className="App">
               <p style={{ margin: 0 }}>v0.106.25</p>
+
               <Switch>
                 <Route path="/auth" component={Unauthenticated} />
                 <PrivateRoute path="/" component={Authenticated} />

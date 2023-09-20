@@ -9,7 +9,7 @@ export default function AuthenticatedUser() {
   return (
     <div className="rangerWrapper">
       <Switch>
-        <PrivateRoute path="/parks" component={RangerView} />
+        <PrivateRoute path="/properties" component={RangerView} />
         <PrivateRoute path="/journal" component={RangerView} />
         <PrivateRoute exact path="/profile" component={ProfileView} />
         <PrivateRoute path="/" component={RangerView} />
