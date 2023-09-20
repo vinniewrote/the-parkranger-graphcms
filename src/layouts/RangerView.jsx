@@ -6,12 +6,9 @@ import Journal from "../components/Journal";
 import ParkDetail from "../components/ParkDetail";
 import LandmarkDetail from "../components/LandmarkDetail";
 import Splash from "../components/Splash";
+import SearchBar from "../components/SearchBar";
 
 export default function RangerView({ children }) {
-  // if (currentUrl == newUrl) {
-  //   props.history.push("/temp");
-  //   props.history.goBack();
-  // }
   let history = useHistory();
   window.onbeforeunload = (event) => {
     const e = event || window.event;
@@ -35,6 +32,7 @@ export default function RangerView({ children }) {
         <h1>Page Header</h1>
         <h2>Subheader Text</h2>
       </div> */}
+      <SearchBar />
       <div className="contentBlock">
         <Switch>
           <Route path="/properties/:parkId/:id" component={LandmarkDetail} />
