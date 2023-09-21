@@ -2,8 +2,8 @@ import React from "react";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import "./App.css";
 import { Auth0Provider } from "@auth0/auth0-react";
-import Authenticated from "./layouts/AuthenticatedUser";
-import Unauthenticated from "./layouts/UnauthenticatedUser";
+import AuthenticatedUser from "./layouts/AuthenticatedUser";
+import UnauthenticatedUser from "./layouts/UnauthenticatedUser";
 import { PrivateRoute } from "./components/PrivateRoute";
 import { ManageStory } from "./contexts/StoryContext";
 import { ApolloClient, createHttpLink, InMemoryCache } from "@apollo/client";
@@ -81,8 +81,8 @@ function App() {
               <p style={{ margin: 0 }}>v0.106.25</p>
 
               <Switch>
-                <Route path="/auth" component={Unauthenticated} />
-                <PrivateRoute path="/" component={Authenticated} />
+                <Route path="/auth" component={UnauthenticatedUser} />
+                <PrivateRoute path="/" component={AuthenticatedUser} />
               </Switch>
             </div>
           </ManageStory>

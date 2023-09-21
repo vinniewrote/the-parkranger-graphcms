@@ -282,6 +282,16 @@ export const SEARCH_QUERY = gql`
   }
 `;
 
+export const SEARCH_QUERY_SHORT = gql`
+  query SearchData {
+    properties(first: 100) {
+      name
+      state
+      summary
+    }
+  }
+`;
+
 export const VISIT_LANDMARK_CHECK = gql`
   query CheckLandmarkForVisits($currentPropertyId: ID, $authorIdentifier: ID) {
     visits(
