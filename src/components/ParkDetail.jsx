@@ -30,6 +30,7 @@ const FILTER_NAMES = Object.keys(FILTER_MAP);
 export default function ParkDetail(props, match, location) {
   const { user } = useAuth0();
   const [rawAreaData, setRawAreaData] = useState(null);
+  const [cleanedData, setCleanedData] = useState(null);
   const {
     params: { parkId },
   } = props.match;
@@ -40,12 +41,25 @@ export default function ParkDetail(props, match, location) {
   const filterList = FILTER_NAMES.map((name) => (
     <FilterButton key={name} name={name} />
   ));
-
+  let cleanedPlate = [];
   const { loading, error, data } = useQuery(LANDMARK_LISTING, {
     variables: { propertyId: parkId, authZeroId: user.sub },
     pollInterval: 10000,
     context: { clientName: "authorLink" },
-    onCompleted() {
+    onCompleted: () => {
+      data.property.childProp.map((simpleArea) => {
+        simpleArea?.childProp?.map((simp) => {
+          cleanedPlate.push({
+            casualAreaName: simpleArea.name,
+            casualPropertyName: simp.name,
+            casualPropertyID: simp.id,
+            casualCategoryName: simp.category.pluralName,
+            casualAreaLink: `/properties/${parkId}/${simp.id}`,
+          });
+        });
+        return cleanedPlate;
+      });
+      setCleanedData(cleanedPlate);
       setRawAreaData(data.property.childProp);
     },
   });
@@ -53,7 +67,9 @@ export default function ParkDetail(props, match, location) {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
-  const areaData = data?.property?.childProp;
+  // cleanedAreDataName()?.length > 0 && setCleanedData(cleanedAreDataName());
+
+  // const areaData = data?.property?.childProp;
   // console.log(areaData);
 
   // const dataBoop = FILTER_ARRAY.map((filterPoint) => {
@@ -72,36 +88,33 @@ export default function ParkDetail(props, match, location) {
         <h2>{parkId}</h2>
       </div>
       <FilterBar>{filterList}</FilterBar>
-      <Fragment>
-        {rawAreaData?.length > 0 &&
-          rawAreaData.map((propertyArea) => (
-            <AreaContainer key={propertyArea.id}>
-              <AreaTitle>{propertyArea.name}</AreaTitle>
 
-              {propertyArea?.childProp?.length > 0 &&
-                propertyArea.childProp
-                  //.filter(FILTER_MAP[filter])
-                  .map((propertyLandmarks) => (
-                    <ParkLandmarkCard key={propertyLandmarks.id}>
-                      <Link
-                        category={propertyLandmarks.category.pluralName}
-                        to={`/properties/${parkId}/${propertyLandmarks.id}`}
-                        style={{ textDecoration: "none" }}
-                      >
-                        <LandmarkCardTop>
-                          <span>{propertyLandmarks.category.pluralName}</span>
-                        </LandmarkCardTop>
-                        <LandmarkCardMiddle>
-                          <h4>{propertyLandmarks.name}</h4>
-                        </LandmarkCardMiddle>
-                      </Link>
-                      <LandmarkCardBottom>
-                        <span>{`${propertyLandmarks?.visits?.length} visits`}</span>
-                        {/* add slim visitlogger here */}
-                        <div>+</div>
-                      </LandmarkCardBottom>
-                    </ParkLandmarkCard>
-                  ))}
+      <Fragment>
+        {cleanedData?.length > 0 &&
+          cleanedData.map((propArea) => (
+            <AreaContainer key={propArea.id}>
+              {/* <AreaTitle>{propArea.casualAreaName}</AreaTitle> */}
+
+              <ParkLandmarkCard>
+                <Link
+                  category={propArea.casualCategoryName}
+                  to={propArea.casualAreaLink}
+                  style={{ textDecoration: "none" }}
+                >
+                  <LandmarkCardTop>
+                    {/* <AreaTitle>{propArea.casualAreaName}</AreaTitle> */}
+                    <span>{propArea.casualCategoryName}</span>
+                  </LandmarkCardTop>
+                  <LandmarkCardMiddle>
+                    <h4>{propArea.casualPropertyName}</h4>
+                  </LandmarkCardMiddle>
+                </Link>
+                <LandmarkCardBottom>
+                  {/* <span>{`${propertyLandmarks?.visits?.length} visits`}</span> */}
+                  {/* add slim visitlogger here */}
+                  <div>+</div>
+                </LandmarkCardBottom>
+              </ParkLandmarkCard>
             </AreaContainer>
           ))}
       </Fragment>
