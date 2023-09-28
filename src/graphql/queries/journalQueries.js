@@ -285,6 +285,7 @@ export const SEARCH_QUERY = gql`
 export const SEARCH_QUERY_SHORT = gql`
   query SearchData {
     properties(first: 1000) {
+      id
       name
       state
       summary
