@@ -268,16 +268,16 @@ export const SEARCH_QUERY = gql`
         year
         type
       }
-      liveDataID {
-        id
-        wikiID
-        wikiLive {
-          liveData {
-            queue
-            status
-          }
-        }
-      }
+      # liveDataID {
+      #   id
+      #   wikiID
+      #   wikiLive {
+      #     liveData {
+      #       queue
+      #       status
+      #     }
+      #   }
+      # }
     }
   }
 `;
