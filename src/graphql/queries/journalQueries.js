@@ -316,6 +316,11 @@ export const LANDMARK_LISTING = gql`
             name
             pluralName
           }
+          classification(where: { attribute_not: Theme }) {
+            name
+            id
+            attribute
+          }
         }
       }
     }

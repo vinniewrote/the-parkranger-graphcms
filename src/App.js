@@ -13,7 +13,7 @@ import { HttpLink } from "apollo-link-http";
 import { ApolloLink } from "apollo-link";
 
 const baseLink = createHttpLink({
-  uri: "https://api-us-east-1.hygraph.com/v2/ck8g4we3i14kb01xv6avzh80e/master",
+  uri: "https://us-east-1.cdn.hygraph.com/content/ck8g4we3i14kb01xv6avzh80e/master",
 });
 
 const authorPAT = `eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImdjbXMtbWFpbi1wcm9kdWN0aW9uIn0.eyJ2ZXJzaW9uIjozLCJpYXQiOjE2ODI5NTI1MjQsImF1ZCI6WyJodHRwczovL2FwaS11cy1lYXN0LTEuaHlncmFwaC5jb20vdjIvY2s4ZzR3ZTNpMTRrYjAxeHY2YXZ6aDgwZS9tYXN0ZXIiLCJtYW5hZ2VtZW50LW5leHQuZ3JhcGhjbXMuY29tIl0sImlzcyI6Imh0dHBzOi8vbWFuYWdlbWVudC5ncmFwaGNtcy5jb20vIiwic3ViIjoiYmMxODZlMTEtODA1Zi00NmM1LThmOTAtNjkwNmNjY2Y1MGFmIiwianRpIjoiY2xoNHloYWlvNW9zdjAxdWpmNjlpYm9rbCJ9.ZXIcpLY7d1A0i_fbjNOrLIfC7eGVIgejShvOaup-5UcBKikbBRMHgm2GCPPKWouZm-MEdWr4aC8mPr42ubkyz5fKoFKeIBnucRWguDYw-YeoS0SKmHSmJq-1E-HlnZFOe9AJitBOPFM2_gaGTMfzw1uNuNhquWY1t3f8bnGGviWUulOtlH2KMOIYs4EqeuOkUTI8Gkkq_oJLvEmHIyUtE87AYgDiqo1j7N27ID-G03-A6IlSITEp--fULkUQvwItIvBRf0fx3YJbdkE_b1Oi8fnU1nN7dHn8ydF8C7Zi2skTpogSqbBII2wU_2jdkEOsDdFLlTEtltT84-R1EoUMR4g55s9z99oLo_VbT5fPG_DGq8rZWM05KgYsse2eNE7jOtlJWPzhvzWpIYH-GOoZM54YhqoSI6e1af2PLQl_Kt4Obw4Z_2VHS7gzPnZo1vS6TVYN1aaBslv13u_x5wSIdyDzZYAQzft_PsNVwct441xeKfrlbyZJTfJkn762aawd8LT1kTz54wne02eywhN_L9V_xk_2g0uszkgw8DcN7PDXPx3iMNgFM_UMj9PJoyKFxiKgMrVvE4by8PG4oZb196qsQe4Nhbi_0Wkzd_8K3utftSHihdVq7o7QMZYAGaydnzAYsKB4hCTFqZheZY4Q2UjpYF9sSnqr6AZi2Vm_nfw`;
@@ -78,7 +78,7 @@ function App() {
         <BrowserRouter>
           <ManageStory>
             <div className="App">
-              <p style={{ margin: 0 }}>v0.106.26</p>
+              <p style={{ margin: 0 }}>v0.106.27</p>
 
               <Switch>
                 <Route path="/auth" component={Unauthenticated} />
