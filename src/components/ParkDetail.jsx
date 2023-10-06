@@ -1,11 +1,9 @@
-import React, { Children, Fragment, useState } from "react";
+import React, { Fragment, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@apollo/client";
-import FilterButton from "./FilterButton";
 import Logout from "../components/LogoutButton";
 import { LANDMARK_LISTING } from "../graphql/queries/journalQueries";
 import { useManagedStory } from "../contexts/StoryContext";
-import { FilterBar } from "../styledComponents/FilterButton_styled";
 import { useAuth0 } from "@auth0/auth0-react";
 import {
   ParkLandmarkCard,
@@ -13,25 +11,19 @@ import {
   LandmarkCardMiddle,
   LandmarkCardBottom,
   AreaContainer,
-  AreaTitle,
+  PropertyFilterBtn,
+  PropertySubFilterBtn,
+  MainFilterWrapper,
+  SubFilterWrapper,
 } from "../styledComponents/ParkDetail_styled";
-
-const FILTER_MAP = {
-  Coasters: (property) => property.category?.pluralName === "Coasters",
-  Shops: (property) => property.category?.pluralName === "Shops",
-  Attractions: (property) => property.category?.pluralName === "Attractions",
-  Dining: (property) => property.category?.pluralName === "Dining",
-};
-
-// const FILTER_ARRAY = ["Coasters", "Shops", "Attractions", "Dining"];
-
-const FILTER_NAMES = Object.keys(FILTER_MAP);
 
 export default function ParkDetail(props, match, location) {
   const { user } = useAuth0();
   const [rawAreaData, setRawAreaData] = useState(null);
   const [cleanedData, setCleanedData] = useState(null);
   const [filterBarItems, setFilterBarItems] = useState(null);
+  const [secondaryFilterBarItems, setSecondaryFilterBarItems] = useState(null);
+  const [currentSelectedCategory, setCurrentSelectedCategory] = useState(null);
   const [parkFilterItem, setParkFilterItem] = useState(cleanedData);
   const {
     params: { parkId },
@@ -39,10 +31,6 @@ export default function ParkDetail(props, match, location) {
 
   const { filter, setFilter, emptyFilters, setEmptyFilters } =
     useManagedStory();
-
-  const filterList = FILTER_NAMES.map((name) => (
-    <FilterButton key={name} name={name} />
-  ));
 
   let cleanedPlate = [];
   const { loading, error, data } = useQuery(LANDMARK_LISTING, {
@@ -58,10 +46,14 @@ export default function ParkDetail(props, match, location) {
             casualPropertyID: simp.id,
             casualCategoryName: simp.category.pluralName,
             casualAreaLink: `/properties/${parkId}/${simp.id}`,
+            casualClassifications: simp.classification?.map((landClass) => {
+              return landClass.name;
+            }),
           });
         });
         return cleanedPlate;
       });
+      console.log(cleanedPlate);
       setCleanedData(cleanedPlate);
       setRawAreaData(data.property.childProp);
       setFilterBarItems([
@@ -75,49 +67,44 @@ export default function ParkDetail(props, match, location) {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error :(</p>;
 
-  // spread operator will display all the values from our category section of our data while Set will only allow the single value of each kind to be displayed
-
-  // const menuItems = [
-  //   ...new Set(cleanedData?.map((cleanVal) => cleanVal.casualCategoryName)),
-  // ];
-
-  // console.log(menuItems);
   console.log(filterBarItems);
 
+  const secondaryClean = (currCategory) => {
+    console.log(currCategory);
+    console.log(cleanedData);
+    let filterShire = [];
+    cleanedData?.map((cleanSubVal) => {
+      if (cleanSubVal.casualCategoryName === currCategory) {
+        console.log("its true focker");
+        filterShire.push(cleanSubVal.casualClassifications);
+      }
+    });
+    setSecondaryFilterBarItems([...new Set(filterShire.flat(Infinity))]);
+    console.log(filterShire.flat(Infinity));
+    return filterShire;
+  };
+
   const filterItem = (currCategory) => {
-    // console.log(currCategory);
+    console.log(currCategory);
+    secondaryClean(currCategory);
     const newItem = cleanedData?.filter((newVal) => {
-      // console.log(newVal.casualCategoryName === currCategory);
+      setCurrentSelectedCategory(currCategory);
       return newVal.casualCategoryName === currCategory;
-      // comparing category for displaying data
     });
     setParkFilterItem(newItem);
   };
+  console.log(secondaryFilterBarItems);
 
-  const Buttons = (setParkFilterItem, filterBarItems) => {
-    return (
-      <div className="d-flex justify-content-center">
-        {filterBarItems?.length > 1 &&
-          filterBarItems?.map((menuVals, index) => {
-            return <button key={index}>{menuVals}</button>;
-          })}
-        <button onClick={() => setParkFilterItem(cleanedData)}>All</button>
-      </div>
-    );
+  const secondaryFilterItem = (currSubCategory) => {
+    console.log(currSubCategory);
+    const newSubItem = cleanedData?.filter((newVal) => {
+      return (
+        newVal.casualCategoryName === currentSelectedCategory &&
+        newVal.casualClassifications?.includes(currSubCategory)
+      );
+    });
+    setParkFilterItem(newSubItem);
   };
-
-  // cleanedAreDataName()?.length > 0 && setCleanedData(cleanedAreDataName());
-
-  // const areaData = data?.property?.childProp;
-  // console.log(areaData);
-
-  // const dataBoop = FILTER_ARRAY.map((filterPoint) => {
-  //   const filterCheck = rawLandmarks.filter(FILTER_MAP[filterPoint]);
-  //   // console.log(filterCheck);
-  //   filterCheck.length === 0 && setEmptyFilters(filterPoint);
-  // });
-  // let propertyCheck = document.getElementsByClassName("areaTitle");
-  // console.log(propertyCheck.length);
 
   return (
     <Fragment>
@@ -126,19 +113,34 @@ export default function ParkDetail(props, match, location) {
         <h1>Parks and Maps</h1>
         <h2>{parkId}</h2>
       </div>
-      {/* <FilterBar>{filterList}</FilterBar> */}
-      {/* <Buttons /> */}
-      <div className="d-flex justify-content-center">
+      <MainFilterWrapper>
         {filterBarItems?.length > 1 &&
           filterBarItems?.map((menuVals, index) => {
             return (
-              <button onClick={() => filterItem(menuVals)} key={index}>
+              <PropertyFilterBtn
+                onClick={() => filterItem(menuVals)}
+                key={index}
+              >
                 {menuVals}
-              </button>
+              </PropertyFilterBtn>
             );
           })}
-        <button onClick={() => setParkFilterItem(cleanedData)}>All</button>
-      </div>
+        {/* <button onClick={() => setParkFilterItem(cleanedData)}>All</button> */}
+      </MainFilterWrapper>
+      <SubFilterWrapper className="d-flex justify-content-center secondaryFilter">
+        {secondaryFilterBarItems?.length > 1 &&
+          secondaryFilterBarItems?.map((subMenuVals, index) => {
+            return (
+              <PropertySubFilterBtn
+                onClick={() => secondaryFilterItem(subMenuVals)}
+                key={index}
+              >
+                {subMenuVals}
+              </PropertySubFilterBtn>
+            );
+          })}
+        {/* <button onClick={() => setParkFilterItem(cleanedData)}>All</button> */}
+      </SubFilterWrapper>
       <Fragment>
         {parkFilterItem?.map((propArea) => (
           <AreaContainer key={propArea.id}>

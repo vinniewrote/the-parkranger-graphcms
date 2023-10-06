@@ -68,3 +68,42 @@ export const AreaTitle = styled.h3`
   text-align: left;
   width: 70%;
 `;
+
+export const PropertyFilterBtn = styled.button`
+  display: inline-flex;
+  padding: 0.625rem 1rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 624.9375rem;
+`;
+
+export const PropertySubFilterBtn = styled.button`
+  display: inline-flex;
+  padding: 0.625rem 1rem;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 624.9375rem;
+`;
+
+export const MainFilterWrapper = styled.div`
+  width: 100%;
+  height: 75px;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  &:button {
+    /* overflow-x: hidden; */
+  }
+`;
+export const SubFilterWrapper = styled.div`
+  width: 100%;
+  height: 75px;
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  &:button {
+    /* overflow-x: hidden; */
+  }
+`;
