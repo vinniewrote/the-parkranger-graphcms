@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import Logout from "../components/LogoutButton";
@@ -19,92 +19,111 @@ import {
 
 export default function ParkDetail(props, match, location) {
   const { user } = useAuth0();
-  const [rawAreaData, setRawAreaData] = useState(null);
   const [cleanedData, setCleanedData] = useState(null);
-  const [filterBarItems, setFilterBarItems] = useState(null);
-  const [secondaryFilterBarItems, setSecondaryFilterBarItems] = useState(null);
-  const [currentSelectedCategory, setCurrentSelectedCategory] = useState(null);
-  const [parkFilterItem, setParkFilterItem] = useState(cleanedData);
   const {
     params: { parkId },
   } = props.match;
 
-  const { filter, setFilter, emptyFilters, setEmptyFilters } =
-    useManagedStory();
+  const {
+    filterBarItems,
+    setFilterBarItems,
+    secondaryFilterBarItems,
+    setSecondaryFilterBarItems,
+    currentSelectedCategory,
+    setCurrentSelectedCategory,
+    parkFilterItem,
+    setParkFilterItem,
+    filterItem,
+    secondaryFilterItem,
+    rawAreaData,
+    setRawAreaData,
+    sub,
+    setSub,
+    currParkID,
+    setCurrParkID,
+    currSubCategory,
+  } = useManagedStory();
 
-  let cleanedPlate = [];
-  const { loading, error, data } = useQuery(LANDMARK_LISTING, {
-    variables: { propertyId: parkId, authZeroId: user.sub },
-    pollInterval: 10000,
-    context: { clientName: "authorLink" },
-    onCompleted: () => {
-      data.property.childProp.map((simpleArea) => {
-        simpleArea?.childProp?.map((simp) => {
-          cleanedPlate.push({
-            casualAreaName: simpleArea.name,
-            casualPropertyName: simp.name,
-            casualPropertyID: simp.id,
-            casualCategoryName: simp.category.pluralName,
-            casualAreaLink: `/properties/${parkId}/${simp.id}`,
-            casualClassifications: simp.classification?.map((landClass) => {
-              return landClass.name;
-            }),
-          });
-        });
-        return cleanedPlate;
-      });
-      console.log(cleanedPlate);
-      setCleanedData(cleanedPlate);
-      setRawAreaData(data.property.childProp);
-      setFilterBarItems([
-        ...new Set(
-          cleanedPlate?.map((cleanVal) => cleanVal.casualCategoryName)
-        ),
-      ]);
-    },
-  });
+  useEffect(() => {
+    setCurrParkID(parkId);
+    setSub(user.sub);
+    //And any time any dependency value changes
+  }, [setCurrParkID, setSub, parkId, user.sub]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error :(</p>;
+  // let cleanedPlate = [];
+  // const { loading, error, data } = useQuery(LANDMARK_LISTING, {
+  //   variables: { propertyId: parkId, authZeroId: user.sub },
+  //   pollInterval: 10000,
+  //   context: { clientName: "authorLink" },
+  //   onCompleted: () => {
+  //     data.property.childProp.map((simpleArea) => {
+  //       simpleArea?.childProp?.map((simp) => {
+  //         cleanedPlate.push({
+  //           casualAreaName: simpleArea.name,
+  //           casualPropertyName: simp.name,
+  //           casualPropertyID: simp.id,
+  //           casualCategoryName: simp.category.pluralName,
+  //           casualAreaLink: `/properties/${parkId}/${simp.id}`,
+  //           casualClassifications: simp.classification?.map((landClass) => {
+  //             return landClass.name;
+  //           }),
+  //         });
+  //       });
+  //       return cleanedPlate;
+  //     });
+  //     console.log(cleanedPlate);
+  //     setCleanedData(cleanedPlate);
+  //     setParkFilterItem(cleanedPlate);
+  //     setRawAreaData(data.property.childProp);
+  //     setFilterBarItems([
+  //       ...new Set(
+  //         cleanedPlate?.map((cleanVal) => cleanVal.casualCategoryName)
+  //       ),
+  //     ]);
+  //   },
+  // });
 
-  console.log(filterBarItems);
+  // if (loading) return <p>Loading...</p>;
+  // if (error) return <p>Error :(</p>;
 
-  const secondaryClean = (currCategory) => {
-    console.log(currCategory);
-    console.log(cleanedData);
-    let filterShire = [];
-    cleanedData?.map((cleanSubVal) => {
-      if (cleanSubVal.casualCategoryName === currCategory) {
-        console.log("its true focker");
-        filterShire.push(cleanSubVal.casualClassifications);
-      }
-    });
-    setSecondaryFilterBarItems([...new Set(filterShire.flat(Infinity))]);
-    console.log(filterShire.flat(Infinity));
-    return filterShire;
-  };
+  // console.log(filterBarItems);
+  // console.log(parkFilterItem);
 
-  const filterItem = (currCategory) => {
-    console.log(currCategory);
-    secondaryClean(currCategory);
-    const newItem = cleanedData?.filter((newVal) => {
-      setCurrentSelectedCategory(currCategory);
-      return newVal.casualCategoryName === currCategory;
-    });
-    setParkFilterItem(newItem);
-  };
-  console.log(secondaryFilterBarItems);
+  // const secondaryClean = (currCategory) => {
+  //   console.log(currCategory);
+  //   console.log(cleanedData);
+  //   let filterShire = [];
+  //   cleanedData?.map((cleanSubVal) => {
+  //     if (cleanSubVal.casualCategoryName === currCategory) {
+  //       console.log("its true focker");
+  //       filterShire.push(cleanSubVal.casualClassifications);
+  //     }
+  //   });
+  //   setSecondaryFilterBarItems([...new Set(filterShire.flat(Infinity))]);
+  //   console.log(filterShire.flat(Infinity));
+  //   return filterShire;
+  // };
 
-  const secondaryFilterItem = (currSubCategory) => {
-    console.log(currSubCategory);
-    const newSubItem = cleanedData?.filter((newVal) => {
-      return (
-        newVal.casualCategoryName === currentSelectedCategory &&
-        newVal.casualClassifications?.includes(currSubCategory)
-      );
-    });
-    setParkFilterItem(newSubItem);
-  };
+  // const filterItem = (currCategory) => {
+  //   console.log(currCategory);
+  //   secondaryClean(currCategory);
+  //   const newItem = cleanedData?.filter((newVal) => {
+  //     setCurrentSelectedCategory(currCategory);
+  //     return newVal.casualCategoryName === currCategory;
+  //   });
+  //   setParkFilterItem(newItem);
+  // };
+  // console.log(secondaryFilterBarItems);
+
+  // const secondaryFilterItem = (currSubCategory) => {
+  //   const newSubItem = cleanedData?.filter((newVal) => {
+  //     return (
+  //       newVal.casualCategoryName === currentSelectedCategory &&
+  //       newVal.casualClassifications?.includes(currSubCategory)
+  //     );
+  //   });
+  //   setParkFilterItem(newSubItem);
+  // };
 
   return (
     <Fragment>
@@ -118,6 +137,8 @@ export default function ParkDetail(props, match, location) {
           filterBarItems?.map((menuVals, index) => {
             return (
               <PropertyFilterBtn
+                aria-pressed={props.isPressed}
+                aria-selected={menuVals === currentSelectedCategory}
                 onClick={() => filterItem(menuVals)}
                 key={index}
               >
@@ -132,6 +153,8 @@ export default function ParkDetail(props, match, location) {
           secondaryFilterBarItems?.map((subMenuVals, index) => {
             return (
               <PropertySubFilterBtn
+                aria-pressed={props.isPressed}
+                aria-selected={subMenuVals === currSubCategory}
                 onClick={() => secondaryFilterItem(subMenuVals)}
                 key={index}
               >
