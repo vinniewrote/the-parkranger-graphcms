@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@apollo/client";
 import { PropertyCardList } from "../components/PropertyCard";
-import { SEARCH_QUERY_SHORT } from "../graphql/queries/journalQueries";
+import { SEARCH_QUERY } from "../graphql/queries/journalQueries";
 
 export default function SearchBar() {
   /************************************************ QUERIES *****************************************************/
@@ -11,7 +11,7 @@ export default function SearchBar() {
     //loading: searchQueryLoading,
     //error: searchQueryError,
     data: searchQueryData,
-  } = useQuery(SEARCH_QUERY_SHORT, {
+  } = useQuery(SEARCH_QUERY, {
     context: { clientName: "authorLink" },
     onCompleted: () => {
       console.log(searchQueryData);
