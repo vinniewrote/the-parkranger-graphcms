@@ -241,6 +241,7 @@ export const PARK_LISTING = gql`
 export const SEARCH_QUERY = gql`
   query SearchData {
     properties(first: 1000) {
+      id
       name
       state
       ticketed
