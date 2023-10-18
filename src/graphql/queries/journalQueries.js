@@ -258,6 +258,10 @@ export const SEARCH_QUERY = gql`
         category {
           name
         }
+        parentProp {
+          id
+          name
+        }
       }
       map {
         latitude
@@ -272,12 +276,12 @@ export const SEARCH_QUERY = gql`
       liveDataID {
         id
         wikiID
-        wikiLive {
-          liveData {
-            queue
-            status
-          }
-        }
+        # wikiLive {
+        #   liveData {
+        #     queue
+        #     status
+        #   }
+        # }
       }
     }
   }
