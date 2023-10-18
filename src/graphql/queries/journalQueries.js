@@ -240,7 +240,8 @@ export const PARK_LISTING = gql`
 
 export const SEARCH_QUERY = gql`
   query SearchData {
-    properties {
+    properties(first: 1000) {
+      id
       name
       state
       ticketed
@@ -255,6 +256,10 @@ export const SEARCH_QUERY = gql`
         id
         name
         category {
+          name
+        }
+        parentProp {
+          id
           name
         }
       }

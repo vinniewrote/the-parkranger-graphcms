@@ -33,6 +33,7 @@ export default function RangerView({ children }) {
         <h2>Subheader Text</h2>
       </div> */}
       <SearchBar />
+
       <div className="contentBlock">
         <Switch>
           <Route path="/properties/:parkId/:id" component={LandmarkDetail} />
@@ -42,6 +43,7 @@ export default function RangerView({ children }) {
           <Route exact path="/" component={Splash} />
         </Switch>
       </div>
+
     </div>
   );
 }
