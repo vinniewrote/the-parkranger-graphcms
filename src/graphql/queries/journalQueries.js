@@ -273,16 +273,16 @@ export const SEARCH_QUERY = gql`
         year
         type
       }
-      liveDataID {
-        id
-        wikiID
-        # wikiLive {
-        #   liveData {
-        #     queue
-        #     status
-        #   }
-        # }
-      }
+      # liveDataID {
+      #   id
+      #   wikiID
+      #   wikiLive {
+      #     liveData {
+      #       queue
+      #       status
+      #     }
+      #   }
+      # }
     }
   }
 `;
@@ -320,6 +320,11 @@ export const LANDMARK_LISTING = gql`
             id
             name
             pluralName
+          }
+          classification(where: { attribute_not: Theme }) {
+            name
+            id
+            attribute
           }
         }
       }

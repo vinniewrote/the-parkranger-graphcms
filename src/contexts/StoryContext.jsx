@@ -1,9 +1,13 @@
 import React, { useContext, useState } from "react";
+import { useQuery } from "@apollo/client";
+import { LANDMARK_LISTING } from "../graphql/queries/journalQueries";
 
 const StoryContext = React.createContext();
 export const useManagedStory = () => useContext(StoryContext);
 
 export function ManageStory({ children }) {
+  const [currParkID, setCurrParkID] = useState(null);
+  const [sub, setSub] = useState(null);
   const [savedStoryId, setSavedStoryId] = useState([]);
   const [savedStoryLandmarkBundle, setSavedStoryLandmarkBundle] = useState([]);
   const [authorId, setAuthorId] = useState();
@@ -77,6 +81,90 @@ export function ManageStory({ children }) {
   };
   const currentDate = toISOStringWithTimezone(newDate);
   const currentISODate = currentDate.toISOString;
+  const [rawAreaData, setRawAreaData] = useState(null);
+  const [cleanedData, setCleanedData] = useState(null);
+  const [filterBarItems, setFilterBarItems] = useState(null);
+  const [secondaryFilterBarItems, setSecondaryFilterBarItems] = useState(null);
+  const [currentSelectedCategory, setCurrentSelectedCategory] = useState(null);
+  const [currSubCategory, setCurrSubCategory] = useState(null);
+  const [parkFilterItem, setParkFilterItem] = useState(null);
+
+  let cleanedPlate = [];
+  const { loading, error, data } = useQuery(LANDMARK_LISTING, {
+    variables: { propertyId: currParkID, authZeroId: sub },
+    pollInterval: 10000,
+    context: { clientName: "authorLink" },
+    onCompleted: () => {
+      data.property.childProp.map((simpleArea) => {
+        simpleArea?.childProp?.map((simp) => {
+          cleanedPlate.push({
+            casualAreaName: simpleArea.name,
+            casualPropertyName: simp.name,
+            casualPropertyID: simp.id,
+            casualCategoryName: simp.category.pluralName,
+            casualAreaLink: `/properties/${currParkID}/${simp.id}`,
+            casualClassifications: simp.classification?.map((landClass) => {
+              return landClass.name;
+            }),
+          });
+        });
+        return cleanedPlate;
+      });
+      console.log(cleanedPlate);
+      setCleanedData(cleanedPlate);
+      setParkFilterItem(cleanedPlate);
+      setRawAreaData(data.property.childProp);
+      setFilterBarItems([
+        ...new Set(
+          cleanedPlate?.map((cleanVal) => cleanVal.casualCategoryName)
+        ),
+      ]);
+    },
+  });
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+
+  console.log(filterBarItems);
+  console.log(parkFilterItem);
+
+  const secondaryClean = (currCategory) => {
+    console.log(currCategory);
+    console.log(cleanedData);
+    let filterShire = [];
+    cleanedData?.map((cleanSubVal) => {
+      if (cleanSubVal.casualCategoryName === currCategory) {
+        console.log("its true focker");
+        filterShire.push(cleanSubVal.casualClassifications);
+      }
+    });
+    setSecondaryFilterBarItems([...new Set(filterShire.flat(Infinity))]);
+    console.log(filterShire.flat(Infinity));
+    return filterShire;
+  };
+
+  const filterItem = (currCategory) => {
+    console.log(currCategory);
+    secondaryClean(currCategory);
+    const newItem = cleanedData?.filter((newVal) => {
+      setCurrentSelectedCategory(currCategory);
+      return newVal.casualCategoryName === currCategory;
+    });
+    setParkFilterItem(newItem);
+  };
+  console.log(secondaryFilterBarItems);
+
+  const secondaryFilterItem = (currSubCategory) => {
+    const newSubItem = cleanedData?.filter((newVal) => {
+      setCurrSubCategory(currSubCategory);
+      return (
+        newVal.casualCategoryName === currentSelectedCategory &&
+        newVal.casualClassifications?.includes(currSubCategory)
+      );
+    });
+    setParkFilterItem(newSubItem);
+  };
+
   const value = {
     authorId,
     setAuthorId,
@@ -104,8 +192,6 @@ export function ManageStory({ children }) {
     rawVisitData,
     setRawVisitData,
     STATUS,
-    // todaysChapterId,
-    // setTodaysChapterId,
     landmarkFlagBoolean,
     setLandmarkFlagBoolean,
     newUserStatus,
@@ -127,6 +213,26 @@ export function ManageStory({ children }) {
     emptyFilters,
     setEmptyFilters,
     toISOStringWithTimezone,
+    cleanedData,
+    setCleanedData,
+    filterBarItems,
+    setFilterBarItems,
+    secondaryFilterBarItems,
+    setSecondaryFilterBarItems,
+    currentSelectedCategory,
+    setCurrentSelectedCategory,
+    parkFilterItem,
+    setParkFilterItem,
+    filterItem,
+    secondaryFilterItem,
+    rawAreaData,
+    setRawAreaData,
+    currParkID,
+    setCurrParkID,
+    currSubCategory,
+    setCurrSubCategory,
+    sub,
+    setSub,
   };
 
   return (
