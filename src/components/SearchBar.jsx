@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@apollo/client";
-import { PropertyCardList } from "../components/PropertyCard";
+import { PropertyCardList } from "../components/SearchResultCard";
 import { SEARCH_QUERY } from "../graphql/queries/journalQueries";
 
 export default function SearchBar() {
