@@ -86,6 +86,8 @@ export function ManageStory({ children }) {
   const [filterBarItems, setFilterBarItems] = useState(null);
   const [secondaryFilterBarItems, setSecondaryFilterBarItems] = useState(null);
   const [currentSelectedCategory, setCurrentSelectedCategory] = useState(null);
+  const [currentSelectedSubCategory, setCurrentSelectedSubCategory] =
+    useState(null);
   const [currSubCategory, setCurrSubCategory] = useState(null);
   const [parkFilterItem, setParkFilterItem] = useState(null);
 
@@ -233,6 +235,8 @@ export function ManageStory({ children }) {
     setCurrSubCategory,
     sub,
     setSub,
+    currentSelectedSubCategory,
+    setCurrentSelectedSubCategory,
   };
 
   return (
