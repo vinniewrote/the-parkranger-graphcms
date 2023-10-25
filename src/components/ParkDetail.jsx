@@ -5,6 +5,7 @@ import Logout from "../components/LogoutButton";
 import { LANDMARK_LISTING } from "../graphql/queries/journalQueries";
 import { useManagedStory } from "../contexts/StoryContext";
 import { useAuth0 } from "@auth0/auth0-react";
+import { ReactComponent as ClearTopFilter } from "../svg/clear-filter.svg";
 import {
   ParkLandmarkCard,
   LandmarkCardTop,
@@ -15,11 +16,17 @@ import {
   PropertySubFilterBtn,
   MainFilterWrapper,
   SubFilterWrapper,
+  ClearPropFilterBtn,
+  PropertyFilterWrapper,
+  PropertySubFilterWrapper,
+  FilterWrapper,
 } from "../styledComponents/ParkDetail_styled";
 
 export default function ParkDetail(props, match, location) {
   const { user } = useAuth0();
   const [cleanedData, setCleanedData] = useState(null);
+  const [filterSelectedState, setFilterSelectedState] = useState(false);
+  const [subFilterSelectedState, setSubFilterSelectedState] = useState(false);
   const {
     params: { parkId },
   } = props.match;
@@ -42,6 +49,7 @@ export default function ParkDetail(props, match, location) {
     currParkID,
     setCurrParkID,
     currSubCategory,
+    setCurrSubCategory,
   } = useManagedStory();
 
   useEffect(() => {
@@ -132,38 +140,112 @@ export default function ParkDetail(props, match, location) {
         <h1>Parks and Maps</h1>
         <h2>{parkId}</h2>
       </div>
-      <MainFilterWrapper>
-        {filterBarItems?.length > 1 &&
-          filterBarItems?.map((menuVals, index) => {
-            return (
-              <PropertyFilterBtn
-                aria-pressed={props.isPressed}
-                aria-selected={menuVals === currentSelectedCategory}
-                onClick={() => filterItem(menuVals)}
-                key={index}
-              >
-                {menuVals}
-              </PropertyFilterBtn>
-            );
-          })}
-        {/* <button onClick={() => setParkFilterItem(cleanedData)}>All</button> */}
-      </MainFilterWrapper>
-      <SubFilterWrapper className="d-flex justify-content-center secondaryFilter">
-        {secondaryFilterBarItems?.length > 1 &&
-          secondaryFilterBarItems?.map((subMenuVals, index) => {
-            return (
-              <PropertySubFilterBtn
-                aria-pressed={props.isPressed}
-                aria-selected={subMenuVals === currSubCategory}
-                onClick={() => secondaryFilterItem(subMenuVals)}
-                key={index}
-              >
-                {subMenuVals}
-              </PropertySubFilterBtn>
-            );
-          })}
-        {/* <button onClick={() => setParkFilterItem(cleanedData)}>All</button> */}
-      </SubFilterWrapper>
+      <FilterWrapper
+        className={
+          filterSelectedState === true
+            ? "flexSingleLineFilter"
+            : "doubleLineFilter"
+        }
+      >
+        <MainFilterWrapper
+          className={
+            filterSelectedState === true ? "shrinkWrapper" : "normalWrapper"
+          }
+        >
+          {filterBarItems?.length > 1 &&
+            filterBarItems?.map((menuVals, index) => {
+              return (
+                <PropertyFilterWrapper
+                  className={
+                    menuVals === currentSelectedCategory && filterSelectedState
+                      ? "filterSelected"
+                      : filterSelectedState === false
+                      ? "showUnselectedFilter"
+                      : "filterUnselected"
+                  }
+                  aria-selected={menuVals === currentSelectedCategory}
+                >
+                  <PropertyFilterBtn
+                    aria-pressed={props.isPressed}
+                    // aria-selected={menuVals === currentSelectedCategory}
+                    onClick={() => {
+                      filterItem(menuVals);
+                      setFilterSelectedState(true);
+                    }}
+                    key={index}
+                  >
+                    {menuVals}
+                  </PropertyFilterBtn>
+                  <ClearPropFilterBtn
+                    className={
+                      menuVals !== currentSelectedCategory
+                        ? "invisible"
+                        : "visible"
+                    }
+                  >
+                    <ClearTopFilter
+                      type="button"
+                      onClick={() => {
+                        setFilterSelectedState(false);
+                        setCurrentSelectedCategory(null);
+                      }}
+                    />
+                  </ClearPropFilterBtn>
+                </PropertyFilterWrapper>
+              );
+            })}
+          {/* <button onClick={() => setParkFilterItem(cleanedData)}>All</button> */}
+        </MainFilterWrapper>
+        <SubFilterWrapper>
+          {secondaryFilterBarItems?.length > 1 &&
+            secondaryFilterBarItems?.map((subMenuVals, index) => {
+              return (
+                <PropertySubFilterWrapper
+                  className={
+                    subMenuVals === currSubCategory && filterSelectedState
+                      ? "subFilterSelected"
+                      : filterSelectedState === false
+                      ? "showUnselectedSubFilter"
+                      : "subFilterUnselected"
+                  }
+                  aria-selected={subMenuVals === currSubCategory}
+                >
+                  <PropertySubFilterBtn
+                    className={
+                      subMenuVals === currSubCategory && filterSelectedState
+                        ? "subFilterSelected"
+                        : filterSelectedState === false
+                        ? "showUnselectedSubFilter"
+                        : "subFilterUnselected"
+                    }
+                    aria-pressed={props.isPressed}
+                    // aria-selected={subMenuVals === currSubCategory}
+                    onClick={() => {
+                      secondaryFilterItem(subMenuVals);
+                      setSubFilterSelectedState(true);
+                    }}
+                    key={index}
+                  >
+                    {subMenuVals}
+                  </PropertySubFilterBtn>
+                  <ClearPropFilterBtn
+                    className={
+                      subMenuVals !== currSubCategory ? "invisible" : "visible"
+                    }
+                  >
+                    <ClearTopFilter
+                      type="button"
+                      onClick={() => {
+                        setCurrSubCategory(null);
+                        setSubFilterSelectedState(false);
+                      }}
+                    />
+                  </ClearPropFilterBtn>
+                </PropertySubFilterWrapper>
+              );
+            })}
+        </SubFilterWrapper>
+      </FilterWrapper>
       <Fragment>
         {parkFilterItem?.map((propArea) => (
           <AreaContainer key={propArea.id}>
